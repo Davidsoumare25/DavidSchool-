@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DavidSchool</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial}
 body{background:#f2f4f8;color:#222}
@@ -16,7 +15,7 @@ main{padding:20px;max-width:960px;margin:auto;display:flex;flex-direction:column
 .card{padding:16px;border-radius:16px;color:white;font-size:18px;font-weight:bold;cursor:pointer;box-shadow:0 6px 15px rgba(0,0,0,.25);transition:.2s}
 .card:hover{transform:scale(1.03)}
 .column{flex:1;display:flex;flex-direction:column;gap:12px}
-#content{display:flex;gap:20px;display:none}
+#content{display:flex;gap:20px}
 .exercise,.lesson{padding:12px;border-radius:14px;color:white;position:relative;background:#3498db}
 .exercise img,.lesson img{width:100%;border-radius:12px;margin-top:8px;cursor:pointer}
 .exercise a,.lesson a{color:white;text-decoration:underline;display:block;margin-top:8px}
@@ -37,8 +36,10 @@ select,input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px 
 </header>
 
 <main>
+<!-- Sélection Classe -->
 <div id="classes" class="grid"></div>
 
+<!-- Contenu Exercices / Cours -->
 <div id="content">
 <div class="column" id="exercisesColumn">
 <h2>Exercices</h2>
@@ -125,7 +126,7 @@ async function loadContent(subject){
         let d=document.createElement("div");
         d.className="exercise";d.style.background=colors[e.subject]||"#3498db";
         d.innerHTML="<b>"+e.title+"</b>";
-        if(e.type==="exercise" && e.url){
+        if(e.url){
             if(e.url.endsWith(".pdf")||e.url.endsWith(".doc")||e.url.endsWith(".docx")){
                 let a=document.createElement("a");a.href=e.url;a.download=e.name;a.innerText="📥 Télécharger";d.appendChild(a);
             }else{
@@ -173,7 +174,13 @@ function loadClasses(){
 function showSubjects(){
     classesBox.style.display="none";contentDiv.style.display="none";
     backBtn.style.display="block";
-    const subContainer=document.createElement("div");subContainer.id="subjects";subContainer.className="grid";
+    let subContainer=document.getElementById("subjects");
+    if(!subContainer){
+        subContainer=document.createElement("div");
+        subContainer.id="subjects";subContainer.className="grid";
+        document.querySelector("main").appendChild(subContainer);
+    }
+    subContainer.innerHTML="";
     classes[curClass].forEach(s=>{
         let d=document.createElement("div");
         d.className="card";d.style.background=colors[s]||"#3498db";
@@ -181,7 +188,6 @@ function showSubjects(){
         d.onclick=()=>{loadContent(s)};
         subContainer.appendChild(d);
     });
-    document.querySelector("main").appendChild(subContainer);
 }
 
 function goBack(){
