@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DavidSchool</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:#f2f4f8;
+  color:#222;
+}
+
+header{
+  background:linear-gradient(135deg,#6a00ff,#1e90ff);
+  color:white;
+  padding:22px;
+  text-align:center;
+  position:relative;
+}
+
+#adminIcon{
+  position:absolute;
+  top:15px;
+  left:15px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:white;
+  color:#6a00ff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,.3);
+}
+
+main{
+  padding:20px;
+  max-width:480px;
+  margin:auto;
+}
+
+.grid{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.card{
+  padding:18px;
+  border-radius:16px;
+  color:white;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 6px 15px rgba(0,0,0,.25);
+  transition:.2s;
+}
+
+.card:hover{
+  transform:scale(1.03);
+}
+
+.exercise{
+  padding:12px;
+  border-radius:14px;
+  margin-bottom:14px;
+  color:white;
+  position:relative;
+}
+
+.exercise img{
+  width:100%;
+  border-radius:12px;
+  margin-top:8px;
+  cursor:pointer;
+}
+
+.exercise a{
+  color:white;
+  text-decoration:underline;
+  display:block;
+  margin-top:8px;
+}
+
+.deleteBtn{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:#ff3b3b;
+  border:none;
+  color:white;
+  border-radius:6px;
+  padding:4px 7px;
+  cursor:pointer;
+}
+
+button{
+  margin-top:15px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#6a00ff;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+}
+
+select,input{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+
+/* MODALS */
+#adminModal,#overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+}
+
+#adminBox{
+  background:white;
+  padding:20px;
+  border-radius:18px;
+  width:90%;
+  max-width:400px;
+  max-height:90%;
+  overflow:auto;
+  position:relative;
+}
+
+#closeAdmin{
+  position:absolute;
+  top:10px;
+  right:14px;
+  font-size:22px;
+  cursor:pointer;
+}
+
+#overlay img{
+  max-width:90%;
+  max-height:90%;
+  border-radius:14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>DavidSchool</h1>
+  <div id="adminIcon">⚙</div>
+</header>
+
+<main>
+  <div id="classes" class="grid"></div>
+  <div id="subjects" class="grid" style="display:none"></div>
+  <div id="exercises" style="display:none"></div>
+  <button id="backBtn" style="display:none" onclick="goBack()">⬅ Retour</button>
+</main>
+
+<!-- ADMIN -->
+<div id="adminModal">
+  <div id="adminBox">
+    <span id="closeAdmin">✖</span>
+    <h2>Admin</h2>
+
+    <input type="password" id="loginPass" placeholder="Code admin">
+    <button onclick="login()">Connexion</button>
+
+    <div id="adminPanel" style="display:none">
+      <hr>
+
+      <label>Changer le code admin</label>
+      <input id="newPass">
+      <button onclick="changePass()">Changer</button>
+
+      <hr>
+
+      <select id="aClass"></select>
+      <select id="aSubject"></select>
+      <input id="aTitle" placeholder="Titre de l'exercice">
+      <input type="file" id="aFile" accept="image/*,.pdf,.doc,.docx">
+      <button onclick="addExercise()">Ajouter exercice</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE OVERLAY -->
+<div id="overlay" onclick="this.style.display='none'">
+  <img id="overlayImg">
+</div>
+
+<script>
+/* ===== DONNÉES ===== */
+const classes={
+  "6e":["Français","Math","Anglais","Histoire","Géographie"],
+  "5e":["Français","Math","Anglais","Histoire","Géographie"],
+  "4e":["Français","Math","Anglais","Physique","Chimie","Histoire"],
+  "3e":["Français","Math","Anglais","Physique","Chimie","Histoire","Géographie"]
+};
+
+const colors={
+  Math:"#1abc9c",
+  Français:"#e74c3c",
+  Anglais:"#3498db",
+  Physique:"#9b59b6",
+  Chimie:"#f39c12",
+  Histoire:"#2ecc71",
+  Géographie:"#16a085"
+};
+
+let exercises = JSON.parse(localStorage.getItem("ds_exercises")) || [];
+let adminPass = localStorage.getItem("ds_pass") || "1234";
+
+let curClass="",curSubject="",isAdmin=false;
+
+/* ===== SAUVEGARDE ===== */
+function save(){
+  localStorage.setItem("ds_exercises",JSON.stringify(exercises));
+}
+
+/* ===== CLASSES ===== */
+function loadClasses(){
+  classesBox.innerHTML="";
+  for(let c in classes){
+    let d=document.createElement("div");
+    d.className="card";
+    d.style.background="linear-gradient(135deg,#6a00ff,#1e90ff)";
+    d.innerText=c.toUpperCase();
+    d.onclick=()=>{curClass=c;loadSubjects()};
+    classesBox.appendChild(d);
+  }
+}
+
+/* ===== MATIÈRES ===== */
+function loadSubjects(){
+  classesBox.style.display="none";
+  subjectsBox.style.display="flex";
+  subjectsBox.innerHTML="";
+  classes[curClass].forEach(s=>{
+    let d=document.createElement("div");
+    d.className="card";
+    d.style.background=colors[s];
+    d.innerText=s;
+    d.onclick=()=>{curSubject=s;loadExercises()};
+    subjectsBox.appendChild(d);
+  });
+  backBtn.style.display="block";
+}
+
+/* ===== EXERCICES ===== */
+function loadExercises(){
+  subjectsBox.style.display="none";
+  exercisesBox.style.display="block";
+  exercisesBox.innerHTML="";
+  exercises.filter(e=>e.c===curClass && e.s===curSubject).forEach((e,i)=>{
+    let d=document.createElement("div");
+    d.className="exercise";
+    d.style.background=colors[e.s];
+    d.innerHTML="<b>"+e.t+"</b>";
+    if(e.type==="img"){
+      let img=document.createElement("img");
+      img.src=e.data;
+      img.onclick=()=>{overlayImg.src=e.data;overlay.style.display="flex"};
+      d.appendChild(img);
+    }else{
+      let a=document.createElement("a");
+      a.href=e.data;
+      a.download=e.name;
+      a.innerText="📥 Télécharger";
+      d.appendChild(a);
+    }
+    if(isAdmin){
+      let b=document.createElement("button");
+      b.className="deleteBtn";
+      b.innerText="✖";
+      b.onclick=()=>{exercises.splice(i,1);save();loadExercises()};
+      d.appendChild(b);
+    }
+    exercisesBox.appendChild(d);
+  });
+}
+
+/* ===== RETOUR ===== */
+function goBack(){
+  exercisesBox.style.display="none";
+  subjectsBox.style.display="none";
+  classesBox.style.display="flex";
+  backBtn.style.display="none";
+}
+
+/* ===== ADMIN ===== */
+adminIcon.onclick=()=>adminModal.style.display="flex";
+closeAdmin.onclick=()=>adminModal.style.display="none";
+
+function login(){
+  if(loginPass.value===adminPass){
+    isAdmin=true;
+    adminPanel.style.display="block";
+    alert("Connecté");
+  }else alert("Code incorrect");
+}
+
+function changePass(){
+  adminPass=newPass.value;
+  localStorage.setItem("ds_pass",adminPass);
+  alert("Code changé");
+}
+
+function addExercise(){
+  let f=aFile.files[0];
+  if(!f||!aTitle.value) return alert("Champs manquants");
+  let r=new FileReader();
+  r.onload=()=>{
+    exercises.push({
+      c:aClass.value,
+      s:aSubject.value,
+      t:aTitle.value,
+      data:r.result,
+      name:f.name,
+      type:f.type.startsWith("image")?"img":"doc"
+    });
+    save();
+    alert("Ajouté");
+  };
+  r.readAsDataURL(f);
+}
+
+/* ===== MENUS ADMIN ===== */
+function loadAdminMenus(){
+  for(let c in classes){
+    let o=document.createElement("option");
+    o.value=c;o.innerText=c;
+    aClass.appendChild(o);
+  }
+  aClass.onchange=()=>{
+    aSubject.innerHTML="";
+    classes[aClass.value].forEach(s=>{
+      let o=document.createElement("option");
+      o.value=s;o.innerText=s;
+      aSubject.appendChild(o);
+    });
+  };
+  aClass.onchange();
+}
+
+/* ===== INIT ===== */
+const classesBox=document.getElementById("classes");
+const subjectsBox=document.getElementById("subjects");
+const exercisesBox=document.getElementById("exercises");
+const backBtn=document.getElementById("backBtn");
+
+loadClasses();
+loadAdminMenus();
+</script>
+
+</body>
+</html>
