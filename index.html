@@ -4,368 +4,234 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DavidSchool</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:#f2f4f8;
-  color:#222;
-}
-
-header{
-  background:linear-gradient(135deg,#6a00ff,#1e90ff);
-  color:white;
-  padding:22px;
-  text-align:center;
-  position:relative;
-}
-
-#adminIcon{
-  position:absolute;
-  top:15px;
-  left:15px;
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  background:white;
-  color:#6a00ff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:0 4px 10px rgba(0,0,0,.3);
-}
-
-main{
-  padding:20px;
-  max-width:480px;
-  margin:auto;
-}
-
-.grid{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-}
-
-.card{
-  padding:18px;
-  border-radius:16px;
-  color:white;
-  font-size:18px;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:0 6px 15px rgba(0,0,0,.25);
-  transition:.2s;
-}
-
-.card:hover{
-  transform:scale(1.03);
-}
-
-.exercise{
-  padding:12px;
-  border-radius:14px;
-  margin-bottom:14px;
-  color:white;
-  position:relative;
-}
-
-.exercise img{
-  width:100%;
-  border-radius:12px;
-  margin-top:8px;
-  cursor:pointer;
-}
-
-.exercise a{
-  color:white;
-  text-decoration:underline;
-  display:block;
-  margin-top:8px;
-}
-
-.deleteBtn{
-  position:absolute;
-  top:8px;
-  right:8px;
-  background:#ff3b3b;
-  border:none;
-  color:white;
-  border-radius:6px;
-  padding:4px 7px;
-  cursor:pointer;
-}
-
-button{
-  margin-top:15px;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#6a00ff;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
-}
-
-select,input{
-  width:100%;
-  padding:12px;
-  margin:6px 0;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-
-/* MODALS */
-#adminModal,#overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.65);
-  justify-content:center;
-  align-items:center;
-  z-index:1000;
-}
-
-#adminBox{
-  background:white;
-  padding:20px;
-  border-radius:18px;
-  width:90%;
-  max-width:400px;
-  max-height:90%;
-  overflow:auto;
-  position:relative;
-}
-
-#closeAdmin{
-  position:absolute;
-  top:10px;
-  right:14px;
-  font-size:22px;
-  cursor:pointer;
-}
-
-#overlay img{
-  max-width:90%;
-  max-height:90%;
-  border-radius:14px;
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,Arial}
+body{background:#f2f4f8;color:#222}
+header{background:linear-gradient(135deg,#6a00ff,#1e90ff);color:white;padding:22px;text-align:center;position:relative}
+#adminIcon{position:absolute;top:15px;left:15px;width:42px;height:42px;border-radius:50%;background:white;color:#6a00ff;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+main{padding:20px;max-width:960px;margin:auto;display:flex;flex-direction:column;gap:20px}
+.grid{display:flex;flex-direction:column;gap:12px}
+.card{padding:16px;border-radius:16px;color:white;font-size:18px;font-weight:bold;cursor:pointer;box-shadow:0 6px 15px rgba(0,0,0,.25);transition:.2s}
+.card:hover{transform:scale(1.03)}
+.column{flex:1;display:flex;flex-direction:column;gap:12px}
+#content{display:flex;gap:20px;display:none}
+.exercise,.lesson{padding:12px;border-radius:14px;color:white;position:relative;background:#3498db}
+.exercise img,.lesson img{width:100%;border-radius:12px;margin-top:8px;cursor:pointer}
+.exercise a,.lesson a{color:white;text-decoration:underline;display:block;margin-top:8px}
+.deleteBtn{position:absolute;top:8px;right:8px;background:#ff3b3b;border:none;color:white;border-radius:6px;padding:4px 7px;cursor:pointer}
+button{margin-top:10px;padding:12px;border:none;border-radius:10px;background:#6a00ff;color:white;font-size:16px;cursor:pointer}
+select,input{width:100%;padding:12px;margin:6px 0;border-radius:10px;border:1px solid #ccc}
+#adminModal,#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);justify-content:center;align-items:center;z-index:1000}
+#adminBox{background:white;padding:20px;border-radius:18px;width:90%;max-width:400px;max-height:90%;overflow:auto;position:relative}
+#closeAdmin{position:absolute;top:10px;right:14px;font-size:22px;cursor:pointer}
+#overlay img{max-width:90%;max-height:90%;border-radius:14px}
 </style>
 </head>
-
 <body>
 
 <header>
-  <h1>DavidSchool</h1>
-  <div id="adminIcon">⚙</div>
+<h1>DavidSchool</h1>
+<div id="adminIcon">⚙</div>
 </header>
 
 <main>
-  <div id="classes" class="grid"></div>
-  <div id="subjects" class="grid" style="display:none"></div>
-  <div id="exercises" style="display:none"></div>
-  <button id="backBtn" style="display:none" onclick="goBack()">⬅ Retour</button>
+<div id="classes" class="grid"></div>
+
+<div id="content">
+<div class="column" id="exercisesColumn">
+<h2>Exercices</h2>
+<div id="exercises" class="grid"></div>
+</div>
+<div class="column" id="lessonsColumn">
+<h2>Cours / Leçons</h2>
+<div id="lessons" class="grid"></div>
+</div>
+</div>
+
+<button id="backBtn" style="display:none" onclick="goBack()">⬅ Retour</button>
 </main>
 
 <!-- ADMIN -->
 <div id="adminModal">
-  <div id="adminBox">
-    <span id="closeAdmin">✖</span>
-    <h2>Admin</h2>
-
-    <input type="password" id="loginPass" placeholder="Code admin">
-    <button onclick="login()">Connexion</button>
-
-    <div id="adminPanel" style="display:none">
-      <hr>
-
-      <label>Changer le code admin</label>
-      <input id="newPass">
-      <button onclick="changePass()">Changer</button>
-
-      <hr>
-
-      <select id="aClass"></select>
-      <select id="aSubject"></select>
-      <input id="aTitle" placeholder="Titre de l'exercice">
-      <input type="file" id="aFile" accept="image/*,.pdf,.doc,.docx">
-      <button onclick="addExercise()">Ajouter exercice</button>
-    </div>
-  </div>
+<div id="adminBox">
+<span id="closeAdmin">✖</span>
+<h2>Admin</h2>
+<input type="password" id="loginPass" placeholder="Code admin">
+<button onclick="login()">Connexion</button>
+<div id="adminPanel" style="display:none">
+<hr>
+<label>Changer le code admin</label>
+<input id="newPass">
+<button onclick="changePass()">Changer</button>
+<hr>
+<select id="aClass"></select>
+<select id="aSubject"></select>
+<select id="typeSelect">
+<option value="exercise">Exercice</option>
+<option value="lesson">Cours</option>
+</select>
+<input id="aTitle" placeholder="Titre">
+<input type="file" id="aFile" accept="image/*,.pdf,.doc,.docx">
+<button onclick="addContent()">Ajouter</button>
+</div>
+</div>
 </div>
 
 <!-- IMAGE OVERLAY -->
 <div id="overlay" onclick="this.style.display='none'">
-  <img id="overlayImg">
+<img id="overlayImg">
 </div>
 
 <script>
-/* ===== DONNÉES ===== */
+// ===== SUPABASE INIT =====
+const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncnhnZXRhaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MzY1NTQsImV4cCI6MjA4NTMxMjU1NH0.MsCgDKBz3jXrJ_dOcJ35koaLi-uBpNXoAoaFLAWDbkg";
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== DONNÉES =====
 const classes={
-  "6e":["Français","Math","Anglais","Histoire","Géographie"],
-  "5e":["Français","Math","Anglais","Histoire","Géographie"],
-  "4e":["Français","Math","Anglais","Physique","Chimie","Histoire"],
-  "3e":["Français","Math","Anglais","Physique","Chimie","Histoire","Géographie"]
+"6e":["Français","Math","Anglais","Histoire","Géographie","SVT"],
+"5e":["Français","Math","Anglais","Histoire","Géographie","SVT"],
+"4e":["Français","Math","Anglais","Physique","Chimie","Histoire","SVT"],
+"3e":["Français","Math","Anglais","Physique","Chimie","Histoire","Géographie","SVT"]
 };
-
 const colors={
-  Math:"#1abc9c",
-  Français:"#e74c3c",
-  Anglais:"#3498db",
-  Physique:"#9b59b6",
-  Chimie:"#f39c12",
-  Histoire:"#2ecc71",
-  Géographie:"#16a085"
+Math:"#1abc9c",Français:"#e74c3c",Anglais:"#3498db",
+Physique:"#9b59b6",Chimie:"#f39c12",Histoire:"#2ecc71",
+Géographie:"#16a085",SVT:"#9c27b0"
 };
-
-let exercises = JSON.parse(localStorage.getItem("ds_exercises")) || [];
-let adminPass = localStorage.getItem("ds_pass") || "1234";
-
+let adminPass = localStorage.getItem("ds_pass")||"1234";
 let curClass="",curSubject="",isAdmin=false;
 
-/* ===== SAUVEGARDE ===== */
-function save(){
-  localStorage.setItem("ds_exercises",JSON.stringify(exercises));
+// ===== INIT DOM =====
+const classesBox=document.getElementById("classes");
+const exercisesBox=document.getElementById("exercises");
+const lessonsBox=document.getElementById("lessons");
+const contentDiv=document.getElementById("content");
+const backBtn=document.getElementById("backBtn");
+
+// ===== FUNCTIONS =====
+async function loadContent(subject){
+    curSubject=subject;
+    contentDiv.style.display="flex";backBtn.style.display="block";
+    exercisesBox.innerHTML="";lessonsBox.innerHTML="";
+
+    // Exercices
+    const {data:ex,error:exErr}=await supabase.from("exercises").select("*").eq("class",curClass).eq("subject",curSubject).eq("type","exercise");
+    if(exErr)console.log(exErr);
+    else ex.forEach(e=>{
+        let d=document.createElement("div");
+        d.className="exercise";d.style.background=colors[e.subject]||"#3498db";
+        d.innerHTML="<b>"+e.title+"</b>";
+        if(e.type==="exercise" && e.url){
+            if(e.url.endsWith(".pdf")||e.url.endsWith(".doc")||e.url.endsWith(".docx")){
+                let a=document.createElement("a");a.href=e.url;a.download=e.name;a.innerText="📥 Télécharger";d.appendChild(a);
+            }else{
+                let img=document.createElement("img");img.src=e.url;
+                img.onclick=()=>{overlayImg.src=e.url;overlay.style.display="flex"};
+                d.appendChild(img);
+            }
+        }
+        if(isAdmin){let b=document.createElement("button");b.className="deleteBtn";b.innerText="✖";b.onclick=async()=>{await supabase.from("exercises").delete().eq("id",e.id);loadContent(curSubject)};d.appendChild(b)}
+        exercisesBox.appendChild(d);
+    });
+
+    // Lessons
+    const {data:le,error:leErr}=await supabase.from("exercises").select("*").eq("class",curClass).eq("subject",curSubject).eq("type","lesson");
+    if(leErr)console.log(leErr);
+    else le.forEach(e=>{
+        let d=document.createElement("div");
+        d.className="lesson";d.style.background=colors[e.subject]||"#16a085";
+        d.innerHTML="<b>"+e.title+"</b>";
+        if(e.url){
+            if(e.url.endsWith(".pdf")||e.url.endsWith(".doc")||e.url.endsWith(".docx")){
+                let a=document.createElement("a");a.href=e.url;a.download=e.name;a.innerText="📥 Télécharger";d.appendChild(a);
+            }else{
+                let img=document.createElement("img");img.src=e.url;
+                img.onclick=()=>{overlayImg.src=e.url;overlay.style.display="flex"};
+                d.appendChild(img);
+            }
+        }
+        if(isAdmin){let b=document.createElement("button");b.className="deleteBtn";b.innerText="✖";b.onclick=async()=>{await supabase.from("exercises").delete().eq("id",e.id);loadContent(curSubject)};d.appendChild(b)}
+        lessonsBox.appendChild(d);
+    });
 }
 
-/* ===== CLASSES ===== */
 function loadClasses(){
-  classesBox.innerHTML="";
-  for(let c in classes){
-    let d=document.createElement("div");
-    d.className="card";
-    d.style.background="linear-gradient(135deg,#6a00ff,#1e90ff)";
-    d.innerText=c.toUpperCase();
-    d.onclick=()=>{curClass=c;loadSubjects()};
-    classesBox.appendChild(d);
-  }
-}
-
-/* ===== MATIÈRES ===== */
-function loadSubjects(){
-  classesBox.style.display="none";
-  subjectsBox.style.display="flex";
-  subjectsBox.innerHTML="";
-  classes[curClass].forEach(s=>{
-    let d=document.createElement("div");
-    d.className="card";
-    d.style.background=colors[s];
-    d.innerText=s;
-    d.onclick=()=>{curSubject=s;loadExercises()};
-    subjectsBox.appendChild(d);
-  });
-  backBtn.style.display="block";
-}
-
-/* ===== EXERCICES ===== */
-function loadExercises(){
-  subjectsBox.style.display="none";
-  exercisesBox.style.display="block";
-  exercisesBox.innerHTML="";
-  exercises.filter(e=>e.c===curClass && e.s===curSubject).forEach((e,i)=>{
-    let d=document.createElement("div");
-    d.className="exercise";
-    d.style.background=colors[e.s];
-    d.innerHTML="<b>"+e.t+"</b>";
-    if(e.type==="img"){
-      let img=document.createElement("img");
-      img.src=e.data;
-      img.onclick=()=>{overlayImg.src=e.data;overlay.style.display="flex"};
-      d.appendChild(img);
-    }else{
-      let a=document.createElement("a");
-      a.href=e.data;
-      a.download=e.name;
-      a.innerText="📥 Télécharger";
-      d.appendChild(a);
+    classesBox.innerHTML="";
+    for(let c in classes){
+        let d=document.createElement("div");
+        d.className="card";d.style.background="linear-gradient(135deg,#6a00ff,#1e90ff)";
+        d.innerText=c.toUpperCase();
+        d.onclick=()=>{curClass=c;showSubjects()};
+        classesBox.appendChild(d);
     }
-    if(isAdmin){
-      let b=document.createElement("button");
-      b.className="deleteBtn";
-      b.innerText="✖";
-      b.onclick=()=>{exercises.splice(i,1);save();loadExercises()};
-      d.appendChild(b);
-    }
-    exercisesBox.appendChild(d);
-  });
 }
 
-/* ===== RETOUR ===== */
+function showSubjects(){
+    classesBox.style.display="none";contentDiv.style.display="none";
+    backBtn.style.display="block";
+    const subContainer=document.createElement("div");subContainer.id="subjects";subContainer.className="grid";
+    classes[curClass].forEach(s=>{
+        let d=document.createElement("div");
+        d.className="card";d.style.background=colors[s]||"#3498db";
+        d.innerText=s;
+        d.onclick=()=>{loadContent(s)};
+        subContainer.appendChild(d);
+    });
+    document.querySelector("main").appendChild(subContainer);
+}
+
 function goBack(){
-  exercisesBox.style.display="none";
-  subjectsBox.style.display="none";
-  classesBox.style.display="flex";
-  backBtn.style.display="none";
+    contentDiv.style.display="none";
+    const sub=document.getElementById("subjects");if(sub)sub.remove();
+    classesBox.style.display="flex";backBtn.style.display="none";
 }
 
-/* ===== ADMIN ===== */
+// ===== ADMIN =====
+const adminIcon=document.getElementById("adminIcon");
+const adminModal=document.getElementById("adminModal");
+const closeAdmin=document.getElementById("closeAdmin");
+const loginPass=document.getElementById("loginPass");
+const adminPanel=document.getElementById("adminPanel");
+const newPass=document.getElementById("newPass");
+const aClass=document.getElementById("aClass");
+const aSubject=document.getElementById("aSubject");
+const aFile=document.getElementById("aFile");
+const aTitle=document.getElementById("aTitle");
+const typeSelect=document.getElementById("typeSelect");
+
 adminIcon.onclick=()=>adminModal.style.display="flex";
 closeAdmin.onclick=()=>adminModal.style.display="none";
 
-function login(){
-  if(loginPass.value===adminPass){
-    isAdmin=true;
-    adminPanel.style.display="block";
-    alert("Connecté");
-  }else alert("Code incorrect");
+function login(){if(loginPass.value===adminPass){isAdmin=true;adminPanel.style.display="block";alert("Connecté")}else alert("Code incorrect")}
+function changePass(){adminPass=newPass.value;localStorage.setItem("ds_pass",adminPass);alert("Code changé")}
+
+async function addContent(){
+    let f=aFile.files[0];
+    if(!f||!aTitle.value) return alert("Champs manquants");
+    let type=typeSelect.value;
+    let name=f.name;
+    const {data,error}=await supabase.storage.from("davidschool").upload(Date.now()+"_"+f.name,f);
+    if(error){console.log(error);return alert("Erreur upload")}
+    const url= supabase.storage.from("davidschool").getPublicUrl(data.path).data.publicUrl;
+    const {data:ex,error:err}=await supabase.from("exercises").insert([{class:aClass.value,subject:aSubject.value,title:aTitle.value,type:type,name:name,url:url}]);
+    if(err){console.log(err);return alert("Erreur DB")}
+    alert("Ajouté");loadContent(curSubject);
 }
 
-function changePass(){
-  adminPass=newPass.value;
-  localStorage.setItem("ds_pass",adminPass);
-  alert("Code changé");
-}
-
-function addExercise(){
-  let f=aFile.files[0];
-  if(!f||!aTitle.value) return alert("Champs manquants");
-  let r=new FileReader();
-  r.onload=()=>{
-    exercises.push({
-      c:aClass.value,
-      s:aSubject.value,
-      t:aTitle.value,
-      data:r.result,
-      name:f.name,
-      type:f.type.startsWith("image")?"img":"doc"
-    });
-    save();
-    alert("Ajouté");
-  };
-  r.readAsDataURL(f);
-}
-
-/* ===== MENUS ADMIN ===== */
-function loadAdminMenus(){
-  for(let c in classes){
-    let o=document.createElement("option");
-    o.value=c;o.innerText=c;
-    aClass.appendChild(o);
-  }
-  aClass.onchange=()=>{
-    aSubject.innerHTML="";
-    classes[aClass.value].forEach(s=>{
-      let o=document.createElement("option");
-      o.value=s;o.innerText=s;
-      aSubject.appendChild(o);
-    });
-  };
-  aClass.onchange();
-}
-
-/* ===== INIT ===== */
-const classesBox=document.getElementById("classes");
-const subjectsBox=document.getElementById("subjects");
-const exercisesBox=document.getElementById("exercises");
-const backBtn=document.getElementById("backBtn");
-
+// ===== INIT =====
 loadClasses();
+function loadAdminMenus(){
+    for(let c in classes){
+        let o=document.createElement("option");o.value=c;o.innerText=c;aClass.appendChild(o);
+    }
+    aClass.onchange=()=>{aSubject.innerHTML="";classes[aClass.value].forEach(s=>{let o=document.createElement("option");o.value=s;o.innerText=s;aSubject.appendChild(o)})};
+    aClass.onchange();
+}
 loadAdminMenus();
 </script>
-
 </body>
 </html>
