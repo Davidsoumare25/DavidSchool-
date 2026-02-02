@@ -9,7 +9,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb}
 header{background:#1e3a8a;color:white;padding:15px;text-align:center;position:relative;font-size:22px;}
 header button{position:absolute;left:15px;top:10px;padding:8px 12px;border:none;border-radius:8px;cursor:pointer;background:#f59e0b;color:white;font-weight:bold;}
 header button:hover{opacity:0.8;}
-h3{padding:10px 20px;text-align:center}
+h3{text-align:center;padding:10px 0;}
 .buttons{display:flex;justify-content:center;gap:20px;padding:10px;}
 .buttonType{padding:10px 20px;cursor:pointer;border:none;border-radius:10px;color:white;font-weight:bold;font-size:16px;transition:0.2s;}
 .exercisesBtn{background:#2563eb}.lessonsBtn{background:#16a34a}
@@ -38,7 +38,8 @@ const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const params = new URLSearchParams(location.search);
 const classe = params.get("classe");
-document.getElementById("title").innerText = "Classe " + classe;
+const matiere = params.get("matiere");
+document.getElementById("title").innerText = `Classe ${classe} - ${matiere}`;
 
 let currentType = "exercise";
 show(currentType);
@@ -48,13 +49,14 @@ async function show(type){
   const {data,error} = await supabase
     .from("contents")
     .select("*")
-    .eq("classe",classe)
-    .eq("type",type);
+    .eq("classe", classe)
+    .eq("matiere", matiere)
+    .eq("type", type);
   const list = document.getElementById("list");
   list.innerHTML="";
   if(data){
     data.forEach(d=>{
-      let div = document.createElement("div");
+      const div = document.createElement("div");
       div.className="item";
       if(d.file_url.endsWith(".pdf")){
         div.innerHTML = `<b>${d.title}</b><br><a href="${d.file_url}" target="_blank">Télécharger</a>`;
