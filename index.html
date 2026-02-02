@@ -18,7 +18,6 @@ header button:hover{opacity:0.8;}
 .card{padding:20px;border-radius:12px;color:white;text-align:center;font-weight:bold;cursor:pointer;transition:0.2s;}
 .card:hover{transform:scale(1.05);}
 .c6e{background:#16a34a}.c5e{background:#2563eb}.c4e{background:#9333ea}.c3e{background:#f59e0b}
-
 /* Admin */
 #adminModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;pointer-events:none;}
 #adminModal.active{display:flex;pointer-events:auto}
@@ -29,17 +28,12 @@ header button:hover{opacity:0.8;}
 <body>
 <header>
 📘 DavidSchool
-<button onclick="openAdmin()">Admin</button>
+<button id="openAdminBtn">Admin</button>
 </header>
 
 <div id="classes">
   <h3 style="padding:0 20px">Choisis ta classe</h3>
-  <div class="grid">
-    <div class="card c6e" onclick="goContent('6e')">6e</div>
-    <div class="card c5e" onclick="goContent('5e')">5e</div>
-    <div class="card c4e" onclick="goContent('4e')">4e</div>
-    <div class="card c3e" onclick="goContent('3e')">3e</div>
-  </div>
+  <div class="grid" id="classGrid"></div>
 </div>
 
 <!-- Admin -->
@@ -47,29 +41,23 @@ header button:hover{opacity:0.8;}
   <div class="adminBox">
     <h3>Admin</h3>
     <input type="password" id="adminPass" placeholder="Mot de passe">
-    <button onclick="login()">Entrer</button>
+    <button id="loginBtn">Entrer</button>
 
     <div id="adminPanel" style="display:none">
       <select id="aClass">
         <option>6e</option><option>5e</option><option>4e</option><option>3e</option>
       </select>
       <p>Matières (optionnelles)</p>
-      <label><input type="checkbox" value="Math"> Math</label><br>
-      <label><input type="checkbox" value="Français"> Français</label><br>
-      <label><input type="checkbox" value="Anglais"> Anglais</label><br>
-      <label><input type="checkbox" value="Histoire"> Histoire</label><br>
-      <label><input type="checkbox" value="Géographie"> Géographie</label><br>
-      <label><input type="checkbox" value="SVT"> SVT</label><br>
-      <label><input type="checkbox" value="Physique-Chimie"> Physique-Chimie</label><br>
+      <div id="subjectCheckboxes"></div>
       <select id="aType">
         <option value="exercise">Exercice</option>
         <option value="lesson">Leçon</option>
       </select>
       <input id="aTitle" placeholder="Titre">
       <input type="file" id="aFile">
-      <button onclick="addContent()">Ajouter</button>
+      <button id="addContentBtn">Ajouter</button>
     </div>
-    <button onclick="closeAdmin()">Fermer</button>
+    <button id="closeAdminBtn">Fermer</button>
   </div>
 </div>
 
@@ -79,28 +67,54 @@ const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncX...";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function goContent(classe){
-  window.location.href = "contenu.html?classe="+classe;
-}
+const classes = ["6e","5e","4e","3e"];
+const subjectsByClass = {
+  "6e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
+  "5e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
+  "4e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"],
+  "3e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"]
+};
 
-/* Admin */
-function openAdmin(){document.getElementById("adminModal").classList.add("active")}
-function closeAdmin(){document.getElementById("adminModal").classList.remove("active")}
-function login(){
-  const pass = document.getElementById("adminPass").value;
-  if(pass==="1234") document.getElementById("adminPanel").style.display="block";
-}
-async function addContent(){
+// Générer les classes
+const classGrid = document.getElementById("classGrid");
+classes.forEach(classe=>{
+  const div = document.createElement("div");
+  div.className="card c"+classe[0]+"e";
+  div.innerText = classe;
+  div.addEventListener("click",()=>selectClass(classe));
+  classGrid.appendChild(div);
+});
+
+// Générer les checkboxes des matières
+const subjectCheckboxes = document.getElementById("subjectCheckboxes");
+const allSubjects = ["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"];
+allSubjects.forEach(s=>{
+  const label = document.createElement("label");
+  label.innerHTML = `<input type="checkbox" value="${s}"> ${s}`;
+  subjectCheckboxes.appendChild(label);
+  subjectCheckboxes.appendChild(document.createElement("br"));
+});
+
+// Admin
+const adminModal = document.getElementById("adminModal");
+const adminPanel = document.getElementById("adminPanel");
+document.getElementById("openAdminBtn").addEventListener("click",()=>adminModal.classList.add("active"));
+document.getElementById("closeAdminBtn").addEventListener("click",()=>adminModal.classList.remove("active"));
+document.getElementById("loginBtn").addEventListener("click",()=>{
+  if(document.getElementById("adminPass").value==="1234") adminPanel.style.display="block";
+});
+
+// Ajouter contenu
+document.getElementById("addContentBtn").addEventListener("click", async ()=>{
   const file = document.getElementById("aFile").files[0];
   if(!file){alert("Sélectionne un fichier"); return;}
   const path = Date.now()+"_"+file.name;
   await supabase.storage.from("davidschool").upload(path,file);
   const {data:{publicUrl}} = supabase.storage.from("davidschool").getPublicUrl(path);
-
   const type = document.getElementById("aType").value;
   const title = document.getElementById("aTitle").value;
   const classe = document.getElementById("aClass").value;
-  document.querySelectorAll('input[type=checkbox]:checked').forEach(cb=>{
+  document.querySelectorAll('#subjectCheckboxes input[type=checkbox]:checked').forEach(cb=>{
     supabase.from("contents").insert({
       classe:classe,
       matiere:cb.value,
@@ -110,6 +124,13 @@ async function addContent(){
     });
   });
   alert("Ajouté !");
+});
+
+// Navigation vers contenu
+function selectClass(classe){
+  const subjects = subjectsByClass[classe];
+  let matiere = subjects[0]; // par défaut la première matière
+  window.location.href = `contenu.html?classe=${classe}&matiere=${matiere}`;
 }
 </script>
 </body>
