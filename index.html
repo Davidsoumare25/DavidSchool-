@@ -3,252 +3,295 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DavidSchool - Exercices</title>
+<title>DavidSchool – Exercices</title>
+
+<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{
-  --main:#1e90ff;
-  --bg:#f4f7fb;
+  --blue:#2563eb;
+  --bg:#f4f6fb;
   --card:#ffffff;
-  --text:#333;
-  --accent:#ff9900;
 }
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--bg);
-}
+*{box-sizing:border-box;font-family:Arial, sans-serif}
+body{margin:0;background:var(--bg)}
+
+/* ===== HEADER ===== */
 header{
-  background:var(--main);
+  background:var(--blue);
   color:white;
-  padding:15px;
+  padding:16px;
   text-align:center;
   font-size:22px;
-  font-weight:bold;
   position:relative;
 }
 #adminIcon{
   position:absolute;
-  top:10px;
-  left:10px;
+  left:12px;
+  top:12px;
   background:white;
-  color:var(--main);
-  padding:10px 12px;
+  color:var(--blue);
+  width:40px;
+  height:40px;
   border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
   font-weight:bold;
-  box-shadow:0 2px 6px rgba(0,0,0,.2);
-  z-index:2000;
 }
-.container{padding:20px;}
+
+/* ===== SECTIONS ===== */
+.section{display:none;padding:18px}
+.section.active{display:block}
+
+/* ===== GRID ===== */
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-  gap:15px;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:14px;
 }
 .card{
-  background:var(--card);
-  padding:20px;
-  border-radius:12px;
+  padding:22px;
+  border-radius:14px;
+  color:white;
   text-align:center;
-  cursor:pointer;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
   font-weight:bold;
-  transition:transform 0.2s, box-shadow 0.2s;
+  cursor:pointer;
+  box-shadow:0 4px 10px rgba(0,0,0,.12);
+  transition:.2s;
 }
-.card:hover{
-  transform:scale(1.05);
-  box-shadow:0 4px 10px rgba(0,0,0,.15);
+.card:hover{transform:scale(1.05)}
+
+/* Classes */
+.c6e{background:#16a34a}
+.c5e{background:#0ea5e9}
+.c4e{background:#6366f1}
+.c3e{background:#9333ea}
+
+/* Matières */
+.math{background:#f59e0b}
+.fr{background:#ef4444}
+.ang{background:#14b8a6}
+.hist{background:#64748b}
+.geo{background:#22c55e}
+.svt{background:#10b981}
+.pc{background:#dc2626}
+
+/* ===== BUTTONS ===== */
+button{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
 }
-#subjects,#exercises{display:none;}
+.back{background:#334155;color:white;margin-bottom:10px}
+
+/* ===== EXERCISES ===== */
 .item{
-  border-bottom:1px solid #eee;
-  padding:8px;
+  background:white;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
 }
-.item img{
-  max-width:100%;
-  border-radius:8px;
-  margin-top:5px;
-}
-/* Colors classes */
-.c6e{background:#16a34a;color:white;}
-.c5e{background:#2563eb;color:white;}
-.c4e{background:#9333ea;color:white;}
-.c3e{background:#f59e0b;color:white;}
-/* Colors matières */
-.mMath{background:#fbbf24;color:white;}
-.mFrançais{background:#f87171;color:white;}
-.mAnglais{background:#60a5fa;color:white;}
-.mHistoire{background:#34d399;color:white;}
-.mGéographie{background:#a78bfa;color:white;}
-.mSVT{background:#10b981;color:white;}
-.mPhysique-Chimie{background:#f472b6;color:white;}
-/* ADMIN */
+.item img{max-width:100%;border-radius:8px}
+
+/* ===== ADMIN ===== */
 #adminModal{
-  display:none;
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
   z-index:3000;
 }
-#adminBox{
+.adminBox{
   background:white;
-  width:90%;
-  max-width:400px;
-  margin:60px auto;
   padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 12px rgba(0,0,0,.25);
+  width:90%;
+  max-width:420px;
+  border-radius:14px;
 }
-input,select,button{
+input,select{
   width:100%;
-  margin:6px 0;
   padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
+  margin:6px 0;
 }
-button{
-  background:var(--main);
-  color:white;
-  border:none;
-  cursor:pointer;
-  font-weight:bold;
-}
-button:hover{background:var(--accent);}
 </style>
 </head>
+
 <body>
+
 <header>
-  📘 DavidSchool
   <div id="adminIcon">⚙</div>
+  📘 DavidSchool – Exercices
 </header>
-<div class="container">
-<!-- CLASSES -->
-<div id="classes" class="grid">
-  <div class="card c6e" onclick="selectClass('6e')">6e</div>
-  <div class="card c5e" onclick="selectClass('5e')">5e</div>
-  <div class="card c4e" onclick="selectClass('4e')">4e</div>
-  <div class="card c3e" onclick="selectClass('3e')">3e</div>
+
+<!-- ===== CLASSES ===== -->
+<div id="classes" class="section active">
+  <h3>Choisis ta classe</h3>
+  <div class="grid">
+    <div class="card c6e" data-classe="6e">6e</div>
+    <div class="card c5e" data-classe="5e">5e</div>
+    <div class="card c4e" data-classe="4e">4e</div>
+    <div class="card c3e" data-classe="3e">3e</div>
+  </div>
 </div>
 
-<!-- MATIÈRES -->
-<div id="subjects" class="grid"></div>
-
-<!-- EXERCICES -->
-<div id="exercises" class="grid"></div>
+<!-- ===== MATIÈRES ===== -->
+<div id="subjects" class="section">
+  <button class="back" id="backToClasses">⬅ Retour</button>
+  <h3 id="classeTitre"></h3>
+  <div class="grid" id="subjectsList"></div>
 </div>
 
-<!-- ADMIN -->
+<!-- ===== EXERCICES ===== -->
+<div id="exercisesSection" class="section">
+  <button class="back" id="backToSubjects">⬅ Retour</button>
+  <h3 id="exerciseTitle"></h3>
+  <div id="exercisesList"></div>
+</div>
+
+<!-- ===== ADMIN ===== -->
 <div id="adminModal">
-  <div id="adminBox">
+  <div class="adminBox">
     <h3>Admin</h3>
     <input type="password" id="adminPass" placeholder="Mot de passe">
-    <button onclick="login()">Entrer</button>
+    <button id="loginBtn">Entrer</button>
 
     <div id="adminPanel" style="display:none">
-      <select id="aClass">
-        <option>6e</option>
-        <option>5e</option>
-        <option>4e</option>
-        <option>3e</option>
+      <select id="aClasse">
+        <option>6e</option><option>5e</option><option>4e</option><option>3e</option>
       </select>
-      <p>Matières (optionnelles)</p>
-      <label><input type="checkbox" value="Math"> Math</label><br>
+
+      <p>Matières</p>
+      <label><input type="checkbox" value="Maths"> Maths</label><br>
       <label><input type="checkbox" value="Français"> Français</label><br>
       <label><input type="checkbox" value="Anglais"> Anglais</label><br>
       <label><input type="checkbox" value="Histoire"> Histoire</label><br>
       <label><input type="checkbox" value="Géographie"> Géographie</label><br>
       <label><input type="checkbox" value="SVT"> SVT</label><br>
       <label><input type="checkbox" value="Physique-Chimie"> Physique-Chimie</label><br>
-      <input id="aTitle" placeholder="Titre">
+
+      <input id="aTitle" placeholder="Titre exercice">
       <input type="file" id="aFile">
-      <button onclick="addContent()">Ajouter</button>
+      <button id="addBtn">Ajouter</button>
     </div>
+
     <button onclick="closeAdmin()">Fermer</button>
   </div>
 </div>
 
 <script>
-const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncX";
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* ===== SUPABASE ===== */
+const supabaseClient = supabase.createClient(
+  "https://xwzjlddgqwlrxgetahvp.supabase.co",
+  "TON_ANON_KEY_ICI"
+);
 
-let currentClass="", currentSubject="";
+/* ===== VARIABLES ===== */
+let currentClasse="", currentMatiere="";
+
 const subjectsByClass={
-  "6e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
-  "5e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
-  "4e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"],
-  "3e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"]
+  "6e":["Maths","Français","Anglais","Histoire","Géographie","SVT"],
+  "5e":["Maths","Français","Anglais","Histoire","Géographie","SVT"],
+  "4e":["Maths","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"],
+  "3e":["Maths","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"]
 };
 
-function selectClass(c){
-  currentClass=c;
-  document.getElementById("classes").style.display="none";
-  const s=document.getElementById("subjects");
-  s.innerHTML="";
-  subjectsByClass[c].forEach(m=>{
-    const colorClass="m"+m.replace(/ /g,'-');
-    s.innerHTML+=`<div class="card ${colorClass}" onclick="selectSubject('${m}')">${m}</div>`;
+/* ===== NAV ===== */
+function show(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ===== CLASSES CLICK ===== */
+document.querySelectorAll("[data-classe]").forEach(c=>{
+  c.addEventListener("click",()=>{
+    currentClasse=c.dataset.classe;
+    document.getElementById("classeTitre").innerText="Classe "+currentClasse;
+    let list=document.getElementById("subjectsList");
+    list.innerHTML="";
+    subjectsByClass[currentClasse].forEach(m=>{
+      let d=document.createElement("div");
+      d.className="card math";
+      d.innerText=m;
+      d.onclick=()=>openExercises(m);
+      list.appendChild(d);
+    });
+    show("subjects");
   });
-  s.style.display="grid";
+});
+
+function openExercises(m){
+  currentMatiere=m;
+  document.getElementById("exerciseTitle").innerText=
+    currentClasse+" – "+m;
+  loadExercises();
+  show("exercisesSection");
 }
 
-async function selectSubject(m){
-  currentSubject=m;
-  document.getElementById("subjects").style.display="none";
-  document.getElementById("exercises").style.display="grid";
-  await loadContent();
-}
+/* ===== LOAD EXERCISES ===== */
+async function loadExercises(){
+  let list=document.getElementById("exercisesList");
+  list.innerHTML="";
 
-async function loadContent(){
-  exercises.innerHTML="";
-  const {data} = await supabase
+  const {data}=await supabaseClient
     .from("contents")
     .select("*")
-    .eq("classe",currentClass)
-    .eq("matiere",currentSubject);
+    .eq("classe",currentClasse)
+    .eq("matiere",currentMatiere);
 
-  data.forEach(d=>{
-    const div=document.createElement("div");
-    div.className="item";
-    div.innerHTML=`<b>${d.title}</b><br>${
-      d.file_url?.endsWith(".pdf")
-      ? `<a href="${d.file_url}" target="_blank">Télécharger</a>`
-      : `<img src="${d.file_url}">`
-    }`;
-    exercises.appendChild(div);
+  data.forEach(e=>{
+    let d=document.createElement("div");
+    d.className="item";
+    d.innerHTML=`<b>${e.title}</b><br>
+      ${e.file_url ? `<img src="${e.file_url}">` : ""}`;
+    list.appendChild(d);
   });
 }
 
-/* ADMIN */
-adminIcon.onclick=()=>adminModal.style.display="block";
-function closeAdmin(){adminModal.style.display="none";}
-function login(){
-  if(adminPass.value==="1234"){
-    adminPanel.style.display="block";
-  } else alert("Mot de passe incorrect");
-}
+/* ===== ADMIN ===== */
+const adminModal=document.getElementById("adminModal");
+document.getElementById("adminIcon").onclick=()=>adminModal.style.display="flex";
+function closeAdmin(){adminModal.style.display="none"}
 
-async function addContent(){
-  const file=aFile.files[0];
-  let fileUrl="";
+document.getElementById("loginBtn").onclick=()=>{
+  if(document.getElementById("adminPass").value==="1234"){
+    document.getElementById("adminPanel").style.display="block";
+  }
+};
+
+document.getElementById("addBtn").onclick=async()=>{
+  const file=document.getElementById("aFile").files[0];
+  let url="";
   if(file){
     const path=Date.now()+"_"+file.name;
-    await supabase.storage.from("davidschool").upload(path,file);
-    const {data:{publicUrl}} = supabase.storage.from("davidschool").getPublicUrl(path);
-    fileUrl=publicUrl;
+    await supabaseClient.storage.from("davidschool").upload(path,file);
+    url=supabaseClient.storage.from("davidschool").getPublicUrl(path).data.publicUrl;
   }
-  document.querySelectorAll('input[type=checkbox]:checked').forEach(cb=>{
-    supabase.from("contents").insert({
-      classe:aClass.value,
+
+  document.querySelectorAll("input[type=checkbox]:checked").forEach(cb=>{
+    supabaseClient.from("contents").insert({
+      classe:document.getElementById("aClasse").value,
       matiere:cb.value,
-      title:aTitle.value,
-      file_url:fileUrl
+      title:document.getElementById("aTitle").value,
+      file_url:url
     });
   });
-  alert("Exercice ajouté !");
-  if(currentClass && currentSubject) loadContent();
-}
+
+  alert("Exercice ajouté");
+  if(currentClasse && currentMatiere) loadExercises();
+};
+
+/* BACK */
+document.getElementById("backToClasses").onclick=()=>show("classes");
+document.getElementById("backToSubjects").onclick=()=>show("subjects");
 </script>
+
 </body>
 </html>
