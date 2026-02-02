@@ -8,134 +8,19 @@
 
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:#f2f4f8;
-  color:#222;
-}
-
-header{
-  background:linear-gradient(135deg,#6a00ff,#1e90ff);
-  color:white;
-  padding:45px 22px;
-  text-align:center;
-  position:relative;
-}
-
-#adminIcon{
-  position:absolute;
-  top:20px;
-  left:20px;
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  background:white;
-  color:#6a00ff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:0 4px 10px rgba(0,0,0,0.2);
-}
-
-main{
-  padding:20px;
-  max-width:480px;
-  margin:auto;
-}
-
-.grid{
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-
-.card{
-  padding:25px;
-  border-radius:20px;
-  color:white;
-  font-size:22px;
-  font-weight:bold;
-  cursor:pointer;
-  background:linear-gradient(135deg,#6a00ff,#1e90ff);
-  box-shadow:0 6px 15px rgba(0,0,0,0.15);
-  transition:0.2s;
-  text-align:left;
-  text-transform:uppercase;
-}
-
-.card:hover{
-  transform:scale(1.02);
-}
-
-.exercise{
-  padding:15px;
-  border-radius:18px;
-  margin-bottom:15px;
-  color:white;
-  background:linear-gradient(135deg,#6a00ff,#1e90ff);
-  position:relative;
-}
-
-.exercise img{
-  width:100%;
-  border-radius:12px;
-  margin-top:10px;
-  cursor:pointer;
-  background:white;
-}
-
-.exercise a{
-  color:white;
-  font-weight:bold;
-  display:block;
-  margin-top:10px;
-  text-decoration:none;
-  background:rgba(255,255,255,0.2);
-  padding:10px;
-  border-radius:8px;
-  text-align:center;
-}
-
-button{
-  margin-top:15px;
-  padding:15px;
-  border:none;
-  border-radius:12px;
-  background:#6a00ff;
-  color:white;
-  font-size:16px;
-  width:100%;
-  cursor:pointer;
-}
-
-select,input{
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border-radius:10px;
-  border:1px solid #ddd;
-}
-
-#adminModal,#overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.7);
-  justify-content:center;
-  align-items:center;
-  z-index:1000;
-}
-
-#adminBox{
-  background:white;
-  padding:25px;
-  border-radius:20px;
-  width:90%;
-  max-width:400px;
-}
+body{margin:0;font-family:system-ui,Arial;background:#f2f4f8;color:#222}
+header{background:linear-gradient(135deg,#6a00ff,#1e90ff);color:white;padding:45px 22px;text-align:center;position:relative}
+#adminIcon{position:absolute;top:20px;left:20px;width:42px;height:42px;border-radius:50%;background:white;color:#6a00ff;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.2)}
+main{padding:20px;max-width:480px;margin:auto}
+.grid{display:flex;flex-direction:column;gap:16px}
+.card{padding:25px;border-radius:20px;color:white;font-size:22px;font-weight:bold;cursor:pointer;background:linear-gradient(135deg,#6a00ff,#1e90ff);box-shadow:0 6px 15px rgba(0,0,0,0.15);transition:0.2s;text-align:left;text-transform:uppercase}
+.card:hover{transform:scale(1.02)}
+.exercise{padding:15px;border-radius:18px;margin-bottom:15px;color:white;background:linear-gradient(135deg,#6a00ff,#1e90ff);position:relative}
+.exercise img{width:100%;border-radius:12px;margin-top:10px;cursor:pointer;background:white}
+button{margin-top:15px;padding:15px;border:none;border-radius:12px;background:#6a00ff;color:white;font-size:16px;width:100%;cursor:pointer}
+select,input{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid #ddd}
+#adminModal,#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:1000}
+#adminBox{background:white;padding:25px;border-radius:20px;width:90%;max-width:400px}
 </style>
 </head>
 
@@ -155,41 +40,39 @@ select,input{
 
 <div id="adminModal">
   <div id="adminBox">
-    <h2 style="margin-top:0">Administration</h2>
+    <h2>Admin</h2>
     <div id="loginArea">
-      <input type="password" id="loginPass" placeholder="Code Secret (1234)">
+      <input type="password" id="loginPass" placeholder="Code Secret">
       <button onclick="login()">Connexion</button>
     </div>
     <div id="adminPanel" style="display:none">
-      <label>Classe :</label>
       <select id="aClass"></select>
-      <label>Matière :</label>
       <select id="aSubject"></select>
-      <input id="aTitle" placeholder="Titre de l'exercice">
+      <input id="aTitle" placeholder="Titre">
       <input type="file" id="aFile">
-      <button onclick="addExercise()" id="uploadBtn">🚀 Envoyer dans cette matière</button>
-      <button onclick="document.getElementById('adminModal').style.display='none'" style="background:#444">Fermer</button>
+      <button onclick="addExercise()" id="uploadBtn">Envoyer</button>
     </div>
   </div>
 </div>
 
-<div id="overlay" onclick="this.style.display='none'">
-  <img id="overlayImg" style="max-width:95%; border-radius:10px">
-</div>
+<div id="overlay" onclick="this.style.display='none'"><img id="overlayImg" style="max-width:95%"></div>
 
 <script>
-// --- CONFIGURATION : REMPLACE PAR TES CLES SUPABASE ---
-const S_URL = "TON_URL_SUPABASE";
-const S_KEY = "TA_CLE_ANON_PUBLISHABLE";
-const _supabase = supabase.createClient(S_URL, S_KEY);
+// --- CONFIGURATION ---
+const S_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
+const S_KEY = "sb_publishable_H6kxRYeMBOLYdtMDKlzsZg_pFoRSqJR";
+let _supabase;
 
-// --- TA LISTE DE MATIERES PERSONNALISEE ---
+// Tentative de connexion sécurisée pour ne pas bloquer l'affichage
+try {
+    _supabase = supabase.createClient(S_URL, S_KEY);
+} catch(e) { console.error("Erreur de config Supabase"); }
+
 const matieres = ["Math", "Physique-Chimie", "Histoire", "Géographie", "Français", "SVT"];
 const classesList = ["6e", "5e", "4e", "3e"];
-
 let curClass="", curSubject="", isAdmin=false;
 
-// AFFICHAGE DES CLASSES (ACCUEIL)
+// AFFICHAGE IMMEDIAT DES CLASSES
 function loadClasses(){
   const box = document.getElementById("classes");
   box.innerHTML = "";
@@ -200,13 +83,15 @@ function loadClasses(){
     d.onclick = () => { curClass=c; showSubjects(); };
     box.appendChild(d);
   });
+  document.getElementById("classes").style.display = "flex";
+  document.getElementById("subjects").style.display = "none";
+  document.getElementById("exercises").style.display = "none";
+  document.getElementById("backBtn").style.display = "none";
 }
 
-// AFFICHAGE DES MATIERES
 function showSubjects(){
   document.getElementById("classes").style.display="none";
   const box = document.getElementById("subjects");
-  box.style.display="flex";
   box.innerHTML = "";
   matieres.forEach(s => {
     let d = document.createElement("div");
@@ -215,157 +100,79 @@ function showSubjects(){
     d.onclick = () => { curSubject=s; fetchExercises(); };
     box.appendChild(d);
   });
+  box.style.display="flex";
   document.getElementById("backBtn").style.display="block";
 }
 
-// RECUPERATION DES EXERCICES DEPUIS LE CLOUD
 async function fetchExercises(){
   document.getElementById("subjects").style.display="none";
   const box = document.getElementById("exercises");
   box.style.display="block";
-  box.innerHTML = "<p style='text-align:center'>Chargement des exercices...</p>";
+  box.innerHTML = "<p style='text-align:center'>Chargement...</p>";
 
-  const { data, error } = await _supabase.from('exercises')
-    .select('*')
-    .eq('class', curClass)
-    .eq('subject', curSubject)
-    .order('created_at', { ascending: false });
-
-  box.innerHTML = "";
-  if(error) {
-      box.innerHTML = "<p>Erreur de connexion.</p>";
-      return;
-  }
-  
-  if(data.length === 0) {
-      box.innerHTML = "<p style='text-align:center'>Aucun exercice pour le moment.</p>";
-  }
-
-  data.forEach(e => {
-    let div = document.createElement("div");
-    div.className = "exercise";
-    div.innerHTML = `<div style="font-size:18px; margin-bottom:10px">${e.title}</div>`;
-    
-    if(e.file_type === "img"){
-      let img = document.createElement("img");
-      img.src = e.file_url;
-      img.onclick = () => { 
-        document.getElementById("overlayImg").src=e.file_url; 
-        document.getElementById("overlay").style.display="flex"; 
-      };
-      div.appendChild(img);
-    } else {
-      div.innerHTML += `<a href="${e.file_url}" target="_blank">📥 Ouvrir le document</a>`;
-    }
-    
-    if(isAdmin){
-      let btn = document.createElement("button");
-      btn.innerText = "Supprimer";
-      btn.style.background = "#ff4757";
-      btn.style.marginTop = "10px";
-      btn.onclick = async () => { 
-        if(confirm("Supprimer cet exercice ?")){
-            await _supabase.from('exercises').delete().eq('id', e.id); 
-            fetchExercises(); 
-        }
-      };
-      div.appendChild(btn);
-    }
-    box.appendChild(div);
-  });
+  try {
+      const { data, error } = await _supabase.from('exercises').select('*').eq('class', curClass).eq('subject', curSubject);
+      box.innerHTML = "";
+      if(data && data.length > 0){
+          data.forEach(e => {
+            let div = document.createElement("div");
+            div.className = "exercise";
+            div.innerHTML = `<b>${e.title}</b>`;
+            if(e.file_type === "img"){
+                let img = document.createElement("img"); img.src = e.file_url;
+                img.onclick = () => { document.getElementById("overlayImg").src=e.file_url; document.getElementById("overlay").style.display="flex"; };
+                div.appendChild(img);
+            }
+            box.appendChild(div);
+          });
+      } else { box.innerHTML = "<p style='text-align:center'>Aucun exercice.</p>"; }
+  } catch(e) { box.innerHTML = "<p>Erreur de connexion Cloud.</p>"; }
 }
 
 function goBack(){
-  if(document.getElementById("exercises").style.display === "block"){
-    document.getElementById("exercises").style.display = "none";
-    showSubjects();
-  } else {
-    document.getElementById("subjects").style.display = "none";
-    document.getElementById("backBtn").style.display = "none";
-    document.getElementById("classes").style.display = "flex";
-  }
+  if(document.getElementById("exercises").style.display === "block") showSubjects();
+  else loadClasses();
 }
-
-// GESTION ADMIN
-document.getElementById("adminIcon").onclick = () => {
-    document.getElementById("adminModal").style.display="flex";
-};
 
 function login(){
   if(document.getElementById("loginPass").value === "1234"){
     isAdmin = true;
     document.getElementById("loginArea").style.display="none";
     document.getElementById("adminPanel").style.display="block";
-  } else {
-      alert("Code incorrect");
   }
 }
 
-// ENVOYER UN EXERCICE DANS UNE MATIERE PRECISE
 async function addExercise(){
-  const file = document.getElementById("aFile").files[0];
-  const title = document.getElementById("aTitle").value;
-  const selClass = document.getElementById("aClass").value;
-  const selSub = document.getElementById("aSubject").value;
-  const btn = document.getElementById("uploadBtn");
-
-  if(!file || !title) return alert("Remplis le titre et choisis un fichier");
-
-  btn.innerText = "⏳ Envoi en cours...";
-  btn.disabled = true;
-
-  try {
-    const path = `${selClass}/${Date.now()}_${file.name}`;
+    const file = document.getElementById("aFile").files[0];
+    const title = document.getElementById("aTitle").value;
+    if(!file || !title) return alert("Remplis tout !");
     
-    // 1. Upload dans le storage
-    const { data: upData, error: upError } = await _supabase.storage
-        .from('exercise-files')
-        .upload(path, file);
-    
-    if(upError) throw upError;
+    const path = `${curClass}/${Date.now()}_${file.name}`;
+    const { data: upData, error: upErr } = await _supabase.storage.from('exercise-files').upload(path, file);
+    if(upErr) return alert("Erreur Storage: " + upErr.message);
 
-    // 2. Récupérer l'URL
     const { data: urlData } = _supabase.storage.from('exercise-files').getPublicUrl(path);
-
-    // 3. Enregistrer en base de données avec les bonnes étiquettes
-    const { error: dbError } = await _supabase.from('exercises').insert([{
-      class: selClass,
-      subject: selSub,
-      title: title,
-      file_url: urlData.publicUrl,
-      file_type: file.type.startsWith("image") ? "img" : "doc"
+    await _supabase.from('exercises').insert([{
+        class: document.getElementById("aClass").value,
+        subject: document.getElementById("aSubject").value,
+        title: title,
+        file_url: urlData.publicUrl,
+        file_type: file.type.startsWith("image") ? "img" : "doc"
     }]);
-
-    if(dbError) throw dbError;
-
-    alert("L'exercice a été ajouté en " + selClass + " - " + selSub);
+    alert("Envoyé !");
     location.reload();
-
-  } catch (err) {
-    alert("Erreur : " + err.message);
-    btn.innerText = "🚀 Envoyer dans cette matière";
-    btn.disabled = false;
-  }
 }
 
-// INITIALISATION DU PANNEAU ADMIN
-function initAdmin(){
-  const cSel = document.getElementById("aClass");
-  const sSel = document.getElementById("aSubject");
-  
-  classesList.forEach(c => {
-    let o = document.createElement("option"); o.value=c; o.innerText=c;
-    cSel.appendChild(o);
-  });
-  
-  matieres.forEach(m => {
-    let o = document.createElement("option"); o.value=m; o.innerText=m;
-    sSel.appendChild(o);
-  });
-}
+// Init Admin menus
+const cSel = document.getElementById("aClass");
+const sSel = document.getElementById("aSubject");
+classesList.forEach(c => { let o = new Option(c,c); cSel.add(o); });
+matieres.forEach(m => { let o = new Option(m,m); sSel.add(o); });
 
-initAdmin();
-loadClasses();
+document.getElementById("adminIcon").onclick = () => document.getElementById("adminModal").style.display="flex";
+
+// Lancement forcé
+window.onload = loadClasses;
 </script>
 </body>
 </html>
