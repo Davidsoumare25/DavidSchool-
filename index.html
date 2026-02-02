@@ -62,12 +62,14 @@ header{
 .columns{
   display:flex;
   gap:15px;
+  flex-wrap:wrap;
 }
 .column{
   flex:1;
   background:white;
   padding:10px;
   border-radius:10px;
+  min-width:200px;
 }
 .item{
   border-bottom:1px solid #eee;
@@ -98,6 +100,7 @@ input,select,button{
   width:100%;
   margin:6px 0;
   padding:8px;
+  box-sizing:border-box;
 }
 </style>
 </head>
@@ -160,12 +163,26 @@ input,select,button{
 </div>
 
 <script>
-/* 🔴 REMPLACE ICI */
+// 🔴 SUPABASE CONFIG
 const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncXdscnhnZXRhaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MzY1NTQsImV4cCI6MjA4NTMxMjU1NH0.MsCgDKBz3jXrJ_dOcJ35koaLi-uBpNXoAoaFLAWDbkg";
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// VARIABLES DOM
+const adminIcon = document.getElementById("adminIcon");
+const adminModal = document.getElementById("adminModal");
+const adminPanel = document.getElementById("adminPanel");
+const adminPass = document.getElementById("adminPass");
+
+const classesBox = document.getElementById("classes");
+const subjectsBox = document.getElementById("subjects");
+const contentBox = document.getElementById("content");
+
+const exercises = document.getElementById("exercises");
+const lessons = document.getElementById("lessons");
+
+// LOGIQUE
 let currentClass="", currentSubject="";
 const subjectsByClass={
   "6e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
@@ -176,31 +193,34 @@ const subjectsByClass={
 
 function selectClass(c){
   currentClass=c;
-  document.getElementById("classes").style.display="none";
-  const s=document.getElementById("subjects");
-  s.innerHTML="";
+  classesBox.style.display="none";
+  subjectsBox.innerHTML="";
   subjectsByClass[c].forEach(m=>{
-    s.innerHTML+=`<div class="card" onclick="selectSubject('${m}')">${m}</div>`;
+    const div=document.createElement("div");
+    div.className="card";
+    div.textContent=m;
+    div.onclick=()=>selectSubject(m);
+    subjectsBox.appendChild(div);
   });
-  s.style.display="grid";
+  subjectsBox.style.display="grid";
 }
 
 function selectSubject(m){
   currentSubject=m;
-  document.getElementById("subjects").style.display="none";
-  document.getElementById("content").style.display="flex";
+  subjectsBox.style.display="none";
+  contentBox.style.display="flex";
   loadContent();
 }
 
 async function loadContent(){
   exercises.innerHTML="";
   lessons.innerHTML="";
-  const {data}=await supabase
+  const {data,error}=await db
     .from("contents")
     .select("*")
     .eq("classe",currentClass)
     .eq("matiere",currentSubject);
-
+  if(error){console.log(error);return;}
   data.forEach(d=>{
     const div=document.createElement("div");
     div.className="item";
@@ -213,21 +233,24 @@ async function loadContent(){
   });
 }
 
-/* ADMIN */
-adminIcon.onclick=()=>adminModal.style.display="block";
+// ADMIN
+adminIcon.addEventListener("click",()=>adminModal.style.display="block");
 function closeAdmin(){adminModal.style.display="none";}
 function login(){
   if(adminPass.value==="1234"){
     adminPanel.style.display="block";
+  }else{
+    alert("Mot de passe incorrect !");
   }
 }
+
 async function addContent(){
   const file=aFile.files[0];
+  if(!file){alert("Sélectionne un fichier !"); return;}
   const path=Date.now()+"_"+file.name;
-  await supabase.storage.from("davidschool").upload(path,file);
-  const {data:{publicUrl}}=supabase.storage.from("davidschool").getPublicUrl(path);
-
-  await supabase.from("contents").insert({
+  await db.storage.from("davidschool").upload(path,file);
+  const {data:{publicUrl}}=db.storage.from("davidschool").getPublicUrl(path);
+  await db.from("contents").insert({
     classe:aClass.value,
     matiere:aSubject.value,
     type:aType.value,
@@ -235,6 +258,8 @@ async function addContent(){
     file_url:publicUrl
   });
   alert("Ajouté !");
+  aTitle.value="";
+  aFile.value="";
 }
 </script>
 </body>
