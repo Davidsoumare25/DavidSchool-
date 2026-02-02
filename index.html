@@ -4,47 +4,62 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DavidSchool</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{
-  --bg:#f4f7fb;
-  --card:#ffffff;
-  --hover:#d0e7ff;
-  --back:#1e90ff;
-  --exercise:#ffecb3;
-  --lesson:#c8e6c9;
+body{margin:0;font-family:Arial;background:#f4f7fb}
+header{background:#1e90ff;color:#fff;padding:15px;text-align:center;font-size:22px}
+#adminIcon{position:fixed;top:10px;left:10px;background:#fff;color:#1e90ff;
+padding:8px 10px;border-radius:50%;cursor:pointer;z-index:999}
+.container{padding:20px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px}
+.card{padding:15px;border-radius:12px;color:#fff;font-weight:bold;
+text-align:center;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,.1)}
+.card:hover{transform:scale(1.05)}
+
+#subjects,#content{display:none}
+.columns{display:flex;gap:15px;flex-wrap:wrap}
+.column{flex:1;background:#fff;border-radius:10px;padding:10px}
+
+.item{
+background:#eef4ff;
+margin-bottom:10px;
+padding:10px;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold
+}
+.item:hover{background:#dbe9ff}
+
+.backBtn{
+background:#1e90ff;color:#fff;border:none;
+padding:6px 12px;border-radius:6px;
+margin-bottom:10px;cursor:pointer
 }
 
-/* BASE */
-body{margin:0; font-family:Arial,sans-serif; background:var(--bg);}
-header{background:var(--back); color:white; padding:15px; text-align:center; font-size:22px;}
-#adminIcon{position:fixed; top:10px; left:10px; background:white; color:var(--back); padding:8px 10px; border-radius:50%; cursor:pointer; font-weight:bold; z-index:2000;}
-.container{padding:20px;}
-.backBtn{background:var(--back); color:white; border:none; padding:6px 12px; margin-bottom:10px; border-radius:6px; cursor:pointer; display:none;}
-
-/* CARDS */
-.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:15px;}
-.card{padding:15px; border-radius:10px; text-align:center; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.1); transition:all .2s; color:white; font-weight:bold;}
-.card:hover{transform:scale(1.05); opacity:0.9;}
-
-/* CONTENT */
-#subjects,#content{display:none;}
-.columns{display:flex; gap:15px; flex-wrap:wrap;}
-.column{flex:1; background:white; padding:10px; border-radius:10px; min-width:200px;}
-.item{border-bottom:1px solid #eee; padding:8px; cursor:pointer; transition:all .2s;}
-.item:hover{background:#f0f0f0;}
-.item img{max-width:100%; border-radius:8px;}
-
-/* POPUP */
-#popup{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:4000; justify-content:center; align-items:center;}
-#popupBox{background:white; max-width:90%; max-height:90%; overflow:auto; padding:15px; border-radius:10px;}
+#popup{
+display:none;position:fixed;inset:0;
+background:rgba(0,0,0,.7);
+justify-content:center;align-items:center;z-index:2000
+}
+#popupBox{
+background:#fff;width:90%;max-height:90%;
+padding:10px;border-radius:10px;overflow:auto
+}
 
 /* ADMIN */
-#adminModal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:3000;}
-#adminBox{background:white; width:90%; max-width:400px; margin:60px auto; padding:15px; border-radius:10px;}
-input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box;}
+#adminModal{
+display:none;position:fixed;inset:0;
+background:rgba(0,0,0,.7);z-index:3000
+}
+#adminBox{
+background:#fff;width:90%;max-width:400px;
+margin:60px auto;padding:15px;border-radius:10px
+}
+input,select,button{
+width:100%;margin:6px 0;padding:8px
+}
 </style>
 </head>
 
@@ -54,16 +69,11 @@ input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box
 <div id="adminIcon">⚙</div>
 
 <div class="container">
-
 <button id="backBtn" class="backBtn" onclick="goBack()">← Retour</button>
 
-<!-- CLASSES -->
 <div id="classes" class="grid"></div>
-
-<!-- MATIÈRES -->
 <div id="subjects" class="grid"></div>
 
-<!-- CONTENU -->
 <div id="content" class="columns">
   <div class="column">
     <h3>📄 Exercices</h3>
@@ -74,15 +84,12 @@ input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box
     <div id="lessons"></div>
   </div>
 </div>
-
 </div>
 
-<!-- POPUP -->
-<div id="popup">
+<div id="popup" onclick="this.style.display='none'">
   <div id="popupBox"></div>
 </div>
 
-<!-- ADMIN -->
 <div id="adminModal">
   <div id="adminBox">
     <h3>Admin</h3>
@@ -92,7 +99,7 @@ input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box
     <div id="adminPanel" style="display:none">
       <select id="aClass"></select>
       <select id="aSubject">
-        <option value="">Toutes les matières (optionnel)</option>
+        <option value="">Toutes les matières</option>
       </select>
       <select id="aType">
         <option value="exercise">Exercice</option>
@@ -103,143 +110,134 @@ input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box
       <button onclick="addContent()">Ajouter</button>
     </div>
 
-    <button onclick="closeAdmin()">Fermer</button>
+    <button onclick="adminModal.style.display='none'">Fermer</button>
   </div>
 </div>
 
 <script>
-// SUPABASE
-const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncnhnZXRhaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MzY1NTQsImV4cCI6MjA4NTMxMjU1NH0.MsCgDKBz3jXrJ_dOcJ35koaLi-uBpNXoAoaFLAWDbkg";
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = supabase.createClient(
+"https://xwzjlddgqwlrxgetahvp.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncXdscnhnZXRhaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MzY1NTQsImV4cCI6MjA4NTMxMjU1NH0.MsCgDKBz3jXrJ_dOcJ35koaLi-uBpNXoAoaFLAWDbkg"
+);
 
-// DOM
-const adminIcon = document.getElementById("adminIcon");
-const adminModal = document.getElementById("adminModal");
-const adminPanel = document.getElementById("adminPanel");
-const adminPass = document.getElementById("adminPass");
-const classesBox = document.getElementById("classes");
-const subjectsBox = document.getElementById("subjects");
-const contentBox = document.getElementById("content");
-const exercises = document.getElementById("exercises");
-const lessons = document.getElementById("lessons");
-const backBtn = document.getElementById("backBtn");
-const popup = document.getElementById("popup");
-const popupBox = document.getElementById("popupBox");
-const aClass = document.getElementById("aClass");
-const aSubject = document.getElementById("aSubject");
-const aType = document.getElementById("aType");
-const aTitle = document.getElementById("aTitle");
-const aFile = document.getElementById("aFile");
-
-// CLASSES et MATIERES
 const classesData={
-  "6e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
-  "5e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
-  "4e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"],
-  "3e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"]
+"6e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
+"5e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
+"4e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"],
+"3e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"]
 };
-const classColors={"6e":"#f44336","5e":"#9c27b0","4e":"#2196f3","3e":"#ff9800"};
-const subjectColors={"Math":"#3f51b5","Français":"#e91e63","Anglais":"#009688","Histoire":"#795548","Géographie":"#4caf50","SVT":"#ff5722","Physique-Chimie":"#607d8b"};
 
-let currentClass="", currentSubject="";
+const colors=["#f44336","#9c27b0","#2196f3","#ff9800","#009688","#795548"];
 
-// INIT CLASSES et ADMIN select
-function initClasses(){
-  classesBox.innerHTML="";
-  aClass.innerHTML="";
-  aSubject.innerHTML='<option value="">Toutes les matières (optionnel)</option>';
-  Object.keys(classesData).forEach(c=>{
-    const card=document.createElement("div");
-    card.className="card";
-    card.textContent=c;
-    card.style.background=classColors[c] || "#333";
-    card.onclick=()=>selectClass(c);
-    classesBox.appendChild(card);
+let currentClass="",currentSubject="";
 
-    const opt=document.createElement("option"); opt.value=c; opt.textContent=c;
-    aClass.appendChild(opt);
-  });
+const classes=document.getElementById("classes");
+const subjects=document.getElementById("subjects");
+const content=document.getElementById("content");
+const exercises=document.getElementById("exercises");
+const lessons=document.getElementById("lessons");
+const backBtn=document.getElementById("backBtn");
 
-  // Remplir matières dans admin
-  const allSubjects=[...new Set(Object.values(classesData).flat())];
-  allSubjects.forEach(m=>{
-    const opt=document.createElement("option"); opt.value=m; opt.textContent=m;
-    aSubject.appendChild(opt);
-  });
-}
-initClasses();
+function init(){
+let i=0;
+for(const c in classesData){
+let d=document.createElement("div");
+d.className="card";
+d.style.background=colors[i++%colors.length];
+d.textContent=c;
+d.onclick=()=>selectClass(c);
+classes.appendChild(d);
 
-function showBack(){backBtn.style.display="inline-block";}
-function hideBack(){backBtn.style.display="none";}
-function goBack(){
-  if(contentBox.style.display=="flex"){
-    contentBox.style.display="none"; subjectsBox.style.display="grid"; showBack();
-  }else if(subjectsBox.style.display=="grid"){
-    subjectsBox.style.display="none"; classesBox.style.display="grid"; hideBack();
-  }
+let o=document.createElement("option");
+o.value=c;o.textContent=c;
+aClass.appendChild(o);
 }
 
-// SELECTION CLASSE → MATIERE
+[...new Set(Object.values(classesData).flat())].forEach(m=>{
+let o=document.createElement("option");
+o.value=m;o.textContent=m;
+aSubject.appendChild(o);
+});
+}
+init();
+
 function selectClass(c){
-  currentClass=c; classesBox.style.display="none";
-  subjectsBox.innerHTML="";
-  classesData[c].forEach(m=>{
-    const card=document.createElement("div");
-    card.className="card";
-    card.textContent=m;
-    card.style.background=subjectColors[m] || "#555";
-    card.onclick=()=>selectSubject(m);
-    subjectsBox.appendChild(card);
-  });
-  subjectsBox.style.display="grid"; showBack();
+currentClass=c;
+classes.style.display="none";
+subjects.innerHTML="";
+let i=0;
+classesData[c].forEach(m=>{
+let d=document.createElement("div");
+d.className="card";
+d.style.background=colors[i++%colors.length];
+d.textContent=m;
+d.onclick=()=>selectSubject(m);
+subjects.appendChild(d);
+});
+subjects.style.display="grid";
+backBtn.style.display="inline-block";
 }
 
 function selectSubject(m){
-  currentSubject=m; subjectsBox.style.display="none"; contentBox.style.display="flex"; loadContent(); showBack();
+currentSubject=m;
+subjects.style.display="none";
+content.style.display="flex";
+loadContent();
 }
 
-// CHARGEMENT CONTENU
+function goBack(){
+if(content.style.display==="flex"){
+content.style.display="none";
+subjects.style.display="grid";
+}else{
+subjects.style.display="none";
+classes.style.display="grid";
+backBtn.style.display="none";
+}
+}
+
 async function loadContent(){
-  exercises.innerHTML=""; lessons.innerHTML="";
-  const {data,error}=await db.from("contents").select("*")
-    .eq("classe",currentClass)
-    .eq("matiere",currentSubject || "");
-  if(error){console.log(error); return;}
-  data.forEach(d=>{
-    const div=document.createElement("div");
-    div.className="item";
-    div.textContent=d.title;
-    div.onclick=()=>{
-      popupBox.innerHTML = d.file_url.endsWith(".pdf") 
-        ? `<iframe src="${d.file_url}" style="width:100%;height:80vh"></iframe>` 
-        : `<img src="${d.file_url}" style="width:100%">`;
-      popup.style.display="flex";
-    };
-    (d.type==="exercise"?exercises:lessons).appendChild(div);
-  });
+exercises.innerHTML="";
+lessons.innerHTML="";
+const {data}=await db
+.from("contents")
+.select("*")
+.eq("classe",currentClass)
+.or(`matiere.eq.${currentSubject},matiere.eq.`);
+
+data.forEach(d=>{
+let div=document.createElement("div");
+div.className="item";
+div.textContent=d.title;
+div.onclick=()=>{
+popupBox.innerHTML=d.file_url.endsWith(".pdf")
+?`<iframe src="${d.file_url}" style="width:100%;height:80vh"></iframe>`
+:`<img src="${d.file_url}" style="width:100%">`;
+popup.style.display="flex";
+};
+(d.type==="exercise"?exercises:lessons).appendChild(div);
+});
 }
-popup.onclick=()=>popup.style.display="none";
 
-// ADMIN
-adminIcon.addEventListener("click",()=>adminModal.style.display="block");
-function closeAdmin(){adminModal.style.display="none";}
-function login(){if(adminPass.value==="1234") adminPanel.style.display="block"; else alert("Mot de passe incorrect !");}
+adminIcon.onclick=()=>adminModal.style.display="block";
+function login(){
+if(adminPass.value==="1234") adminPanel.style.display="block";
+else alert("Mot de passe incorrect");
+}
 
-// AJOUT CONTENU
 async function addContent(){
-  const file=aFile.files[0]; if(!file){alert("Sélectionne un fichier !"); return;}
-  const path=Date.now()+"_"+file.name;
-  await db.storage.from("davidschool").upload(path,file);
-  const {data:{publicUrl}}=db.storage.from("davidschool").getPublicUrl(path);
-  await db.from("contents").insert({
-    classe:aClass.value,
-    matiere:aSubject.value || "",
-    type:aType.value,
-    title:aTitle.value,
-    file_url:publicUrl
-  });
-  alert("Ajouté !"); aTitle.value=""; aFile.value="";
+const f=aFile.files[0]; if(!f)return;
+const p=Date.now()+"_"+f.name;
+await db.storage.from("davidschool").upload(p,f);
+const {data:{publicUrl}}=db.storage.from("davidschool").getPublicUrl(p);
+await db.from("contents").insert({
+classe:aClass.value,
+matiere:aSubject.value,
+type:aType.value,
+title:aTitle.value,
+file_url:publicUrl
+});
+alert("Ajouté !");
 }
 </script>
 </body>
