@@ -9,124 +9,41 @@
 
 <style>
 :root{
-  --main:#1e90ff;
   --bg:#f4f7fb;
   --card:#ffffff;
-  --card-hover:#d0e7ff;
+  --hover:#d0e7ff;
+  --back:#1e90ff;
   --exercise:#ffecb3;
   --lesson:#c8e6c9;
 }
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:var(--bg);
-}
-header{
-  background:var(--main);
-  color:white;
-  padding:15px;
-  text-align:center;
-  font-size:22px;
-}
-#adminIcon{
-  position:fixed;
-  top:10px;
-  left:10px;
-  background:white;
-  color:var(--main);
-  padding:8px 10px;
-  border-radius:50%;
-  cursor:pointer;
-  font-weight:bold;
-  z-index:2000;
-}
+
+/* BASE */
+body{margin:0; font-family:Arial,sans-serif; background:var(--bg);}
+header{background:var(--back); color:white; padding:15px; text-align:center; font-size:22px;}
+#adminIcon{position:fixed; top:10px; left:10px; background:white; color:var(--back); padding:8px 10px; border-radius:50%; cursor:pointer; font-weight:bold; z-index:2000;}
 .container{padding:20px;}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-  gap:15px;
-}
-.card{
-  background:var(--card);
-  padding:15px;
-  border-radius:10px;
-  text-align:center;
-  cursor:pointer;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-  transition:all .2s;
-}
-.card:hover{
-  transform:scale(1.05);
-  background:var(--card-hover);
-}
+.backBtn{background:var(--back); color:white; border:none; padding:6px 12px; margin-bottom:10px; border-radius:6px; cursor:pointer; display:none;}
+
+/* CARDS */
+.grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:15px;}
+.card{padding:15px; border-radius:10px; text-align:center; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.1); transition:all .2s; color:white; font-weight:bold;}
+.card:hover{transform:scale(1.05); opacity:0.9;}
+
+/* CONTENT */
 #subjects,#content{display:none;}
-.columns{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-}
-.column{
-  flex:1;
-  background:white;
-  padding:10px;
-  border-radius:10px;
-  min-width:200px;
-}
-.item{
-  border-bottom:1px solid #eee;
-  padding:8px;
-  cursor:pointer;
-  transition:all .2s;
-}
-.item:hover{
-  background:#f0f0f0;
-}
+.columns{display:flex; gap:15px; flex-wrap:wrap;}
+.column{flex:1; background:white; padding:10px; border-radius:10px; min-width:200px;}
+.item{border-bottom:1px solid #eee; padding:8px; cursor:pointer; transition:all .2s;}
+.item:hover{background:#f0f0f0;}
 .item img{max-width:100%; border-radius:8px;}
-.backBtn{
-  background:var(--main);
-  color:white;
-  border:none;
-  padding:6px 12px;
-  margin-bottom:10px;
-  border-radius:6px;
-  cursor:pointer;
-}
 
 /* POPUP */
-#popup{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  z-index:4000;
-  justify-content:center;
-  align-items:center;
-}
-#popupBox{
-  background:white;
-  max-width:90%;
-  max-height:90%;
-  overflow:auto;
-  padding:15px;
-  border-radius:10px;
-}
+#popup{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:4000; justify-content:center; align-items:center;}
+#popupBox{background:white; max-width:90%; max-height:90%; overflow:auto; padding:15px; border-radius:10px;}
 
 /* ADMIN */
-#adminModal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  z-index:3000;
-}
-#adminBox{
-  background:white;
-  width:90%;
-  max-width:400px;
-  margin:60px auto;
-  padding:15px;
-  border-radius:10px;
-}
+#adminModal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:3000;}
+#adminBox{background:white; width:90%; max-width:400px; margin:60px auto; padding:15px; border-radius:10px;}
 input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box;}
 </style>
 </head>
@@ -138,16 +55,10 @@ input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box
 
 <div class="container">
 
-<!-- Bouton retour -->
-<button id="backBtn" class="backBtn" style="display:none;" onclick="goBack()">← Retour</button>
+<button id="backBtn" class="backBtn" onclick="goBack()">← Retour</button>
 
 <!-- CLASSES -->
-<div id="classes" class="grid">
-  <div class="card" onclick="selectClass('6e')">6e</div>
-  <div class="card" onclick="selectClass('5e')">5e</div>
-  <div class="card" onclick="selectClass('4e')">4e</div>
-  <div class="card" onclick="selectClass('3e')">3e</div>
-</div>
+<div id="classes" class="grid"></div>
 
 <!-- MATIÈRES -->
 <div id="subjects" class="grid"></div>
@@ -166,7 +77,7 @@ input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box
 
 </div>
 
-<!-- POPUP pour voir fichier -->
+<!-- POPUP -->
 <div id="popup">
   <div id="popupBox"></div>
 </div>
@@ -179,10 +90,10 @@ input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box
     <button onclick="login()">Entrer</button>
 
     <div id="adminPanel" style="display:none">
-      <select id="aClass">
-        <option>6e</option><option>5e</option><option>4e</option><option>3e</option>
+      <select id="aClass"></select>
+      <select id="aSubject">
+        <option value="">Toutes les matières (optionnel)</option>
       </select>
-      <input id="aSubject" placeholder="Matière (optionnel)">
       <select id="aType">
         <option value="exercise">Exercice</option>
         <option value="lesson">Leçon</option>
@@ -197,80 +108,103 @@ input,select,button{width:100%; margin:6px 0; padding:8px; box-sizing:border-box
 </div>
 
 <script>
-// 🔴 SUPABASE
+// SUPABASE
 const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncXdscnhnZXRhaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MzY1NTQsImV4cCI6MjA4NTMxMjU1NH0.MsCgDKBz3jXrJ_dOcJ35koaLi-uBpNXoAoaFLAWDbkg";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncnhnZXRhaHZwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MzY1NTQsImV4cCI6MjA4NTMxMjU1NH0.MsCgDKBz3jXrJ_dOcJ35koaLi-uBpNXoAoaFLAWDbkg";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const db = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-
-// VARIABLES DOM
+// DOM
 const adminIcon = document.getElementById("adminIcon");
 const adminModal = document.getElementById("adminModal");
 const adminPanel = document.getElementById("adminPanel");
 const adminPass = document.getElementById("adminPass");
-
 const classesBox = document.getElementById("classes");
 const subjectsBox = document.getElementById("subjects");
 const contentBox = document.getElementById("content");
 const exercises = document.getElementById("exercises");
 const lessons = document.getElementById("lessons");
 const backBtn = document.getElementById("backBtn");
-
 const popup = document.getElementById("popup");
 const popupBox = document.getElementById("popupBox");
+const aClass = document.getElementById("aClass");
+const aSubject = document.getElementById("aSubject");
+const aType = document.getElementById("aType");
+const aTitle = document.getElementById("aTitle");
+const aFile = document.getElementById("aFile");
 
-// LOGIQUE
-let currentClass="", currentSubject="";
-const subjectsByClass={
+// CLASSES et MATIERES
+const classesData={
   "6e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
   "5e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
   "4e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"],
   "3e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"]
 };
+const classColors={"6e":"#f44336","5e":"#9c27b0","4e":"#2196f3","3e":"#ff9800"};
+const subjectColors={"Math":"#3f51b5","Français":"#e91e63","Anglais":"#009688","Histoire":"#795548","Géographie":"#4caf50","SVT":"#ff5722","Physique-Chimie":"#607d8b"};
+
+let currentClass="", currentSubject="";
+
+// INIT CLASSES et ADMIN select
+function initClasses(){
+  classesBox.innerHTML="";
+  aClass.innerHTML="";
+  aSubject.innerHTML='<option value="">Toutes les matières (optionnel)</option>';
+  Object.keys(classesData).forEach(c=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.textContent=c;
+    card.style.background=classColors[c] || "#333";
+    card.onclick=()=>selectClass(c);
+    classesBox.appendChild(card);
+
+    const opt=document.createElement("option"); opt.value=c; opt.textContent=c;
+    aClass.appendChild(opt);
+  });
+
+  // Remplir matières dans admin
+  const allSubjects=[...new Set(Object.values(classesData).flat())];
+  allSubjects.forEach(m=>{
+    const opt=document.createElement("option"); opt.value=m; opt.textContent=m;
+    aSubject.appendChild(opt);
+  });
+}
+initClasses();
 
 function showBack(){backBtn.style.display="inline-block";}
 function hideBack(){backBtn.style.display="none";}
-
 function goBack(){
   if(contentBox.style.display=="flex"){
-    contentBox.style.display="none";
-    subjectsBox.style.display="grid";
-    hideBack();
+    contentBox.style.display="none"; subjectsBox.style.display="grid"; showBack();
   }else if(subjectsBox.style.display=="grid"){
-    subjectsBox.style.display="none";
-    classesBox.style.display="grid";
-    hideBack();
+    subjectsBox.style.display="none"; classesBox.style.display="grid"; hideBack();
   }
 }
 
+// SELECTION CLASSE → MATIERE
 function selectClass(c){
-  currentClass=c;
-  classesBox.style.display="none";
+  currentClass=c; classesBox.style.display="none";
   subjectsBox.innerHTML="";
-  subjectsByClass[c].forEach(m=>{
-    const div=document.createElement("div");
-    div.className="card";
-    div.textContent=m;
-    div.onclick=()=>selectSubject(m);
-    subjectsBox.appendChild(div);
+  classesData[c].forEach(m=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.textContent=m;
+    card.style.background=subjectColors[m] || "#555";
+    card.onclick=()=>selectSubject(m);
+    subjectsBox.appendChild(card);
   });
-  subjectsBox.style.display="grid";
-  showBack();
+  subjectsBox.style.display="grid"; showBack();
 }
 
 function selectSubject(m){
-  currentSubject=m;
-  subjectsBox.style.display="none";
-  contentBox.style.display="flex";
-  loadContent();
-  showBack();
+  currentSubject=m; subjectsBox.style.display="none"; contentBox.style.display="flex"; loadContent(); showBack();
 }
 
+// CHARGEMENT CONTENU
 async function loadContent(){
-  exercises.innerHTML="";
-  lessons.innerHTML="";
-  const {data,error}=await db.from("contents").select("*").eq("classe",currentClass)
-                                  .eq("matiere",currentSubject || "");
+  exercises.innerHTML=""; lessons.innerHTML="";
+  const {data,error}=await db.from("contents").select("*")
+    .eq("classe",currentClass)
+    .eq("matiere",currentSubject || "");
   if(error){console.log(error); return;}
   data.forEach(d=>{
     const div=document.createElement("div");
@@ -285,34 +219,27 @@ async function loadContent(){
     (d.type==="exercise"?exercises:lessons).appendChild(div);
   });
 }
-
-// POPUP close
 popup.onclick=()=>popup.style.display="none";
 
 // ADMIN
 adminIcon.addEventListener("click",()=>adminModal.style.display="block");
 function closeAdmin(){adminModal.style.display="none";}
-function login(){
-  if(adminPass.value==="1234"){adminPanel.style.display="block";}
-  else alert("Mot de passe incorrect !");
-}
+function login(){if(adminPass.value==="1234") adminPanel.style.display="block"; else alert("Mot de passe incorrect !");}
 
+// AJOUT CONTENU
 async function addContent(){
-  const file=aFile.files[0];
-  if(!file){alert("Sélectionne un fichier !"); return;}
+  const file=aFile.files[0]; if(!file){alert("Sélectionne un fichier !"); return;}
   const path=Date.now()+"_"+file.name;
   await db.storage.from("davidschool").upload(path,file);
   const {data:{publicUrl}}=db.storage.from("davidschool").getPublicUrl(path);
   await db.from("contents").insert({
     classe:aClass.value,
-    matiere:aSubject.value || "", // Matière optionnelle
+    matiere:aSubject.value || "",
     type:aType.value,
     title:aTitle.value,
     file_url:publicUrl
   });
-  alert("Ajouté !");
-  aTitle.value="";
-  aFile.value="";
+  alert("Ajouté !"); aTitle.value=""; aFile.value="";
 }
 </script>
 </body>
