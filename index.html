@@ -3,11 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DavidSchool</title>
-
-<!-- Supabase -->
+<title>DavidSchool - Exercices</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 :root{
   --main:#1e90ff;
@@ -18,7 +15,7 @@
 }
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:var(--bg);
 }
 header{
@@ -28,23 +25,22 @@ header{
   text-align:center;
   font-size:22px;
   font-weight:bold;
+  position:relative;
 }
 #adminIcon{
-  position:fixed;
-  top:15px;
-  left:15px;
+  position:absolute;
+  top:10px;
+  left:10px;
   background:white;
   color:var(--main);
   padding:10px 12px;
   border-radius:50%;
   cursor:pointer;
   font-weight:bold;
-  z-index:2000;
   box-shadow:0 2px 6px rgba(0,0,0,.2);
+  z-index:2000;
 }
-.container{
-  padding:20px;
-}
+.container{padding:20px;}
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
@@ -64,24 +60,7 @@ header{
   transform:scale(1.05);
   box-shadow:0 4px 10px rgba(0,0,0,.15);
 }
-#subjects,#content{display:none;}
-.columns{
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-}
-.column{
-  flex:1;
-  background:white;
-  padding:15px;
-  border-radius:12px;
-  min-width:250px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-}
-.column h3{
-  text-align:center;
-  color:var(--main);
-}
+#subjects,#exercises{display:none;}
 .item{
   border-bottom:1px solid #eee;
   padding:8px;
@@ -91,13 +70,11 @@ header{
   border-radius:8px;
   margin-top:5px;
 }
-
 /* Colors classes */
 .c6e{background:#16a34a;color:white;}
 .c5e{background:#2563eb;color:white;}
 .c4e{background:#9333ea;color:white;}
 .c3e{background:#f59e0b;color:white;}
-
 /* Colors matières */
 .mMath{background:#fbbf24;color:white;}
 .mFrançais{background:#f87171;color:white;}
@@ -106,7 +83,6 @@ header{
 .mGéographie{background:#a78bfa;color:white;}
 .mSVT{background:#10b981;color:white;}
 .mPhysique-Chimie{background:#f472b6;color:white;}
-
 /* ADMIN */
 #adminModal{
   display:none;
@@ -138,18 +114,15 @@ button{
   cursor:pointer;
   font-weight:bold;
 }
-button:hover{
-  background:var(--accent);
-}
+button:hover{background:var(--accent);}
 </style>
 </head>
-
 <body>
-<header>📘 DavidSchool</header>
-<div id="adminIcon">⚙</div>
-
+<header>
+  📘 DavidSchool
+  <div id="adminIcon">⚙</div>
+</header>
 <div class="container">
-
 <!-- CLASSES -->
 <div id="classes" class="grid">
   <div class="card c6e" onclick="selectClass('6e')">6e</div>
@@ -161,18 +134,8 @@ button:hover{
 <!-- MATIÈRES -->
 <div id="subjects" class="grid"></div>
 
-<!-- CONTENU -->
-<div id="content" class="columns">
-  <div class="column">
-    <h3>📄 Exercices</h3>
-    <div id="exercises"></div>
-  </div>
-  <div class="column">
-    <h3>📖 Leçons</h3>
-    <div id="lessons"></div>
-  </div>
-</div>
-
+<!-- EXERCICES -->
+<div id="exercises" class="grid"></div>
 </div>
 
 <!-- ADMIN -->
@@ -197,16 +160,10 @@ button:hover{
       <label><input type="checkbox" value="Géographie"> Géographie</label><br>
       <label><input type="checkbox" value="SVT"> SVT</label><br>
       <label><input type="checkbox" value="Physique-Chimie"> Physique-Chimie</label><br>
-
-      <select id="aType">
-        <option value="exercise">Exercice</option>
-        <option value="lesson">Leçon</option>
-      </select>
       <input id="aTitle" placeholder="Titre">
       <input type="file" id="aFile">
       <button onclick="addContent()">Ajouter</button>
     </div>
-
     <button onclick="closeAdmin()">Fermer</button>
   </div>
 </div>
@@ -230,23 +187,22 @@ function selectClass(c){
   const s=document.getElementById("subjects");
   s.innerHTML="";
   subjectsByClass[c].forEach(m=>{
-    const colorClass="m"+m.replace(/ /g,'-'); // classe de couleur pour matière
+    const colorClass="m"+m.replace(/ /g,'-');
     s.innerHTML+=`<div class="card ${colorClass}" onclick="selectSubject('${m}')">${m}</div>`;
   });
   s.style.display="grid";
 }
 
-function selectSubject(m){
+async function selectSubject(m){
   currentSubject=m;
   document.getElementById("subjects").style.display="none";
-  document.getElementById("content").style.display="flex";
-  loadContent();
+  document.getElementById("exercises").style.display="grid";
+  await loadContent();
 }
 
 async function loadContent(){
   exercises.innerHTML="";
-  lessons.innerHTML="";
-  const {data}=await supabase
+  const {data} = await supabase
     .from("contents")
     .select("*")
     .eq("classe",currentClass)
@@ -258,9 +214,9 @@ async function loadContent(){
     div.innerHTML=`<b>${d.title}</b><br>${
       d.file_url?.endsWith(".pdf")
       ? `<a href="${d.file_url}" target="_blank">Télécharger</a>`
-      : d.file_url?`<img src="${d.file_url}">`:""
+      : `<img src="${d.file_url}">`
     }`;
-    (d.type==="exercise"?exercises:lessons).appendChild(div);
+    exercises.appendChild(div);
   });
 }
 
@@ -270,9 +226,7 @@ function closeAdmin(){adminModal.style.display="none";}
 function login(){
   if(adminPass.value==="1234"){
     adminPanel.style.display="block";
-  } else {
-    alert("Mot de passe incorrect");
-  }
+  } else alert("Mot de passe incorrect");
 }
 
 async function addContent(){
@@ -281,21 +235,18 @@ async function addContent(){
   if(file){
     const path=Date.now()+"_"+file.name;
     await supabase.storage.from("davidschool").upload(path,file);
-    const {data:{publicUrl}}=supabase.storage.from("davidschool").getPublicUrl(path);
+    const {data:{publicUrl}} = supabase.storage.from("davidschool").getPublicUrl(path);
     fileUrl=publicUrl;
   }
-
   document.querySelectorAll('input[type=checkbox]:checked').forEach(cb=>{
     supabase.from("contents").insert({
       classe:aClass.value,
       matiere:cb.value,
-      type:aType.value,
       title:aTitle.value,
       file_url:fileUrl
     });
   });
-
-  alert("Ajouté !");
+  alert("Exercice ajouté !");
   if(currentClass && currentSubject) loadContent();
 }
 </script>
