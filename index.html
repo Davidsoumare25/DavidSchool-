@@ -236,15 +236,9 @@ function openExercises(m){
 }
 
 /* ===== LOAD EXERCISES ===== */
-async function loadExercises(){
-  let list=document.getElementById("exercisesList");
-  list.innerHTML="";
-
-  const {data}=await supabaseClient
-    .from("contents")
-    .select("*")
-    .eq("classe",currentClasse)
-    .eq("matiere",currentMatiere);
+const {data} = await supabaseClient
+  .from("contents")
+  .select("*");
 
   data.forEach(e=>{
     let d=document.createElement("div");
