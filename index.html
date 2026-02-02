@@ -5,11 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DavidSchool</title>
 
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{
   --main:#1e90ff;
   --bg:#f4f7fb;
   --card:#ffffff;
+  --text:#333;
+  --accent:#ff9900;
 }
 body{
   margin:0;
@@ -22,18 +27,20 @@ header{
   padding:15px;
   text-align:center;
   font-size:22px;
+  font-weight:bold;
 }
 #adminIcon{
   position:fixed;
-  top:10px;
-  left:10px;
+  top:15px;
+  left:15px;
   background:white;
   color:var(--main);
-  padding:8px 10px;
+  padding:10px 12px;
   border-radius:50%;
   cursor:pointer;
   font-weight:bold;
   z-index:2000;
+  box-shadow:0 2px 6px rgba(0,0,0,.2);
 }
 .container{
   padding:20px;
@@ -45,14 +52,17 @@ header{
 }
 .card{
   background:var(--card);
-  padding:15px;
-  border-radius:10px;
+  padding:20px;
+  border-radius:12px;
   text-align:center;
   cursor:pointer;
   box-shadow:0 2px 6px rgba(0,0,0,.1);
+  font-weight:bold;
+  transition:transform 0.2s, box-shadow 0.2s;
 }
 .card:hover{
   transform:scale(1.05);
+  box-shadow:0 4px 10px rgba(0,0,0,.15);
 }
 #subjects,#content{display:none;}
 .columns{
@@ -63,9 +73,14 @@ header{
 .column{
   flex:1;
   background:white;
-  padding:10px;
-  border-radius:10px;
-  min-width:200px;
+  padding:15px;
+  border-radius:12px;
+  min-width:250px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+.column h3{
+  text-align:center;
+  color:var(--main);
 }
 .item{
   border-bottom:1px solid #eee;
@@ -74,7 +89,24 @@ header{
 .item img{
   max-width:100%;
   border-radius:8px;
+  margin-top:5px;
 }
+
+/* Colors classes */
+.c6e{background:#16a34a;color:white;}
+.c5e{background:#2563eb;color:white;}
+.c4e{background:#9333ea;color:white;}
+.c3e{background:#f59e0b;color:white;}
+
+/* Colors matières */
+.mMath{background:#fbbf24;color:white;}
+.mFrançais{background:#f87171;color:white;}
+.mAnglais{background:#60a5fa;color:white;}
+.mHistoire{background:#34d399;color:white;}
+.mGéographie{background:#a78bfa;color:white;}
+.mSVT{background:#10b981;color:white;}
+.mPhysique-Chimie{background:#f472b6;color:white;}
+
 /* ADMIN */
 #adminModal{
   display:none;
@@ -88,18 +120,31 @@ header{
   width:90%;
   max-width:400px;
   margin:60px auto;
-  padding:15px;
-  border-radius:10px;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.25);
 }
 input,select,button{
   width:100%;
   margin:6px 0;
-  padding:8px;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+button{
+  background:var(--main);
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+}
+button:hover{
+  background:var(--accent);
 }
 </style>
 </head>
-<body>
 
+<body>
 <header>📘 DavidSchool</header>
 <div id="adminIcon">⚙</div>
 
@@ -107,10 +152,10 @@ input,select,button{
 
 <!-- CLASSES -->
 <div id="classes" class="grid">
-  <div class="card" onclick="selectClass('6e')">6e</div>
-  <div class="card" onclick="selectClass('5e')">5e</div>
-  <div class="card" onclick="selectClass('4e')">4e</div>
-  <div class="card" onclick="selectClass('3e')">3e</div>
+  <div class="card c6e" onclick="selectClass('6e')">6e</div>
+  <div class="card c5e" onclick="selectClass('5e')">5e</div>
+  <div class="card c4e" onclick="selectClass('4e')">4e</div>
+  <div class="card c3e" onclick="selectClass('3e')">3e</div>
 </div>
 
 <!-- MATIÈRES -->
@@ -139,7 +184,10 @@ input,select,button{
 
     <div id="adminPanel" style="display:none">
       <select id="aClass">
-        <option>6e</option><option>5e</option><option>4e</option><option>3e</option>
+        <option>6e</option>
+        <option>5e</option>
+        <option>4e</option>
+        <option>3e</option>
       </select>
       <p>Matières (optionnelles)</p>
       <label><input type="checkbox" value="Math"> Math</label><br>
@@ -149,6 +197,7 @@ input,select,button{
       <label><input type="checkbox" value="Géographie"> Géographie</label><br>
       <label><input type="checkbox" value="SVT"> SVT</label><br>
       <label><input type="checkbox" value="Physique-Chimie"> Physique-Chimie</label><br>
+
       <select id="aType">
         <option value="exercise">Exercice</option>
         <option value="lesson">Leçon</option>
@@ -164,7 +213,7 @@ input,select,button{
 
 <script>
 const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncWx...
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncX";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentClass="", currentSubject="";
@@ -181,7 +230,8 @@ function selectClass(c){
   const s=document.getElementById("subjects");
   s.innerHTML="";
   subjectsByClass[c].forEach(m=>{
-    s.innerHTML+=`<div class="card" onclick="selectSubject('${m}')">${m}</div>`;
+    const colorClass="m"+m.replace(/ /g,'-'); // classe de couleur pour matière
+    s.innerHTML+=`<div class="card ${colorClass}" onclick="selectSubject('${m}')">${m}</div>`;
   });
   s.style.display="grid";
 }
@@ -206,9 +256,9 @@ async function loadContent(){
     const div=document.createElement("div");
     div.className="item";
     div.innerHTML=`<b>${d.title}</b><br>${
-      d.file_url.endsWith(".pdf")
+      d.file_url?.endsWith(".pdf")
       ? `<a href="${d.file_url}" target="_blank">Télécharger</a>`
-      : `<img src="${d.file_url}">`
+      : d.file_url?`<img src="${d.file_url}">`:""
     }`;
     (d.type==="exercise"?exercises:lessons).appendChild(div);
   });
@@ -220,8 +270,11 @@ function closeAdmin(){adminModal.style.display="none";}
 function login(){
   if(adminPass.value==="1234"){
     adminPanel.style.display="block";
+  } else {
+    alert("Mot de passe incorrect");
   }
 }
+
 async function addContent(){
   const file=aFile.files[0];
   let fileUrl="";
