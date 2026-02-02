@@ -16,57 +16,79 @@ h3{text-align:center;padding:10px 0;}
 .list{padding:20px;display:flex;flex-direction:column;gap:12px;}
 .item{background:white;padding:12px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,.1);}
 .item img{max-width:100%;border-radius:8px;}
+.item a{color:#1e3a8a;text-decoration:none;font-weight:bold;}
+.item a:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
 <header>
-  <button onclick="history.back()">⬅ Retour</button>
+  <button id="backBtn">⬅ Retour</button>
   DavidSchool
 </header>
+
 <h3 id="title"></h3>
+
 <div class="buttons">
-  <button class="buttonType exercisesBtn" onclick="show('exercise')">✏️ Exercices</button>
-  <button class="buttonType lessonsBtn" onclick="show('lesson')">📘 Leçons</button>
+  <button class="buttonType exercisesBtn" id="btnExercise">✏️ Exercices</button>
+  <button class="buttonType lessonsBtn" id="btnLesson">📘 Leçons</button>
 </div>
+
 <div class="list" id="list"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// 🔴 Supabase
 const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncX...";
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Récupérer classe + matière
 const params = new URLSearchParams(location.search);
 const classe = params.get("classe");
 const matiere = params.get("matiere");
+
+// Afficher titre
 document.getElementById("title").innerText = `Classe ${classe} - ${matiere}`;
 
-let currentType = "exercise";
-show(currentType);
+// Bouton retour
+document.getElementById("backBtn").addEventListener("click", ()=>history.back());
 
+// Liste des contenus
+const list = document.getElementById("list");
+let currentType = "exercise";
+
+// Fonction pour afficher les contenus
 async function show(type){
   currentType = type;
+  list.innerHTML="";
   const {data,error} = await supabase
     .from("contents")
     .select("*")
     .eq("classe", classe)
     .eq("matiere", matiere)
     .eq("type", type);
-  const list = document.getElementById("list");
-  list.innerHTML="";
-  if(data){
-    data.forEach(d=>{
-      const div = document.createElement("div");
-      div.className="item";
-      if(d.file_url.endsWith(".pdf")){
-        div.innerHTML = `<b>${d.title}</b><br><a href="${d.file_url}" target="_blank">Télécharger</a>`;
-      }else{
-        div.innerHTML = `<b>${d.title}</b><br><img src="${d.file_url}">`;
-      }
-      list.appendChild(div);
-    });
-  }
+
+  if(error){console.error(error); return;}
+  if(data.length===0){list.innerHTML="<p style='text-align:center;color:#555'>Aucun contenu.</p>"; return;}
+
+  data.forEach(d=>{
+    const div = document.createElement("div");
+    div.className="item";
+    if(d.file_url.endsWith(".pdf")){
+      div.innerHTML = `<b>${d.title}</b><br><a href="${d.file_url}" target="_blank">Télécharger le fichier</a>`;
+    }else{
+      div.innerHTML = `<b>${d.title}</b><br><img src="${d.file_url}">`;
+    }
+    list.appendChild(div);
+  });
 }
+
+// Ajouter events aux boutons
+document.getElementById("btnExercise").addEventListener("click",()=>show("exercise"));
+document.getElementById("btnLesson").addEventListener("click",()=>show("lesson"));
+
+// Charger par défaut les exercices
+show("exercise");
 </script>
 </body>
 </html>
