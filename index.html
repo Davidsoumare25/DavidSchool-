@@ -284,29 +284,196 @@ async function addExercise(){
     file_url:data.publicUrl,
     type:f.type.startsWith("image")?"img":"doc"
   });
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  alert("Ajouté");
+<script>
+/* ================= SUPABASE ================= */
+const SUPABASE_URL = "https://TON_PROJET.supabase.co";
+const SUPABASE_KEY = "TON_ANON_KEY";
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ================= DONNÉES ================= */
+const classes = {
+  "6e":["Français","Math","Anglais","SVT","Histoire","Géographie"],
+  "5e":["Français","Math","Anglais","SVT","Histoire","Géographie"],
+  "4e":["Français","Math","Anglais","Physique","Chimie","SVT","Histoire"],
+  "3e":["Français","Math","Anglais","Physique","Chimie","SVT","Histoire","Géographie"]
+};
+
+const colors = {
+  Math:"#1abc9c",
+  Français:"#e74c3c",
+  Anglais:"#3498db",
+  Physique:"#9b59b6",
+  Chimie:"#f39c12",
+  Histoire:"#2ecc71",
+  Géographie:"#16a085",
+  SVT:"#27ae60"
+};
+
+let curClass="", curSubject="", isAdmin=false;
+
+/* ================= CLASSES ================= */
+function loadClasses(){
+  classesBox.innerHTML="";
+  for(let c in classes){
+    let d=document.createElement("div");
+    d.className="card";
+    d.style.background="linear-gradient(135deg,#6a00ff,#1e90ff)";
+    d.innerText=c.toUpperCase();
+    d.onclick=()=>{curClass=c;loadSubjects();};
+    classesBox.appendChild(d);
+  }
+}
+
+/* ================= MATIÈRES ================= */
+function loadSubjects(){
+  classesBox.style.display="none";
+  subjectsBox.style.display="flex";
+  subjectsBox.innerHTML="";
+  classes[curClass].forEach(s=>{
+    let d=document.createElement("div");
+    d.className="card";
+    d.style.background=colors[s];
+    d.innerText=s;
+    d.onclick=()=>{curSubject=s;loadExercises();};
+    subjectsBox.appendChild(d);
+  });
+  backBtn.style.display="block";
+}
+
+/* ================= EXERCICES ================= */
+async function loadExercises(){
+  subjectsBox.style.display="none";
+  exercisesBox.style.display="block";
+  exercisesBox.innerHTML="";
+
+  const { data, error } = await supabase
+    .from("exercises")
+    .select("*")
+    .eq("classe",curClass)
+    .eq("subject",curSubject)
+    .order("created_at",{ascending:false});
+
+  if(error){
+    alert("Erreur chargement");
+    console.log(error);
+    return;
+  }
+
+  data.forEach(e=>{
+    let d=document.createElement("div");
+    d.className="exercise";
+    d.style.background=colors[e.subject];
+    d.innerHTML="<b>"+e.title+"</b>";
+
+    if(e.file_type==="img"){
+      let img=document.createElement("img");
+      img.src=e.file_url;
+      img.onclick=()=>{overlayImg.src=e.file_url;overlay.style.display="flex"};
+      d.appendChild(img);
+    }else{
+      let a=document.createElement("a");
+      a.href=e.file_url;
+      a.target="_blank";
+      a.innerText="📥 Télécharger";
+      d.appendChild(a);
+    }
+
+    if(isAdmin){
+      let b=document.createElement("button");
+      b.className="deleteBtn";
+      b.innerText="✖";
+      b.onclick=()=>deleteExercise(e.id);
+      d.appendChild(b);
+    }
+
+    exercisesBox.appendChild(d);
+  });
+}
+
+/* ================= AJOUT ================= */
+async function addExercise(){
+  if(!aTitle.value || !aFile.files[0]) return alert("Champs manquants");
+
+  const file = aFile.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async () => {
+    const { error } = await supabase.from("exercises").insert({
+      classe: aClass.value,
+      subject: aSubject.value,
+      title: aTitle.value,
+      file_url: reader.result,
+      file_type: file.type.startsWith("image") ? "img" : "doc"
+    });
+
+    if(error){
+      alert("Erreur ajout");
+      console.log(error);
+    }else{
+      alert("Exercice ajouté ✅");
+      loadExercises();
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
+/* ================= SUPPRESSION ================= */
+async function deleteExercise(id){
+  if(!confirm("Supprimer ?")) return;
+  await supabase.from("exercises").delete().eq("id",id);
   loadExercises();
 }
 
-/* ===== ADMIN MENUS ===== */
+/* ================= ADMIN ================= */
+adminIcon.onclick=()=>adminModal.style.display="flex";
+closeAdmin.onclick=()=>adminModal.style.display="none";
+
+function login(){
+  if(loginPass.value==="1234"){
+    isAdmin=true;
+    adminPanel.style.display="block";
+    alert("Admin connecté");
+  }else alert("Code incorrect");
+}
+
+/* ================= RETOUR ================= */
+function goBack(){
+  exercisesBox.style.display="none";
+  subjectsBox.style.display="none";
+  classesBox.style.display="flex";
+  backBtn.style.display="none";
+}
+
+/* ================= MENUS ADMIN ================= */
 function loadAdminMenus(){
   for(let c in classes){
-    aClass.innerHTML+=`<option>${c}</option>`;
+    let o=document.createElement("option");
+    o.value=c;o.innerText=c;
+    aClass.appendChild(o);
   }
   aClass.onchange=()=>{
     aSubject.innerHTML="";
     classes[aClass.value].forEach(s=>{
-      aSubject.innerHTML+=`<option>${s}</option>`;
+      let o=document.createElement("option");
+      o.value=s;o.innerText=s;
+      aSubject.appendChild(o);
     });
   };
   aClass.onchange();
 }
 
-/* ===== INIT ===== */
-loadClasses();
-loadAdminMenus();
-</script>
+/* ================= INIT ================= */
+const classesBox=document.getElementById("classes");
+const subjectsBox=document.getElementById("subjects");
+const exercisesBox=document.getElementById("exercises");
+const backBtn=document.getElementById("backBtn");
 
-</body>
-</html>
+document.addEventListener("DOMContentLoaded",()=>{
+  loadClasses();
+  loadAdminMenus();
+});
+</script>
