@@ -3,236 +3,248 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Espace Élèves</title>
+<title>DavidSchool</title>
 
 <style>
-*{box-sizing:border-box;font-family:Arial}
-body{margin:0;background:#f4f6fb}
-
-/* ===== HEADER ===== */
+:root{
+  --main:#1e90ff;
+  --bg:#f4f7fb;
+  --card:#ffffff;
+}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+}
 header{
-  background:#1e3a8a;
+  background:var(--main);
   color:white;
   padding:15px;
   text-align:center;
+  font-size:22px;
 }
-
-/* ===== SECTIONS ===== */
-.section{display:none;padding:15px}
-.section.active{display:block}
-
-/* ===== CARTES ===== */
+#adminIcon{
+  position:fixed;
+  top:10px;
+  left:10px;
+  background:white;
+  color:var(--main);
+  padding:8px 10px;
+  border-radius:50%;
+  cursor:pointer;
+  font-weight:bold;
+  z-index:2000;
+}
+.container{
+  padding:20px;
+}
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:12px;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:15px;
 }
 .card{
-  padding:20px;
-  border-radius:12px;
-  color:white;
-  text-align:center;
-  font-weight:bold;
-  cursor:pointer;
-  transition:.2s;
-}
-.card:hover{transform:scale(1.05)}
-
-/* Classes */
-.c3e{background:#16a34a}
-.c4e{background:#2563eb}
-.c5e{background:#9333ea}
-
-/* Matières */
-.math{background:#f59e0b}
-.pc{background:#ef4444}
-.svt{background:#10b981}
-
-/* ===== BOUTONS ===== */
-button{
-  padding:12px;
-  border:none;
+  background:var(--card);
+  padding:15px;
   border-radius:10px;
+  text-align:center;
   cursor:pointer;
-  font-weight:bold;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
-.back{background:#334155;color:white;margin-bottom:10px}
-
-/* ===== LISTE ===== */
-.item{
+.card:hover{
+  transform:scale(1.05);
+}
+#subjects,#content{display:none;}
+.columns{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+}
+.column{
+  flex:1;
   background:white;
   padding:10px;
-  border-radius:8px;
-  margin-bottom:8px;
+  border-radius:10px;
+  min-width:200px;
 }
-
-/* ===== ADMIN ===== */
+.item{
+  border-bottom:1px solid #eee;
+  padding:8px;
+}
+.item img{
+  max-width:100%;
+  border-radius:8px;
+}
+/* ADMIN */
 #adminModal{
+  display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  pointer-events:none;
+  background:rgba(0,0,0,.6);
+  z-index:3000;
 }
-#adminModal.active{pointer-events:auto; display:flex}
-.adminBox{
+#adminBox{
   background:white;
-  padding:20px;
   width:90%;
   max-width:400px;
-  border-radius:12px;
+  margin:60px auto;
+  padding:15px;
+  border-radius:10px;
+}
+input,select,button{
+  width:100%;
+  margin:6px 0;
+  padding:8px;
 }
 </style>
 </head>
-
 <body>
 
-<header>
-  📘 Plateforme scolaire
-  <button onclick="openAdmin()" style="float:right">Admin</button>
-</header>
+<header>📘 DavidSchool</header>
+<div id="adminIcon">⚙</div>
 
-<!-- ===== CLASSES ===== -->
-<div id="classes" class="section active">
-  <h3>Choisis ta classe</h3>
-  <div class="grid">
-    <div class="card c3e" onclick="openMatieres('3e')">3e</div>
-    <div class="card c4e" onclick="openMatieres('4e')">4e</div>
-    <div class="card c5e" onclick="openMatieres('5e')">5e</div>
+<div class="container">
+
+<!-- CLASSES -->
+<div id="classes" class="grid">
+  <div class="card" onclick="selectClass('6e')">6e</div>
+  <div class="card" onclick="selectClass('5e')">5e</div>
+  <div class="card" onclick="selectClass('4e')">4e</div>
+  <div class="card" onclick="selectClass('3e')">3e</div>
+</div>
+
+<!-- MATIÈRES -->
+<div id="subjects" class="grid"></div>
+
+<!-- CONTENU -->
+<div id="content" class="columns">
+  <div class="column">
+    <h3>📄 Exercices</h3>
+    <div id="exercises"></div>
+  </div>
+  <div class="column">
+    <h3>📖 Leçons</h3>
+    <div id="lessons"></div>
   </div>
 </div>
 
-<!-- ===== MATIÈRES ===== -->
-<div id="matieres" class="section">
-  <button class="back" onclick="goBack('classes')">⬅ Retour</button>
-  <h3 id="classeTitre"></h3>
-  <div class="grid" id="matieresList"></div>
 </div>
 
-<!-- ===== CONTENU ===== -->
-<div id="contenu" class="section">
-  <button class="back" onclick="goBack('matieres')">⬅ Retour</button>
-  <h3 id="contenuTitre"></h3>
-  <div class="columns" style="display:flex; gap:15px; flex-wrap:wrap">
-    <div class="column" style="flex:1; min-width:200px">
-      <h3>✏️ Exercices</h3>
-      <div id="exercicesList"></div>
-    </div>
-    <div class="column" style="flex:1; min-width:200px">
-      <h3>📘 Leçons</h3>
-      <div id="leconsList"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ===== ADMIN ===== -->
+<!-- ADMIN -->
 <div id="adminModal">
-  <div class="adminBox">
+  <div id="adminBox">
     <h3>Admin</h3>
+    <input type="password" id="adminPass" placeholder="Mot de passe">
+    <button onclick="login()">Entrer</button>
 
-    <select id="aClasse">
-      <option>3e</option>
-      <option>4e</option>
-      <option>5e</option>
-    </select>
+    <div id="adminPanel" style="display:none">
+      <select id="aClass">
+        <option>6e</option><option>5e</option><option>4e</option><option>3e</option>
+      </select>
+      <p>Matières (optionnelles)</p>
+      <label><input type="checkbox" value="Math"> Math</label><br>
+      <label><input type="checkbox" value="Français"> Français</label><br>
+      <label><input type="checkbox" value="Anglais"> Anglais</label><br>
+      <label><input type="checkbox" value="Histoire"> Histoire</label><br>
+      <label><input type="checkbox" value="Géographie"> Géographie</label><br>
+      <label><input type="checkbox" value="SVT"> SVT</label><br>
+      <label><input type="checkbox" value="Physique-Chimie"> Physique-Chimie</label><br>
+      <select id="aType">
+        <option value="exercise">Exercice</option>
+        <option value="lesson">Leçon</option>
+      </select>
+      <input id="aTitle" placeholder="Titre">
+      <input type="file" id="aFile">
+      <button onclick="addContent()">Ajouter</button>
+    </div>
 
-    <p>Matières (choix optionnel)</p>
-    <label><input type="checkbox" value="Maths"> Maths</label><br>
-    <label><input type="checkbox" value="PC"> Physique</label><br>
-    <label><input type="checkbox" value="SVT"> SVT</label><br>
-
-    <select id="aType">
-      <option value="lecons">Leçon</option>
-      <option value="exercices">Exercice</option>
-    </select>
-
-    <input id="aTitre" placeholder="Titre">
-    <button onclick="addContent()">Ajouter</button>
     <button onclick="closeAdmin()">Fermer</button>
   </div>
 </div>
 
 <script>
-let data = {};
-let currentClasse, currentMatiere;
+const SUPABASE_URL = "https://xwzjlddgqwlrxgetahvp.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3empsZGRncWx...
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Afficher une section
-function show(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+let currentClass="", currentSubject="";
+const subjectsByClass={
+  "6e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
+  "5e":["Math","Français","Anglais","Histoire","Géographie","SVT"],
+  "4e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"],
+  "3e":["Math","Français","Anglais","Histoire","Géographie","SVT","Physique-Chimie"]
+};
+
+function selectClass(c){
+  currentClass=c;
+  document.getElementById("classes").style.display="none";
+  const s=document.getElementById("subjects");
+  s.innerHTML="";
+  subjectsByClass[c].forEach(m=>{
+    s.innerHTML+=`<div class="card" onclick="selectSubject('${m}')">${m}</div>`;
+  });
+  s.style.display="grid";
 }
 
-// Classes → Matières
-function openMatieres(classe){
-  currentClasse = classe;
-  document.getElementById("classeTitre").innerText = "Classe " + classe;
-  let m = document.getElementById("matieresList");
-  m.innerHTML = `
-    <div class="card math" onclick="openContenu('Maths')">Maths</div>
-    <div class="card pc" onclick="openContenu('PC')">Physique</div>
-    <div class="card svt" onclick="openContenu('SVT')">SVT</div>
-  `;
-  show('matieres');
+function selectSubject(m){
+  currentSubject=m;
+  document.getElementById("subjects").style.display="none";
+  document.getElementById("content").style.display="flex";
+  loadContent();
 }
 
-// Matière → Contenu
-function openContenu(mat){
-  currentMatiere = mat;
-  document.getElementById("contenuTitre").innerText = currentClasse + " - " + mat;
-  updateContenu();
-  show('contenu');
-}
+async function loadContent(){
+  exercises.innerHTML="";
+  lessons.innerHTML="";
+  const {data}=await supabase
+    .from("contents")
+    .select("*")
+    .eq("classe",currentClass)
+    .eq("matiere",currentSubject);
 
-// Mettre à jour les colonnes Exercices / Leçons
-function updateContenu(){
-  let exercices = document.getElementById("exercicesList");
-  let lecons = document.getElementById("leconsList");
-  exercices.innerHTML = "";
-  lecons.innerHTML = "";
-
-  ["exercices","lecons"].forEach(type=>{
-    let key = currentClasse + currentMatiere + type;
-    (data[key]||[]).forEach(titre=>{
-      let div = document.createElement("div");
-      div.className="item";
-      div.innerText = titre;
-      if(type==="exercices") exercices.appendChild(div);
-      else lecons.appendChild(div);
-    });
+  data.forEach(d=>{
+    const div=document.createElement("div");
+    div.className="item";
+    div.innerHTML=`<b>${d.title}</b><br>${
+      d.file_url.endsWith(".pdf")
+      ? `<a href="${d.file_url}" target="_blank">Télécharger</a>`
+      : `<img src="${d.file_url}">`
+    }`;
+    (d.type==="exercise"?exercises:lessons).appendChild(div);
   });
 }
 
-function goBack(id){show(id)}
-
-/* ===== ADMIN ===== */
-function openAdmin(){
-  document.getElementById("adminModal").classList.add("active");
+/* ADMIN */
+adminIcon.onclick=()=>adminModal.style.display="block";
+function closeAdmin(){adminModal.style.display="none";}
+function login(){
+  if(adminPass.value==="1234"){
+    adminPanel.style.display="block";
+  }
 }
-function closeAdmin(){
-  document.getElementById("adminModal").classList.remove("active");
-}
-
-function addContent(){
-  let classe = document.getElementById("aClasse").value;
-  let type = document.getElementById("aType").value;
-  let titre = document.getElementById("aTitre").value;
+async function addContent(){
+  const file=aFile.files[0];
+  let fileUrl="";
+  if(file){
+    const path=Date.now()+"_"+file.name;
+    await supabase.storage.from("davidschool").upload(path,file);
+    const {data:{publicUrl}}=supabase.storage.from("davidschool").getPublicUrl(path);
+    fileUrl=publicUrl;
+  }
 
   document.querySelectorAll('input[type=checkbox]:checked').forEach(cb=>{
-    let key = classe + cb.value + type;
-    if(!data[key]) data[key]=[];
-    data[key].push(titre);
-
-    // Si la classe et matière ouverte → mise à jour immédiate
-    if(classe===currentClasse && cb.value===currentMatiere){
-      updateContenu();
-    }
+    supabase.from("contents").insert({
+      classe:aClass.value,
+      matiere:cb.value,
+      type:aType.value,
+      title:aTitle.value,
+      file_url:fileUrl
+    });
   });
 
   alert("Ajouté !");
+  if(currentClass && currentSubject) loadContent();
 }
 </script>
-
 </body>
 </html>
