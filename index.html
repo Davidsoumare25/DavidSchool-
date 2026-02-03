@@ -1,71 +1,67 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DavidSchool</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,Arial;background:#f2f4f8;color:#222}
-header{background:linear-gradient(135deg,#6a00ff,#1e90ff);color:white;padding:45px 22px;text-align:center;position:relative}
-#adminIcon{position:absolute;top:20px;left:20px;width:42px;height:42px;border-radius:50%;background:white;color:#6a00ff;display:flex;align-items:center;justify-content:center;font-weight:bold;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.2)}
-main{padding:20px;max-width:480px;margin:auto}
-.grid{display:flex;flex-direction:column;gap:16px}
-.card{padding:25px;border-radius:20px;color:white;font-size:22px;font-weight:bold;cursor:pointer;background:linear-gradient(135deg,#6a00ff,#1e90ff);box-shadow:0 6px 15px rgba(0,0,0,0.15);transition:0.2s;text-align:left;text-transform:uppercase}
-.card:hover{transform:scale(1.02)}
-.exercise{padding:15px;border-radius:18px;margin-bottom:15px;color:white;background:linear-gradient(135deg,#6a00ff,#1e90ff);position:relative}
-.exercise img{width:100%;border-radius:12px;margin-top:10px;cursor:pointer;background:white}
-button{margin-top:10px;padding:15px;border:none;border-radius:12px;background:#6a00ff;color:white;font-size:16px;width:100%;cursor:pointer}
-select,input{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid #ddd}
-#adminModal,#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:1000}
-#adminBox{background:white;padding:25px;border-radius:20px;width:90%;max-width:400px}
-.btn-close{background:#ff4757;margin-top:20px} /* Style pour le bouton fermer */
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DavidSchool</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: system-ui, Arial; background: #f2f4f8; color: #222; }
+        header { background: linear-gradient(135deg, #6a00ff, #1e90ff); color: white; padding: 45px 22px; text-align: center; position: relative; }
+        #adminIcon { position: absolute; top: 20px; left: 20px; width: 42px; height: 42px; border-radius: 50%; background: white; color: #6a00ff; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
+        main { padding: 20px; max-width: 480px; margin: auto; }
+        .grid { display: flex; flex-direction: column; gap: 16px; }
+        .card { padding: 25px; border-radius: 20px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; background: linear-gradient(135deg, #6a00ff, #1e90ff); box-shadow: 0 6px 15px rgba(0,0,0,0.15); text-align: left; text-transform: uppercase; }
+        .exercise { padding: 20px; border-radius: 18px; margin-bottom: 15px; color: white; background: #333; }
+        .exercise img { width: 100%; border-radius: 12px; margin-top: 10px; background: white; }
+        button { margin-top: 10px; padding: 15px; border: none; border-radius: 12px; background: #6a00ff; color: white; font-size: 16px; width: 100%; cursor: pointer; }
+        select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; }
+        #adminModal, #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
+        #adminBox { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; }
+        .btn-quit { background: #ff4757; }
+    </style>
 </head>
-
 <body>
 
 <header>
-  <div id="adminIcon">⚙</div>
-  <h1>DavidSchool</h1>
+    <div id="adminIcon">⚙</div>
+    <h1>DavidSchool</h1>
 </header>
 
 <main>
-  <div id="classes" class="grid"></div>
-  <div id="subjects" class="grid" style="display:none"></div>
-  <div id="exercises" style="display:none"></div>
-  <button id="backBtn" style="display:none; background:#888" onclick="goBack()">⬅ Retour</button>
+    <div id="classes" class="grid"></div>
+    <div id="subjects" class="grid" style="display:none"></div>
+    <div id="exercises" class="grid" style="display:none"></div>
+    
+    <button id="backBtn" style="display:none; background:#888; margin-top:20px" onclick="goBack()">⬅ Retour</button>
 </main>
 
 <div id="adminModal">
-  <div id="adminBox">
-    <h2 style="margin-top:0">Administration</h2>
-    <div id="loginArea">
-      <input type="password" id="loginPass" placeholder="Code Secret">
-      <button onclick="login()">Connexion</button>
-      <button onclick="closeAdmin()" class="btn-close">Annuler</button>
+    <div id="adminBox">
+        <h2>Admin</h2>
+        <div id="loginArea">
+            <input type="password" id="loginPass" placeholder="Code (1234)">
+            <button onclick="login()">Connexion</button>
+            <button onclick="closeAdmin()" class="btn-quit">Annuler</button>
+        </div>
+        <div id="adminPanel" style="display:none">
+            <select id="aClass"></select>
+            <select id="aSubject"></select>
+            <input id="aTitle" placeholder="Titre">
+            <input type="file" id="aFile">
+            <button onclick="addExercise()" id="uploadBtn">Envoyer</button>
+            <button onclick="closeAdmin()" class="btn-quit">Quitter l'Admin</button>
+        </div>
     </div>
-    <div id="adminPanel" style="display:none">
-      <label>Classe :</label>
-      <select id="aClass"></select>
-      <label>Matière :</label>
-      <select id="aSubject"></select>
-      <input id="aTitle" placeholder="Titre de l'exercice">
-      <input type="file" id="aFile">
-      <button onclick="addExercise()" id="uploadBtn">🚀 Envoyer l'exercice</button>
-      <button onclick="closeAdmin()" class="btn-close">Quitter l'Admin</button>
-    </div>
-  </div>
 </div>
 
-<div id="overlay" onclick="this.style.display='none'"><img id="overlayImg" style="max-width:95%; border-radius:10px"></div>
+<div id="overlay" onclick="this.style.display='none'"><img id="overlayImg" style="max-width:90%"></div>
 
 <script>
-// --- CONFIGURATION : REMPLACE PAR TES CLÉS ---
-const S_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
-const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
+// --- CONFIGURATION ---
+const S_URL = "TON_URL_SUPABASE";
+const S_KEY = "TA_CLE_ANON";
 const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const matieres = ["Math", "Physique-Chimie", "Histoire", "Géographie", "Français", "SVT"];
@@ -73,80 +69,79 @@ const classesList = ["6e", "5e", "4e", "3e"];
 let curClass="", curSubject="", isAdmin=false;
 
 function loadClasses(){
-  const box = document.getElementById("classes");
-  box.innerHTML = "";
-  classesList.forEach(c => {
-    let d = document.createElement("div");
-    d.className = "card";
-    d.innerText = c;
-    d.onclick = () => { curClass=c; showSubjects(); };
-    box.appendChild(d);
-  });
-  document.getElementById("classes").style.display = "flex";
-  document.getElementById("subjects").style.display = "none";
-  document.getElementById("exercises").style.display = "none";
+    document.getElementById("classes").style.display = "flex";
+    document.getElementById("subjects").style.display = "none";
+    document.getElementById("exercises").style.display = "none";
+    document.getElementById("backBtn").style.display = "none";
+    
+    const box = document.getElementById("classes");
+    box.innerHTML = "";
+    classesList.forEach(c => {
+        let d = document.createElement("div");
+        d.className = "card";
+        d.innerText = c;
+        d.onclick = () => { curClass=c; showSubjects(); };
+        box.appendChild(d);
+    });
 }
 
 function showSubjects(){
-  document.getElementById("classes").style.display="none";
-  const box = document.getElementById("subjects");
-  box.innerHTML = "";
-  matieres.forEach(s => {
-    let d = document.createElement("div");
-    d.className = "card";
-    d.innerText = s;
-    d.onclick = () => { curSubject=s; fetchExercises(); };
-    box.appendChild(d);
-  });
-  box.style.display="flex";
-  document.getElementById("backBtn").style.display="block";
+    document.getElementById("classes").style.display="none";
+    document.getElementById("exercises").style.display="none";
+    document.getElementById("subjects").style.display="flex";
+    document.getElementById("backBtn").style.display="block";
+    
+    const box = document.getElementById("subjects");
+    box.innerHTML = "";
+    matieres.forEach(s => {
+        let d = document.createElement("div");
+        d.className = "card";
+        d.innerText = s;
+        d.onclick = () => { curSubject=s; fetchExercises(); };
+        box.appendChild(d);
+    });
 }
 
 async function fetchExercises(){
-  document.getElementById("subjects").style.display="none";
-  const box = document.getElementById("exercises");
-  box.style.display="block";
-  box.innerHTML = "<p style='text-align:center'>Chargement...</p>";
+    document.getElementById("subjects").style.display="none";
+    const box = document.getElementById("exercises");
+    box.style.display="flex";
+    box.innerHTML = "<p style='text-align:center'>Chargement...</p>";
 
-  const { data, error } = await _supabase.from('exercises')
-    .select('*').eq('class', curClass).eq('subject', curSubject);
-  
-  box.innerHTML = "";
-  if(data && data.length > 0){
-      data.forEach(e => {
-        let div = document.createElement("div");
-        div.className = "exercise";
-        div.innerHTML = `<b>${e.title}</b>`;
-        if(e.file_type === "img"){
-            let img = document.createElement("img"); img.src = e.file_url;
-            img.onclick = () => { document.getElementById("overlayImg").src=e.file_url; document.getElementById("overlay").style.display="flex"; };
-            div.appendChild(img);
-        } else {
-            div.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:white;display:block;margin-top:10px">📥 Ouvrir Document</a>`;
-        }
-        box.appendChild(div);
-      });
-  } else { box.innerHTML = "<p style='text-align:center'>Aucun exercice ici.</p>"; }
+    const { data, error } = await _supabase.from('exercises')
+        .select('*').eq('class', curClass).eq('subject', curSubject);
+    
+    box.innerHTML = "";
+    if(data && data.length > 0){
+        data.forEach(e => {
+            let div = document.createElement("div");
+            div.className = "exercise";
+            div.innerHTML = `<b>${e.title}</b>`;
+            if(e.file_type === "img"){
+                let img = document.createElement("img"); img.src = e.file_url;
+                img.onclick = () => { document.getElementById("overlayImg").src=e.file_url; document.getElementById("overlay").style.display="flex"; };
+                div.appendChild(img);
+            } else {
+                div.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:#00d1ff;display:block;margin-top:10px;text-decoration:none;">📥 Ouvrir le document</a>`;
+            }
+            box.appendChild(div);
+        });
+    } else { box.innerHTML = "<p style='text-align:center'>Aucun exercice en " + curSubject + "</p>"; }
 }
 
 function goBack(){
-  if(document.getElementById("exercises").style.display === "block") showSubjects();
-  else loadClasses();
+    if(document.getElementById("exercises").style.display === "flex") showSubjects();
+    else loadClasses();
 }
 
-// GESTION ADMIN
 document.getElementById("adminIcon").onclick = () => document.getElementById("adminModal").style.display="flex";
-
-function closeAdmin() {
-    document.getElementById("adminModal").style.display = "none";
-}
+function closeAdmin() { document.getElementById("adminModal").style.display = "none"; }
 
 function login(){
-  if(document.getElementById("loginPass").value === "1234"){
-    isAdmin = true;
-    document.getElementById("loginArea").style.display="none";
-    document.getElementById("adminPanel").style.display="block";
-  } else { alert("Code incorrect"); }
+    if(document.getElementById("loginPass").value === "1234"){
+        document.getElementById("loginArea").style.display="none";
+        document.getElementById("adminPanel").style.display="block";
+    }
 }
 
 async function addExercise(){
@@ -155,20 +150,17 @@ async function addExercise(){
     const btn = document.getElementById("uploadBtn");
     if(!file || !title) return alert("Remplis tout !");
     
-    btn.innerText = "⏳ Envoi...";
+    btn.innerText = "⌛ Envoi...";
     btn.disabled = true;
 
     try {
-        // Nettoyage du nom pour éviter l'erreur "Invalid Key"
         const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
         const path = `${curClass}/${Date.now()}_${cleanName}`;
-
-        const { data: upData, error: upErr } = await _supabase.storage.from('exercise-files').upload(path, file);
+        const { error: upErr } = await _supabase.storage.from('exercise-files').upload(path, file);
         if(upErr) throw upErr;
 
         const { data: urlData } = _supabase.storage.from('exercise-files').getPublicUrl(path);
 
-        // Insertion avec file_path pour corriger l'erreur de colonne NULL
         const { error: dbError } = await _supabase.from('exercises').insert([{
             class: document.getElementById("aClass").value,
             subject: document.getElementById("aSubject").value,
@@ -183,16 +175,14 @@ async function addExercise(){
         location.reload();
     } catch(err) {
         alert("Erreur : " + err.message);
-        btn.innerText = "🚀 Envoyer l'exercice";
-        btn.disabled = false;
+        btn.innerText = "Envoyer"; btn.disabled = false;
     }
 }
 
-// Initialisation menus admin
 const cSel = document.getElementById("aClass");
 const sSel = document.getElementById("aSubject");
-classesList.forEach(c => { cSel.add(new Option(c,c)); });
-matieres.forEach(m => { sSel.add(new Option(m,m)); });
+classesList.forEach(c => cSel.add(new Option(c,c)));
+matieres.forEach(m => sSel.add(new Option(m,m)));
 
 window.onload = loadClasses;
 </script>
