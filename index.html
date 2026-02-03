@@ -3,52 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro Fix</title>
+    <title>DavidSchool Ultimate</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #f2f4f8; --text: #222; --accent: #6a00ff; }
-        .dark-mode { --bg: #121212; --text: #ffffff; --accent: #bb86fc; }
-        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        :root { --bg: #f2f4f8; --text: #222; }
+        .dark-mode { --bg: #121212; --text: #ffffff; }
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
-        /* Splash & News */
-        #splash-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #1e004e, #1e90ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .hide-splash { transform: translateY(-100%); transition: 0.8s ease-in-out; }
-        #news-bar { background: #ff4757; color: white; padding: 12px; overflow: hidden; white-space: nowrap; font-weight: bold; z-index: 100; }
+        /* Splash Screen */
+        #splash-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #1e004e, #1e90ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: 0.6s ease-in-out; }
+        .hide-splash { transform: translateY(-100%); }
+
+        /* News Bar */
+        #news-bar { background: #ff4757; color: white; padding: 12px; overflow: hidden; white-space: nowrap; font-weight: bold; }
         .news-text { display: inline-block; animation: scroll 15s linear infinite; }
         @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
 
         /* Header */
-        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 35px 20px; text-align: center; position: relative; }
-        .top-btns { position: absolute; top: 15px; width: 100%; left: 0; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-        .circle-btn { width: 42px; height: 42px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid white; font-size: 20px; }
+        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 30px 20px; text-align: center; position: relative; }
+        .top-btns { position: absolute; top: 15px; width: 100%; left: 0; padding: 0 20px; display: flex; justify-content: space-between; }
+        .circle-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid white; }
 
-        /* Content */
-        .search-area { padding: 15px; max-width: 500px; margin: auto; }
-        #searchInput { width: 100%; padding: 14px; border-radius: 30px; border: 1px solid #ddd; outline: none; }
-        main { padding: 15px; max-width: 500px; margin: auto; }
-        .grid { display: flex; flex-direction: column; gap: 12px; }
-        .card { padding: 22px; border-radius: 18px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); text-align: left; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* Main UI */
+        main { padding: 15px; max-width: 500px; margin: auto; min-height: 100vh; }
+        .grid { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .card { padding: 20px; border-radius: 15px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); text-align: left; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-p { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: none; background: #6a00ff; color: white; font-weight: bold; cursor: pointer; }
+        .search-area { margin-bottom: 15px; }
+        #searchInput { width: 100%; padding: 12px; border-radius: 25px; border: 1px solid #ccc; outline: none; }
 
-        /* --- ADMIN MODAL CORRIGÉ --- */
-        #adminModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; padding: 10px; align-items: flex-start; justify-content: center; overflow-y: auto; }
-        .admin-box { background: white; width: 100%; max-width: 450px; border-radius: 20px; padding: 20px; color: #333; position: relative; margin: 20px 0; }
-        
-        /* LA CROIX DE FERMETURE FIXE */
-        .close-admin-btn { position: absolute; top: -15px; right: -5px; width: 40px; height: 40px; background: #ff4757; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 9999; border: 2px solid white; }
-
-        input, select, .btn-p { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; }
-        .btn-p { background: #6a00ff; color: white; font-weight: bold; border: none; cursor: pointer; }
-        .admin-list-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        /* Admin Modal */
+        #adminModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9000; padding: 10px; overflow-y: auto; align-items: flex-start; justify-content: center; }
+        .admin-box { background: white; width: 100%; max-width: 450px; border-radius: 20px; padding: 20px; color: #333; position: relative; margin-top: 30px; }
+        .close-admin-btn { position: absolute; top: -15px; right: -5px; width: 45px; height: 45px; background: #ff4757; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10001; }
+        input, select { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
     <div id="splash-screen">
-        <h2 style="color:white;">DavidSchool</h2>
+        <h1 style="color:white;">DavidSchool</h1>
     </div>
 
-    <div id="news-bar"><div class="news-text" id="newsMsg">Chargement...</div></div>
+    <div id="news-bar"><div class="news-text" id="newsMsg">Chargement de l'annonce...</div></div>
 
     <header>
         <div class="top-btns">
@@ -58,12 +56,13 @@
         <h1>DavidSchool</h1>
     </header>
 
-    <div class="search-area" id="searchContainer" style="display:none">
-        <input type="text" id="searchInput" placeholder="🔍 Rechercher..." onkeyup="doSearch()">
-    </div>
-
     <main>
-        <button id="backBtn" class="btn-p" style="display:none; background:#888;" onclick="handleBack()">⬅️ Retour</button>
+        <button id="backBtn" class="btn-p" style="display:none; background:#888;" onclick="goBack()">⬅️ Retour</button>
+        
+        <div id="searchContainer" class="search-area" style="display:none">
+            <input type="text" id="searchInput" placeholder="🔍 Rechercher un exercice..." onkeyup="filterEx()">
+        </div>
+
         <div id="classes" class="grid"></div>
         <div id="subjects" class="grid" style="display:none"></div>
         <div id="exercises" class="grid" style="display:none"></div>
@@ -72,34 +71,29 @@
     <div id="adminModal">
         <div class="admin-box">
             <div class="close-admin-btn" onclick="closeAdmin()">×</div>
-            
             <h3>Administration</h3>
-            
             <div id="loginArea">
                 <input type="password" id="admPass" placeholder="Code secret">
                 <button class="btn-p" onclick="login()">Se connecter</button>
             </div>
-
             <div id="adminPanel" style="display:none">
-                <p><b>Annonce :</b></p>
-                <input id="inpNews" placeholder="Votre texte...">
-                <button class="btn-p" onclick="saveNews()" style="background:#2ed573">Mettre à jour</button>
+                <input id="inpNews" placeholder="Nouvelle annonce">
+                <button class="btn-p" onclick="updateNews()" style="background:#2ed573">Mettre à jour l'annonce</button>
                 <hr>
-                <p><b>Ajouter un cours :</b></p>
                 <select id="sClass"></select><select id="sSub"></select>
                 <input id="iTitle" placeholder="Titre">
                 <input type="file" id="iFile">
                 <button class="btn-p" id="upBtn" onclick="upload()">🚀 Publier</button>
                 <hr>
                 <div id="admList"></div>
-                <button class="btn-p" style="background:#ff4757; margin-top:20px;" onclick="closeAdmin()">Fermer et Retourner au site</button>
+                <button class="btn-p" style="background:#ff4757; margin-top:20px;" onclick="closeAdmin()">Fermer</button>
             </div>
         </div>
     </div>
 
 <script>
-    const S_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
-    const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
+    const S_URL = "TON_URL_SUPABASE";
+    const S_KEY = "TA_CLE_ANON";
     const _supabase = supabase.createClient(S_URL, S_KEY);
 
     const matieres = ["MATH", "PHYSIQUE-CHIMIE", "HISTOIRE", "GÉOGRAPHIE", "FRANÇAIS", "SVT"];
@@ -108,122 +102,120 @@
 
     window.onload = () => {
         loadNews();
-        renderClasses();
+        showClasses();
         setTimeout(() => document.getElementById('splash-screen').classList.add('hide-splash'), 1500);
     };
 
     async function loadNews() {
         const { data } = await _supabase.from('settings').select('value').eq('key', 'announcement').single();
-        document.getElementById('newsMsg').innerText = data ? data.value : "Bienvenue sur DavidSchool !";
+        document.getElementById('newsMsg').innerText = data ? data.value : "Bienvenue !";
     }
 
-    async function saveNews() {
+    async function updateNews() {
         const val = document.getElementById('inpNews').value;
         await _supabase.from('settings').upsert({ key: 'announcement', value: val });
-        alert("Annonce OK !"); loadNews();
+        alert("Annonce changée !"); loadNews();
     }
 
-    function renderClasses() {
-        document.getElementById("classes").style.display="flex";
+    // --- NAVIGATION LOGIQUE ---
+    function hideAll() {
+        document.getElementById("classes").style.display="none";
         document.getElementById("subjects").style.display="none";
         document.getElementById("exercises").style.display="none";
-        document.getElementById("backBtn").style.display="none";
         document.getElementById("searchContainer").style.display="none";
-        const box = document.getElementById("classes"); box.innerHTML = "";
-        classes.forEach(c => {
-            let b = document.createElement("button"); b.className="card"; b.innerText="Classe de " + c;
-            b.onclick = () => { curC=c; renderSubjects(); };
-            box.appendChild(b);
-        });
+        document.getElementById("backBtn").style.display="none";
     }
 
-    function renderSubjects() {
-        document.getElementById("classes").style.display="none";
-        document.getElementById("subjects").style.display="flex";
-        document.getElementById("backBtn").style.display="block";
-        const box = document.getElementById("subjects"); box.innerHTML = "";
+    function showClasses() {
+        hideAll();
+        const box = document.getElementById("classes");
+        box.innerHTML = "";
+        classes.forEach(c => {
+            let b = document.createElement("button"); b.className="card"; b.innerText="Classe de "+c;
+            b.onclick = () => { curC=c; showSubjects(); };
+            box.appendChild(b);
+        });
+        box.style.display="flex";
+    }
+
+    function showSubjects() {
+        hideAll();
+        const box = document.getElementById("subjects");
+        box.innerHTML = "";
         matieres.forEach(s => {
             let b = document.createElement("button"); b.className="card"; b.innerText=s;
             b.onclick = () => { curS=s; loadEx(); };
             box.appendChild(b);
         });
+        box.style.display="flex";
+        document.getElementById("backBtn").style.display="block";
     }
 
     async function loadEx() {
-        document.getElementById("subjects").style.display="none";
-        document.getElementById("exercises").style.display="flex";
+        hideAll();
+        const box = document.getElementById("exercises");
+        box.innerHTML = "Chargement...";
+        box.style.display="flex";
+        document.getElementById("backBtn").style.display="block";
         document.getElementById("searchContainer").style.display="block";
-        const box = document.getElementById("exercises"); box.innerHTML = "Chargement...";
+
         const { data } = await _supabase.from('exercises').select('*').eq('class', curC).eq('subject', curS);
-        allEx = data || []; showList(allEx);
+        allEx = data || [];
+        renderList(allEx);
     }
 
-    function showList(list) {
-        const box = document.getElementById("exercises"); box.innerHTML = "";
+    function renderList(list) {
+        const box = document.getElementById("exercises");
+        box.innerHTML = "";
+        if(list.length === 0) box.innerHTML = "Aucun exercice.";
         list.forEach(e => {
             let d = document.createElement("div"); d.className="card"; d.style.background="#333";
             d.innerHTML = `<b>${e.title}</b><br>`;
-            if(e.file_type === "img") d.innerHTML += `<img src="${e.file_url}" style="width:100%; margin-top:10px; border-radius:10px;">`;
-            else d.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:#00d1ff; display:block; margin-top:10px;">📂 Ouvrir</a>`;
+            if(e.file_type === "img") d.innerHTML += `<img src="${e.file_url}" style="width:100%; border-radius:10px; margin-top:10px;">`;
+            else d.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:#00d1ff; display:block; margin-top:10px;">📂 Voir le document</a>`;
             box.appendChild(d);
         });
     }
 
-    function doSearch() {
+    function filterEx() {
         const q = document.getElementById("searchInput").value.toLowerCase();
-        showList(allEx.filter(e => e.title.toLowerCase().includes(q)));
+        renderList(allEx.filter(e => e.title.toLowerCase().includes(q)));
     }
 
-    function handleBack() {
-        if(document.getElementById("exercises").style.display === "flex") renderSubjects();
-        else renderClasses();
+    function goBack() {
+        if(document.getElementById("exercises").style.display === "flex") showSubjects();
+        else showClasses();
     }
 
-    // ADMIN
-    function openAdmin() { document.getElementById("adminModal").style.display="block"; }
+    // --- ADMIN ---
+    function openAdmin() { document.getElementById("adminModal").style.display="flex"; }
     function closeAdmin() { document.getElementById("adminModal").style.display="none"; }
-    function login() { if(document.getElementById("admPass").value === "1234") { document.getElementById("loginArea").style.display="none"; document.getElementById("adminPanel").style.display="block"; refreshAdmList(); } }
+    function login() { if(document.getElementById("admPass").value === "1234") { document.getElementById("loginArea").style.display="none"; document.getElementById("adminPanel").style.display="block"; refreshList(); } }
 
     async function upload() {
         const f = document.getElementById("iFile").files[0];
         const t = document.getElementById("iTitle").value;
-        if(!f || !t) return alert("Fichier ou titre manquant !");
-        
-        document.getElementById("upBtn").innerText = "⏳ Envoi...";
+        if(!f || !t) return alert("Manquant !");
+        document.getElementById("upBtn").innerText = "⏳...";
         const path = `${document.getElementById("sClass").value}/${Date.now()}_${f.name}`;
-        
-        // SECURITÉ : On vérifie l'envoi du fichier d'abord
-        const { error: stError } = await _supabase.storage.from('exercise-files').upload(path, f);
-        if(stError) { alert("Erreur envoi fichier : " + stError.message); return; }
-
+        const { error: sErr } = await _supabase.storage.from('exercise-files').upload(path, f);
+        if(sErr) return alert("Erreur fichier");
         const { data: u } = _supabase.storage.from('exercise-files').getPublicUrl(path);
-        
-        // Ensuite on insère en base de données
-        const { error: dbError } = await _supabase.from('exercises').insert([{ 
-            class: document.getElementById("sClass").value, 
-            subject: document.getElementById("sSub").value, 
-            title: t, 
-            file_url: u.publicUrl, 
-            file_path: path, 
-            file_type: f.type.startsWith("image") ? "img" : "doc" 
-        }]);
-
-        if(dbError) alert("Erreur SQL : " + dbError.message);
-        else { alert("Publié !"); refreshAdmList(); }
-        document.getElementById("upBtn").innerText = "🚀 Publier";
+        await _supabase.from('exercises').insert([{ class:document.getElementById("sClass").value, subject:document.getElementById("sSub").value, title:t, file_url:u.publicUrl, file_path:path, file_type:f.type.startsWith("image")?"img":"doc" }]);
+        alert("Publié !"); document.getElementById("upBtn").innerText = "🚀 Publier"; refreshList();
     }
 
-    async function refreshAdmList() {
+    async function refreshList() {
         const { data } = await _supabase.from('exercises').select('*').order('created_at',{ascending:false});
-        const box = document.getElementById("admList"); box.innerHTML = "<b>Gestion :</b>";
+        const box = document.getElementById("admList"); box.innerHTML = "";
         data.forEach(e => {
-            let row = document.createElement("div"); row.className="admin-list-item";
-            row.innerHTML = `<span>[${e.class}] ${e.title}</span> <button onclick="del('${e.id}','${e.file_path}')" style="color:red">X</button>`;
-            box.appendChild(row);
+            let d = document.createElement("div"); d.style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #eee; font-size:12px;";
+            d.innerHTML = `<span>[${e.class}] ${e.title}</span> <button onclick="del('${e.id}','${e.file_path}')" style="color:red">X</button>`;
+            box.appendChild(d);
         });
     }
 
-    async function del(id, p) { if(confirm("Supprimer ?")) { await _supabase.from('exercises').delete().eq('id', id); await _supabase.storage.from('exercise-files').remove([p]); refreshAdmList(); } }
+    async function del(id, p) { if(confirm("Supprimer ?")) { await _supabase.from('exercises').delete().eq('id', id); await _supabase.storage.from('exercise-files').remove([p]); refreshList(); } }
     function toggleDark() { document.body.classList.toggle('dark-mode'); }
     classes.forEach(c => document.getElementById("sClass").add(new Option(c,c)));
     matieres.forEach(m => document.getElementById("sSub").add(new Option(m,m)));
