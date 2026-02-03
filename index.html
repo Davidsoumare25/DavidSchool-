@@ -3,73 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DavidSchool Pro</title>
+    <title>DavidSchool Pro Fix</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --bg: #f2f4f8; --text: #222; --card: linear-gradient(90deg, #6a00ff, #1e90ff); --header: linear-gradient(135deg, #1e004e, #6a00ff); }
+        :root { --bg: #f2f4f8; --text: #222; --card: linear-gradient(90deg, #6a00ff, #1e90ff); }
         .dark-mode { --bg: #121212; --text: #ffffff; --card: #1e1e1e; }
-
-        * { box-sizing: border-box; transition: background 0.3s, color 0.3s; }
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
-
-        /* --- SPLASH SCREEN --- */
-        #splash-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #1e004e, #1e90ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
-        .hide-splash { transform: translateY(-100%); transition: 0.8s cubic-bezier(0.65, 0, 0.35, 1); }
-
-        /* --- ANNONCE DÉFILANTE --- */
-        #news-bar { background: #ff4757; color: white; padding: 8px; font-size: 14px; white-space: nowrap; overflow: hidden; position: relative; }
+        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); }
+        
+        /* Splash & News */
+        #splash-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #1e004e, #1e90ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; transition: 0.8s; }
+        .hide-splash { transform: translateY(-100%); }
+        #news-bar { background: #ff4757; color: white; padding: 10px; overflow: hidden; white-space: nowrap; }
         .news-text { display: inline-block; animation: scroll 15s linear infinite; }
         @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
 
-        /* --- HEADER & TOOLS --- */
-        header { background: var(--header); color: white; padding: 40px 20px; text-align: center; position: relative; }
-        .logo-img { height: 60px; border-radius: 12px; margin-bottom: 10px; }
-        .top-tools { position: absolute; top: 15px; width: 100%; padding: 0 20px; display: flex; justify-content: space-between; }
-        .tool-btn { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); font-size: 18px; }
+        /* Header */
+        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 30px; text-align: center; position: relative; }
+        .logo-img { height: 60px; border-radius: 12px; }
+        .tools { position: absolute; top: 10px; width: 100%; left: 0; padding: 0 15px; display: flex; justify-content: space-between; }
+        .btn-tool { width: 35px; height: 35px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid white; }
 
-        /* --- RECHERCHE --- */
-        .search-box { padding: 10px 20px; }
+        /* Search & Cards */
+        .search-area { padding: 15px; }
         #searchInput { width: 100%; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
-
-        /* --- CARDS & BADGES --- */
-        main { padding: 10px 20px; max-width: 500px; margin: auto; }
+        main { padding: 15px; max-width: 500px; margin: auto; }
         .grid { display: flex; flex-direction: column; gap: 12px; }
-        .card { padding: 20px; border-radius: 15px; color: white; font-weight: bold; cursor: pointer; background: var(--card); border: none; text-align: left; position: relative; }
-        .badge-new { position: absolute; top: -5px; right: -5px; background: #2ed573; color: white; font-size: 10px; padding: 4px 8px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .view-count { font-size: 11px; opacity: 0.7; float: right; }
+        .card { padding: 20px; border-radius: 15px; color: white; font-weight: bold; border: none; background: var(--card); text-align: left; cursor: pointer; position: relative; }
+        .badge { position: absolute; top: 5px; right: 10px; background: #2ed573; font-size: 10px; padding: 3px 7px; border-radius: 5px; }
 
-        /* --- ADMIN --- */
-        #adminModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; padding: 20px; align-items: center; justify-content: center; }
-        .admin-box { background: white; width: 100%; max-width: 400px; border-radius: 25px; padding: 20px; max-height: 80vh; overflow-y: auto; color: #222; }
-        .btn-main { width: 100%; padding: 14px; margin-top: 10px; border-radius: 12px; border: none; background: #6a00ff; color: white; font-weight: bold; cursor: pointer; }
-        .btn-close { background: #ff4757; }
-        .admin-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
+        /* Admin */
+        #adminModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; padding: 20px; align-items: center; justify-content: center; }
+        .admin-box { background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; color: #333; max-height: 80vh; overflow-y: auto; }
+        input, select, .btn-p { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: 1px solid #ddd; }
+        .btn-p { background: #6a00ff; color: white; font-weight: bold; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="splash-screen">
-        <img src="https://lqevweyhxkvnckhtfpwh.supabase.co/storage/v1/object/public/exercise-files/1769899198248.png" style="width:100px; border-radius:20px;">
-        <h1 style="color:white; margin-top:20px;">DavidSchool</h1>
+        <img src="https://lqevweyhxkvnckhtfpwh.supabase.co/storage/v1/object/public/exercise-files/1769899198248.png" style="width:80px; border-radius:15px;">
+        <h2 style="color:white;">DavidSchool</h2>
     </div>
 
-    <div id="news-bar"><div class="news-text" id="newsMsg">Bienvenue sur DavidSchool - Consultez vos nouveaux exercices !</div></div>
+    <div id="news-bar"><div class="news-text" id="newsMsg">Chargement de l'annonce...</div></div>
 
     <header>
-        <div class="top-tools">
-            <div class="tool-btn" onclick="openAdmin()">⚙️</div>
-            <div class="tool-btn" onclick="toggleDarkMode()">🌙</div>
+        <div class="tools">
+            <div class="btn-tool" onclick="document.getElementById('adminModal').style.display='flex'">⚙️</div>
+            <div class="btn-tool" onclick="toggleDark()">🌙</div>
         </div>
         <img src="https://lqevweyhxkvnckhtfpwh.supabase.co/storage/v1/object/public/exercise-files/1769899198248.png" class="logo-img">
-        <h1 style="margin:0; font-size: 24px;">DavidSchool</h1>
+        <h1>DavidSchool</h1>
     </header>
 
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="🔍 Rechercher un exercice..." onkeyup="filterExercises()">
+    <div class="search-area" id="searchContainer" style="display:none">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher un exercice..." onkeyup="doSearch()">
     </div>
 
     <main>
-        <button id="backBtn" class="btn-main" style="display:none; background:#888; margin-bottom:15px;" onclick="goBack()">⬅️ Retour</button>
+        <button id="backBtn" class="btn-p" style="display:none; background:#888; margin-bottom:15px;" onclick="handleBack()">⬅️ Retour</button>
         <div id="classes" class="grid"></div>
         <div id="subjects" class="grid" style="display:none"></div>
         <div id="exercises" class="grid" style="display:none"></div>
@@ -77,156 +70,159 @@
 
     <div id="adminModal">
         <div class="admin-box">
-            <h2 id="admTitle">Admin</h2>
+            <h3>Administration</h3>
             <div id="loginArea">
-                <input type="password" id="passInput" placeholder="Code secret" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px; border:1px solid #ddd;">
-                <button class="btn-main" onclick="checkPass()">Connexion</button>
+                <input type="password" id="admPass" placeholder="Code secret">
+                <button class="btn-p" onclick="login()">Connexion</button>
+                <button class="btn-p" style="background:#888" onclick="this.parentElement.parentElement.parentElement.style.display='none'">Fermer</button>
             </div>
             <div id="adminPanel" style="display:none">
-                <input id="newNews" placeholder="Modifier l'annonce défilante" style="width:100%; padding:10px; margin-bottom:10px;">
-                <button class="btn-main" onclick="updateNews()" style="background:#2ed573; margin-bottom:20px;">Mettre à jour l'annonce</button>
-                
-                <select id="selClass" style="width:100%; padding:10px; margin-bottom:5px;"></select>
-                <select id="selSub" style="width:100%; padding:10px; margin-bottom:5px;"></select>
-                <input id="inTitle" placeholder="Titre" style="width:100%; padding:10px; margin-bottom:5px;">
-                <input type="file" id="inFile" style="margin-bottom:10px;">
-                <button class="btn-main" id="upBtn" onclick="upload()">🚀 Publier</button>
+                <input id="inpNews" placeholder="Nouvelle annonce">
+                <button class="btn-p" onclick="saveNews()" style="background:#2ed573">Mettre à jour l'annonce</button>
                 <hr>
-                <div id="adminList"></div>
-                <button class="btn-main btn-close" onclick="closeAdmin()">Fermer</button>
+                <select id="sClass"></select><select id="sSub"></select>
+                <input id="iTitle" placeholder="Titre de l'exercice">
+                <input type="file" id="iFile">
+                <button class="btn-p" onclick="upload()">🚀 Publier</button>
+                <div id="admList" style="margin-top:20px; font-size:12px;"></div>
             </div>
         </div>
     </div>
 
 <script>
+    // CONFIGURATION (Remplace avec tes vraies clés)
     const S_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
     const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
     const _supabase = supabase.createClient(S_URL, S_KEY);
 
     const matieres = ["MATH", "PHYSIQUE-CHIMIE", "HISTOIRE", "GÉOGRAPHIE", "FRANÇAIS", "SVT"];
     const classes = ["6e", "5e", "4e", "3e"];
-    let curC="", curS="", isAdmin=false, allEx=[];
+    let curC="", curS="", allEx=[];
 
-    window.onload = () => {
-        setTimeout(() => { document.getElementById('splash-screen').classList.add('hide-splash'); renderClasses(); }, 2000);
-        if(localStorage.getItem('dark') === 'true') document.body.classList.add('dark-mode');
+    window.onload = async () => {
+        loadNews();
+        renderClasses();
+        setTimeout(() => document.getElementById('splash-screen').classList.add('hide-splash'), 2000);
     };
 
-    function toggleDarkMode() {
-        document.body.classList.toggle('dark-mode');
-        localStorage.setItem('dark', document.body.classList.contains('dark-mode'));
+    // --- ANNONCES SYNCHRONISÉES ---
+    async function loadNews() {
+        const { data } = await _supabase.from('settings').select('value').eq('key', 'announcement').single();
+        if(data) document.getElementById('newsMsg').innerText = data.value;
     }
 
+    async function saveNews() {
+        const val = document.getElementById('inpNews').value;
+        await _supabase.from('settings').upsert({ key: 'announcement', value: val });
+        alert("Annonce mise à jour pour tous !");
+        loadNews();
+    }
+
+    // --- NAVIGATION ---
     function renderClasses() {
-        const box = document.getElementById("classes"); box.innerHTML = "";
-        classes.forEach(c => {
-            let b = document.createElement("button"); b.className = "card";
-            b.innerText = c; b.onclick = () => { curC=c; renderSubjects(); };
-            box.appendChild(b);
-        });
+        curC = ""; curS = "";
         document.getElementById("classes").style.display="flex";
         document.getElementById("subjects").style.display="none";
         document.getElementById("exercises").style.display="none";
         document.getElementById("backBtn").style.display="none";
+        document.getElementById("searchContainer").style.display="none";
+        const box = document.getElementById("classes"); box.innerHTML = "";
+        classes.forEach(c => {
+            let b = document.createElement("button"); b.className="card"; b.innerText=c;
+            b.onclick = () => { curC=c; renderSubjects(); };
+            box.appendChild(b);
+        });
     }
 
     function renderSubjects() {
-        const box = document.getElementById("subjects"); box.innerHTML = "";
-        matieres.forEach(s => {
-            let b = document.createElement("button"); b.className = "card";
-            b.innerText = s; b.onclick = () => { curS=s; loadExercises(); };
-            box.appendChild(b);
-        });
         document.getElementById("classes").style.display="none";
+        document.getElementById("exercises").style.display="none";
         document.getElementById("subjects").style.display="flex";
         document.getElementById("backBtn").style.display="block";
-    }
-
-    async function loadExercises() {
-        const box = document.getElementById("exercises");
-        box.style.display="flex"; document.getElementById("subjects").style.display="none";
-        box.innerHTML = "Chargement...";
-        const { data } = await _supabase.from('exercises').select('*').eq('class', curC).eq('subject', curS);
-        allEx = data || [];
-        displayEx(allEx);
-    }
-
-    function displayEx(list) {
-        const box = document.getElementById("exercises"); box.innerHTML = "";
-        list.forEach(e => {
-            const isNew = (new Date() - new Date(e.created_at)) < (48 * 60 * 60 * 1000);
-            let d = document.createElement("div"); d.className = "card"; d.style.background = "#333";
-            d.innerHTML = `${isNew ? '<span class="badge-new">NEW</span>' : ''} 
-                           <b>${e.title}</b> <span class="view-count">👁️ ${Math.floor(Math.random()*100)}</span><br>`;
-            if(e.file_type === "img") {
-                d.innerHTML += `<img src="${e.file_url}" style="width:100%; border-radius:10px; margin-top:10px;">`;
-            } else {
-                d.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:#00d1ff; text-decoration:none; display:block; margin-top:10px;">📂 Ouvrir</a>`;
-            }
-            box.appendChild(d);
+        document.getElementById("searchContainer").style.display="none";
+        const box = document.getElementById("subjects"); box.innerHTML = "";
+        matieres.forEach(s => {
+            let b = document.createElement("button"); b.className="card"; b.innerText=s;
+            b.onclick = () => { curS=s; loadEx(); };
+            box.appendChild(b);
         });
     }
 
-    function filterExercises() {
-        const val = document.getElementById("searchInput").value.toLowerCase();
-        const filtered = allEx.filter(e => e.title.toLowerCase().includes(val));
-        displayEx(filtered);
-    }
-
-    function goBack() {
+    function handleBack() {
         if(document.getElementById("exercises").style.display === "flex") renderSubjects();
         else renderClasses();
     }
 
-    // --- ADMIN ---
-    function openAdmin() { document.getElementById("adminModal").style.display="flex"; }
-    function closeAdmin() { document.getElementById("adminModal").style.display="none"; }
-    function checkPass() { if(document.getElementById("passInput").value === "1234") { 
-        isAdmin=true; document.getElementById("loginArea").style.display="none"; 
-        document.getElementById("adminPanel").style.display="block"; refreshAdminList(); 
-    } }
-
-    function updateNews() {
-        const msg = document.getElementById("newNews").value;
-        if(msg) document.getElementById("newsMsg").innerText = msg;
+    // --- EXERCICES & RECHERCHE ---
+    async function loadEx() {
+        document.getElementById("subjects").style.display="none";
+        document.getElementById("exercises").style.display="flex";
+        document.getElementById("searchContainer").style.display="block";
+        const box = document.getElementById("exercises"); box.innerHTML = "Chargement...";
+        const { data } = await _supabase.from('exercises').select('*').eq('class', curC).eq('subject', curS);
+        allEx = data || [];
+        showList(allEx);
     }
 
-    async function refreshAdminList() {
-        const list = document.getElementById("adminList"); list.innerHTML = "";
-        const { data } = await _supabase.from('exercises').select('*').order('created_at', {ascending: false});
-        data.forEach(e => {
-            let row = document.createElement("div"); row.className="admin-item";
-            row.innerHTML = `<span>[${e.class}] ${e.title}</span> <button onclick="delEx('${e.id}','${e.file_path}')" style="color:red">Suppr.</button>`;
-            list.appendChild(row);
+    function showList(list) {
+        const box = document.getElementById("exercises"); box.innerHTML = "";
+        if(list.length === 0) { box.innerHTML = "Aucun résultat."; return; }
+        list.forEach(e => {
+            let d = document.createElement("div"); d.className="card"; d.style.background="#333";
+            d.innerHTML = `<b>${e.title}</b><br>`;
+            if(e.file_type === "img") d.innerHTML += `<img src="${e.file_url}" style="width:100%; margin-top:10px; border-radius:10px;">`;
+            else d.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:#00d1ff; display:block; margin-top:10px;">📂 Ouvrir</a>`;
+            box.appendChild(d);
         });
     }
 
-    async function delEx(id, path) {
-        if(confirm("Supprimer ?")) {
-            await _supabase.from('exercises').delete().eq('id', id);
-            await _supabase.storage.from('exercise-files').remove([path]);
-            refreshAdminList();
+    function doSearch() {
+        const q = document.getElementById("searchInput").value.toLowerCase();
+        const res = allEx.filter(e => e.title.toLowerCase().includes(q));
+        showList(res);
+    }
+
+    // --- ADMIN ---
+    function login() {
+        if(document.getElementById("admPass").value === "1234") {
+            document.getElementById("loginArea").style.display="none";
+            document.getElementById("adminPanel").style.display="block";
+            refreshAdmList();
         }
     }
 
     async function upload() {
-        const file = document.getElementById("inFile").files[0];
-        const title = document.getElementById("inTitle").value;
-        if(!file || !title) return alert("Champs vides");
-        const path = `${document.getElementById("selClass").value}/${Date.now()}_${file.name}`;
-        await _supabase.storage.from('exercise-files').upload(path, file);
-        const { data: urlData } = _supabase.storage.from('exercise-files').getPublicUrl(path);
-        await _supabase.from('exercises').insert([{
-            class: document.getElementById("selClass").value,
-            subject: document.getElementById("selSub").value,
-            title: title, file_url: urlData.publicUrl, file_path: path,
-            file_type: file.type.startsWith("image") ? "img" : "doc"
-        }]);
-        alert("Publié !"); refreshAdminList();
+        const f = document.getElementById("iFile").files[0];
+        const t = document.getElementById("iTitle").value;
+        const c = document.getElementById("sClass").value;
+        const s = document.getElementById("sSub").value;
+        if(!f || !t) return alert("Remplis tout !");
+        const path = `${c}/${Date.now()}_${f.name}`;
+        await _supabase.storage.from('exercise-files').upload(path, f);
+        const { data: u } = _supabase.storage.from('exercise-files').getPublicUrl(path);
+        await _supabase.from('exercises').insert([{ class:c, subject:s, title:t, file_url:u.publicUrl, file_path:path, file_type:f.type.startsWith("image")?"img":"doc" }]);
+        alert("Publié !"); refreshAdmList();
     }
 
-    classes.forEach(c => document.getElementById("selClass").add(new Option(c,c)));
-    matieres.forEach(m => document.getElementById("selSub").add(new Option(m,m)));
+    async function refreshAdmList() {
+        const { data } = await _supabase.from('exercises').select('*').order('created_at',{ascending:false});
+        const box = document.getElementById("admList"); box.innerHTML = "<b>Liste globale :</b><br>";
+        data.forEach(e => {
+            box.innerHTML += `<div>[${e.class}] ${e.title} <button onclick="del('${e.id}','${e.file_path}')" style="color:red">X</button></div>`;
+        });
+    }
+
+    async function del(id, p) {
+        if(confirm("Supprimer ?")) {
+            await _supabase.from('exercises').delete().eq('id', id);
+            await _supabase.storage.from('exercise-files').remove([p]);
+            refreshAdmList();
+        }
+    }
+
+    function toggleDark() { document.body.classList.toggle('dark-mode'); }
+    classes.forEach(c => document.getElementById("sClass").add(new Option(c,c)));
+    matieres.forEach(m => document.getElementById("sSub").add(new Option(m,m)));
 </script>
 </body>
 </html>
