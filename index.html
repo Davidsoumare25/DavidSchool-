@@ -6,29 +6,58 @@
     <title>DavidSchool</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Styles Généraux */
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: system-ui, Arial; background: #f2f4f8; color: #222; }
+        body { margin: 0; font-family: system-ui, Arial; background: #f2f4f8; color: #222; overflow-x: hidden; } /* Empêche le défilement horizontal */
+        
+        /* Animation Bienvenue */
+        #welcome-animation {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #6a00ff, #1e90ff); /* Ton dégradé */
+            color: white;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 3em; font-weight: bold;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 1.5s ease-out 1.5s, transform 1.5s ease-out 1.5s; /* Transition après un délai */
+            transform: scale(1);
+        }
+        #welcome-animation.fade-out {
+            opacity: 0;
+            transform: scale(1.1); /* Petit zoom arrière pour l'effet */
+            pointer-events: none; /* Empêche les clics une fois disparu */
+        }
+
+        /* Header */
         header { background: linear-gradient(135deg, #6a00ff, #1e90ff); color: white; padding: 30px 20px; text-align: center; position: relative; }
-        
-        /* Style du Logo */
         .logo-img { height: 70px; margin-bottom: 10px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        
         #adminIcon { position: absolute; top: 20px; left: 20px; width: 42px; height: 42px; border-radius: 50%; background: white; color: #6a00ff; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        
+        /* Contenu Principal */
         main { padding: 20px; max-width: 480px; margin: auto; }
         .grid { display: flex; flex-direction: column; gap: 16px; }
         .card { padding: 25px; border-radius: 20px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; background: linear-gradient(135deg, #6a00ff, #1e90ff); box-shadow: 0 6px 15px rgba(0,0,0,0.15); text-align: left; text-transform: uppercase; transition: 0.2s; }
         .card:hover { transform: scale(1.02); }
         .exercise { padding: 20px; border-radius: 18px; margin-bottom: 15px; color: white; background: #333; position: relative; }
         .exercise img { width: 100%; border-radius: 12px; margin-top: 10px; background: white; cursor: pointer; }
+        
+        /* Boutons & Inputs */
         button { margin-top: 10px; padding: 15px; border: none; border-radius: 12px; background: #6a00ff; color: white; font-size: 16px; width: 100%; cursor: pointer; }
         select, input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; }
+        
+        /* Modale Admin */
         #adminModal, #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; }
         #adminBox { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 400px; }
+        
+        /* Boutons spécifiques */
         .btn-quit { background: #ff4757; }
         .btn-delete { background: #ff4757; font-size: 14px; padding: 8px; margin-top: 15px; }
     </style>
 </head>
 <body>
+
+<div id="welcome-animation">Bienvenue dans DavidSchool</div>
 
 <header>
     <div id="adminIcon">⚙</div>
@@ -68,14 +97,15 @@
 
 <script>
 // --- CONFIGURATION ---
-const S_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
-const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
+const S_URL = "TON_URL_SUPABASE";
+const S_KEY = "TA_CLE_ANON";
 const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const matieres = ["Math", "Physique-Chimie", "Histoire", "Géographie", "Français", "SVT"];
 const classesList = ["6e", "5e", "4e", "3e"];
 let curClass="", curSubject="", isAdmin=false;
 
+// Fonctionnalités de navigation
 function loadClasses(){
     document.getElementById("classes").style.display = "flex";
     document.getElementById("subjects").style.display = "none";
@@ -136,7 +166,7 @@ async function fetchExercises(){
                     if(confirm("Supprimer définitivement cet exercice ?")){
                         await _supabase.from('exercises').delete().eq('id', e.id);
                         await _supabase.storage.from('exercise-files').remove([e.file_path]);
-                        fetchExercises();
+                        fetchExercises(); // Rafraîchir la liste après suppression
                     }
                 };
                 div.appendChild(delBtn);
@@ -151,6 +181,7 @@ function goBack(){
     else loadClasses();
 }
 
+// Fonctionnalités Admin
 document.getElementById("adminIcon").onclick = () => document.getElementById("adminModal").style.display="flex";
 function closeAdmin() { document.getElementById("adminModal").style.display = "none"; }
 
@@ -159,7 +190,7 @@ function login(){
         isAdmin = true;
         document.getElementById("loginArea").style.display="none";
         document.getElementById("adminPanel").style.display="block";
-        loadClasses(); // Refresh pour activer les boutons supprimer
+        loadClasses(); // Rafraîchir pour activer les boutons supprimer si besoin
     } else { alert("Code incorrect"); }
 }
 
@@ -192,11 +223,22 @@ async function addExercise(){
     }
 }
 
+// Initialisation des menus déroulants Admin
 const cSel = document.getElementById("aClass");
 const sSel = document.getElementById("aSubject");
 classesList.forEach(c => cSel.add(new Option(c,c)));
 matieres.forEach(m => sSel.add(new Option(m,m)));
-window.onload = loadClasses;
+
+// Lancement de l'animation puis du site
+window.addEventListener('load', () => {
+    // Retirer l'animation après un délai
+    setTimeout(() => {
+        document.getElementById('welcome-animation').classList.add('fade-out');
+        // Charger le contenu du site une fois l'animation terminée
+        loadClasses();
+    }, 1000); // L'animation dure 1 seconde avant de commencer à disparaître
+});
 </script>
 </body>
 </html>
+
