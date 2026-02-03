@@ -170,6 +170,52 @@ classesList.forEach(c => { let o = new Option(c,c); cSel.add(o); });
 matieres.forEach(m => { let o = new Option(m,m); sSel.add(o); });
 
 document.getElementById("adminIcon").onclick = () => document.getElementById("adminModal").style.display="flex";
+  async function addExercise() {
+  const file = document.getElementById("aFile").files[0];
+  const title = document.getElementById("aTitle").value;
+  const btn = document.getElementById("uploadBtn");
+
+  if (!file || !title) return alert("Remplis le titre et le fichier !");
+
+  // On enlève les espaces et caractères bizarres du nom du fichier
+  const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+  const path = `${curClass}/${Date.now()}_${cleanName}`;
+
+  btn.innerText = "⏳ Envoi...";
+  btn.disabled = true;
+
+  try {
+    // Envoi au Storage
+    const { data: upData, error: upError } = await _supabase.storage
+      .from('exercise-files')
+      .upload(path, file);
+
+    if (upError) throw upError;
+
+    // Lien Public
+    const { data: urlData } = _supabase.storage.from('exercise-files').getPublicUrl(path);
+
+    // Enregistrement Table
+    const { error: dbError } = await _supabase.from('exercises').insert([{
+      class: document.getElementById("aClass").value,
+      subject: document.getElementById("aSubject").value,
+      title: title,
+      file_url: urlData.publicUrl,
+      file_type: file.type.startsWith("image") ? "img" : "doc"
+    }]);
+
+    if (dbError) throw dbError;
+
+    alert("Exercice ajouté avec succès !");
+    location.reload();
+
+  } catch (err) {
+    alert("Erreur : " + err.message);
+    btn.innerText = "Envoyer";
+    btn.disabled = false;
+  }
+}
+
 
 // Lancement forcé
 window.onload = loadClasses;
