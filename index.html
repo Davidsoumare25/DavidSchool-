@@ -17,10 +17,11 @@ main{padding:20px;max-width:480px;margin:auto}
 .card:hover{transform:scale(1.02)}
 .exercise{padding:15px;border-radius:18px;margin-bottom:15px;color:white;background:linear-gradient(135deg,#6a00ff,#1e90ff);position:relative}
 .exercise img{width:100%;border-radius:12px;margin-top:10px;cursor:pointer;background:white}
-button{margin-top:15px;padding:15px;border:none;border-radius:12px;background:#6a00ff;color:white;font-size:16px;width:100%;cursor:pointer}
+button{margin-top:10px;padding:15px;border:none;border-radius:12px;background:#6a00ff;color:white;font-size:16px;width:100%;cursor:pointer}
 select,input{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px solid #ddd}
 #adminModal,#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;z-index:1000}
 #adminBox{background:white;padding:25px;border-radius:20px;width:90%;max-width:400px}
+.btn-close{background:#ff4757;margin-top:20px} /* Style pour le bouton fermer */
 </style>
 </head>
 
@@ -40,39 +41,37 @@ select,input{width:100%;padding:12px;margin:8px 0;border-radius:10px;border:1px 
 
 <div id="adminModal">
   <div id="adminBox">
-    <h2>Admin</h2>
+    <h2 style="margin-top:0">Administration</h2>
     <div id="loginArea">
       <input type="password" id="loginPass" placeholder="Code Secret">
       <button onclick="login()">Connexion</button>
+      <button onclick="closeAdmin()" class="btn-close">Annuler</button>
     </div>
     <div id="adminPanel" style="display:none">
+      <label>Classe :</label>
       <select id="aClass"></select>
+      <label>Matière :</label>
       <select id="aSubject"></select>
-      <input id="aTitle" placeholder="Titre">
+      <input id="aTitle" placeholder="Titre de l'exercice">
       <input type="file" id="aFile">
-      <button onclick="addExercise()" id="uploadBtn">Envoyer</button>
+      <button onclick="addExercise()" id="uploadBtn">🚀 Envoyer l'exercice</button>
+      <button onclick="closeAdmin()" class="btn-close">Quitter l'Admin</button>
     </div>
   </div>
 </div>
 
-<div id="overlay" onclick="this.style.display='none'"><img id="overlayImg" style="max-width:95%"></div>
+<div id="overlay" onclick="this.style.display='none'"><img id="overlayImg" style="max-width:95%; border-radius:10px"></div>
 
 <script>
-// --- CONFIGURATION ---
-const S_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
-const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
-let _supabase;
-
-// Tentative de connexion sécurisée pour ne pas bloquer l'affichage
-try {
-    _supabase = supabase.createClient(S_URL, S_KEY);
-} catch(e) { console.error("Erreur de config Supabase"); }
+// --- CONFIGURATION : REMPLACE PAR TES CLÉS ---
+const S_URL = "TON_URL_SUPABASE";
+const S_KEY = "TA_CLE_ANON";
+const _supabase = supabase.createClient(S_URL, S_KEY);
 
 const matieres = ["Math", "Physique-Chimie", "Histoire", "Géographie", "Français", "SVT"];
 const classesList = ["6e", "5e", "4e", "3e"];
 let curClass="", curSubject="", isAdmin=false;
 
-// AFFICHAGE IMMEDIAT DES CLASSES
 function loadClasses(){
   const box = document.getElementById("classes");
   box.innerHTML = "";
@@ -86,7 +85,6 @@ function loadClasses(){
   document.getElementById("classes").style.display = "flex";
   document.getElementById("subjects").style.display = "none";
   document.getElementById("exercises").style.display = "none";
-  document.getElementById("backBtn").style.display = "none";
 }
 
 function showSubjects(){
@@ -110,23 +108,25 @@ async function fetchExercises(){
   box.style.display="block";
   box.innerHTML = "<p style='text-align:center'>Chargement...</p>";
 
-  try {
-      const { data, error } = await _supabase.from('exercises').select('*').eq('class', curClass).eq('subject', curSubject);
-      box.innerHTML = "";
-      if(data && data.length > 0){
-          data.forEach(e => {
-            let div = document.createElement("div");
-            div.className = "exercise";
-            div.innerHTML = `<b>${e.title}</b>`;
-            if(e.file_type === "img"){
-                let img = document.createElement("img"); img.src = e.file_url;
-                img.onclick = () => { document.getElementById("overlayImg").src=e.file_url; document.getElementById("overlay").style.display="flex"; };
-                div.appendChild(img);
-            }
-            box.appendChild(div);
-          });
-      } else { box.innerHTML = "<p style='text-align:center'>Aucun exercice.</p>"; }
-  } catch(e) { box.innerHTML = "<p>Erreur de connexion Cloud.</p>"; }
+  const { data, error } = await _supabase.from('exercises')
+    .select('*').eq('class', curClass).eq('subject', curSubject);
+  
+  box.innerHTML = "";
+  if(data && data.length > 0){
+      data.forEach(e => {
+        let div = document.createElement("div");
+        div.className = "exercise";
+        div.innerHTML = `<b>${e.title}</b>`;
+        if(e.file_type === "img"){
+            let img = document.createElement("img"); img.src = e.file_url;
+            img.onclick = () => { document.getElementById("overlayImg").src=e.file_url; document.getElementById("overlay").style.display="flex"; };
+            div.appendChild(img);
+        } else {
+            div.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:white;display:block;margin-top:10px">📥 Ouvrir Document</a>`;
+        }
+        box.appendChild(div);
+      });
+  } else { box.innerHTML = "<p style='text-align:center'>Aucun exercice ici.</p>"; }
 }
 
 function goBack(){
@@ -134,90 +134,66 @@ function goBack(){
   else loadClasses();
 }
 
+// GESTION ADMIN
+document.getElementById("adminIcon").onclick = () => document.getElementById("adminModal").style.display="flex";
+
+function closeAdmin() {
+    document.getElementById("adminModal").style.display = "none";
+}
+
 function login(){
   if(document.getElementById("loginPass").value === "1234"){
     isAdmin = true;
     document.getElementById("loginArea").style.display="none";
     document.getElementById("adminPanel").style.display="block";
-  }
+  } else { alert("Code incorrect"); }
 }
 
 async function addExercise(){
     const file = document.getElementById("aFile").files[0];
     const title = document.getElementById("aTitle").value;
+    const btn = document.getElementById("uploadBtn");
     if(!file || !title) return alert("Remplis tout !");
     
-    const path = `${curClass}/${Date.now()}_${file.name}`;
-    const { data: upData, error: upErr } = await _supabase.storage.from('exercise-files').upload(path, file);
-    if(upErr) return alert("Erreur Storage: " + upErr.message);
+    btn.innerText = "⏳ Envoi...";
+    btn.disabled = true;
 
-    const { data: urlData } = _supabase.storage.from('exercise-files').getPublicUrl(path);
-    await _supabase.from('exercises').insert([{
-        class: document.getElementById("aClass").value,
-        subject: document.getElementById("aSubject").value,
-        title: title,
-        file_url: urlData.publicUrl,
-        file_type: file.type.startsWith("image") ? "img" : "doc"
-    }]);
-    alert("Envoyé !");
-    location.reload();
+    try {
+        // Nettoyage du nom pour éviter l'erreur "Invalid Key"
+        const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+        const path = `${curClass}/${Date.now()}_${cleanName}`;
+
+        const { data: upData, error: upErr } = await _supabase.storage.from('exercise-files').upload(path, file);
+        if(upErr) throw upErr;
+
+        const { data: urlData } = _supabase.storage.from('exercise-files').getPublicUrl(path);
+
+        // Insertion avec file_path pour corriger l'erreur de colonne NULL
+        const { error: dbError } = await _supabase.from('exercises').insert([{
+            class: document.getElementById("aClass").value,
+            subject: document.getElementById("aSubject").value,
+            title: title,
+            file_url: urlData.publicUrl,
+            file_path: path,
+            file_type: file.type.startsWith("image") ? "img" : "doc"
+        }]);
+
+        if(dbError) throw dbError;
+        alert("Succès !");
+        location.reload();
+    } catch(err) {
+        alert("Erreur : " + err.message);
+        btn.innerText = "🚀 Envoyer l'exercice";
+        btn.disabled = false;
+    }
 }
 
-// Init Admin menus
+// Initialisation menus admin
 const cSel = document.getElementById("aClass");
 const sSel = document.getElementById("aSubject");
-classesList.forEach(c => { let o = new Option(c,c); cSel.add(o); });
-matieres.forEach(m => { let o = new Option(m,m); sSel.add(o); });
+classesList.forEach(c => { cSel.add(new Option(c,c)); });
+matieres.forEach(m => { sSel.add(new Option(m,m)); });
 
-document.getElementById("adminIcon").onclick = () => document.getElementById("adminModal").style.display="flex";
-  async function addExercise() {
-  const file = document.getElementById("aFile").files[0];
-  const title = document.getElementById("aTitle").value;
-  const btn = document.getElementById("uploadBtn");
-
-  if (!file || !title) return alert("Remplis le titre et le fichier !");
-
-  // On enlève les espaces et caractères bizarres du nom du fichier
-  const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-  const path = `${curClass}/${Date.now()}_${cleanName}`;
-
-  btn.innerText = "⏳ Envoi...";
-  btn.disabled = true;
-
-  try {
-    // Envoi au Storage
-    const { data: upData, error: upError } = await _supabase.storage
-      .from('exercise-files')
-      .upload(path, file);
-
-    if (upError) throw upError;
-
-    // Lien Public
-    const { data: urlData } = _supabase.storage.from('exercise-files').getPublicUrl(path);
-
-    // Enregistrement Table
-    const { error: dbError } = await _supabase.from('exercises').insert([{
-      class: document.getElementById("aClass").value,
-      subject: document.getElementById("aSubject").value,
-      title: title,
-      file_url: urlData.publicUrl,
-      file_type: file.type.startsWith("image") ? "img" : "doc"
-    }]);
-
-    if (dbError) throw dbError;
-
-    alert("Exercice ajouté avec succès !");
-    location.reload();
-
-  } catch (err) {
-    alert("Erreur : " + err.message);
-    btn.innerText = "Envoyer";
-    btn.disabled = false;
-  }
-}
-
-
-// Lancement forcé
 window.onload = loadClasses;
 </script>
 </body>
