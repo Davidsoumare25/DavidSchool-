@@ -3,83 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro v9</title>
+    <title>DavidSchool Pro v10</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #6a00ff; --secondary: #1e90ff; --bg: #f2f4f8; --text: #222; --new: #2ecc71; --card-bg: #ffffff; }
-        @media (prefers-color-scheme: dark) {
-            :root { --bg: #121212; --text: #ffffff; --card-bg: #1e1e1e; }
-        }
+        :root { --primary: #6a00ff; --secondary: #1e90ff; --bg: #f2f4f8; --text: #222; --new: #2ecc71; --card-bg: #ffffff; --fav: #ff4757; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #121212; --text: #ffffff; --card-bg: #1e1e1e; } }
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: var(--text); transition: 0.3s; }
+        body { margin: 0; background: var(--bg); color: var(--text); transition: 0.3s; padding-bottom: 50px; }
 
         /* SPLASH SCREEN */
         #splash { position: fixed; inset: 0; background: linear-gradient(135deg, #1e004e, #6a00ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: 0.8s; }
         .splash-logo { width: 100px; height: 100px; border-radius: 20px; background: white; padding: 5px; object-fit: contain; }
 
-        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 40px 20px; text-align: center; position: relative; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .admin-trigger { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: 1px solid white; padding: 8px 15px; border-radius: 20px; font-size: 11px; cursor: pointer; }
         
-        #news-bar { background: #ff4757; color: white; padding: 12px; font-weight: bold; text-align: center; overflow: hidden; }
+        #news-bar { background: var(--fav); color: white; padding: 12px; font-weight: bold; text-align: center; overflow: hidden; }
         .news-text { display: inline-block; animation: scroll 15s linear infinite; white-space: nowrap; }
         @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
 
-        .search-area { padding: 15px; display: none; max-width: 500px; margin: auto; }
-        #searchBox { width: 100%; padding: 15px 20px; border-radius: 15px; border: 1px solid #ddd; outline: none; font-size: 16px; background: var(--card-bg); color: var(--text); }
+        .search-area { padding: 15px; display: none; max-width: 500px; margin: auto; flex-direction: column; gap: 10px; }
+        #searchBox { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #ddd; background: var(--card-bg); color: var(--text); }
 
         .grid { display: flex; flex-direction: column; gap: 15px; padding: 20px; max-width: 500px; margin: auto; }
-        .card { padding: 20px; border-radius: 20px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); cursor: pointer; position: relative; box-shadow: 0 4px 15px rgba(106, 0, 255, 0.2); }
+        .card { padding: 20px; border-radius: 20px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); cursor: pointer; position: relative; box-shadow: 0 4px 15px rgba(106,0,255,0.2); transition: 0.2s; }
+        .card:active { transform: scale(0.98); }
         .card-count { font-size: 11px; opacity: 0.8; font-weight: normal; margin-top: 5px; display: block; }
         
         .dot-new { position: absolute; top: 12px; right: 12px; width: 10px; height: 10px; background: var(--new); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px var(--new); }
 
-        .exo-item { background: var(--card-bg); color: var(--text); padding: 20px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.1); }
-        .type-badge { font-size: 10px; background: #eee; color: #333; padding: 3px 8px; border-radius: 5px; margin-bottom: 8px; display: inline-block; }
+        .exo-item { background: var(--card-bg); padding: 20px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.1); position: relative; }
+        .fav-btn { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; }
 
-        .btn-back { display: none; width: 80%; max-width: 200px; margin: 15px auto; padding: 12px; border-radius: 15px; border: 2px solid #6a00ff; background: transparent; color: #6a00ff; font-weight: bold; cursor: pointer; }
-
-        .action-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-action { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 13px; transition: 0.2s; }
+        .action-btns { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+        .btn-action { flex: 1; min-width: 100px; padding: 12px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 12px; }
         
-        /* ADMIN FORM */
+        /* ADMIN */
         #admin-page { display: none; padding: 20px; background: var(--bg); min-height: 100vh; }
-        .admin-card { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ccc; font-size: 16px; background: var(--card-bg); color: var(--text); }
-        .btn-p { width: 100%; padding: 15px; background: #6a00ff; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .admin-card { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; }
+        .btn-p { width: 100%; padding: 15px; background: #6a00ff; color: white; border: none; border-radius: 12px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="splash">
         <img src="https://lqevweyhxkvnckhtfpwh.supabase.co/storage/v1/object/public/exercise-files/1769899198248.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/167/167707.png'" class="splash-logo">
-        <div style="width: 30px; height: 30px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin-top:20px;"></div>
+        <div class="loader" style="width:30px; height:30px; border:3px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:scroll 1s linear infinite; margin-top:20px;"></div>
     </div>
 
     <div id="user-page">
-        <header><div class="admin-trigger" onclick="showAdmin()">⚙️ Gérer</div><h1 style="margin:0; font-size: 24px;">DavidSchool</h1></header>
-        <div id="news-bar"><div class="news-text" id="newsMsg">Chargement des actus...</div></div>
-        <div class="search-area" id="searchArea"><input type="text" id="searchBox" placeholder="🔍 Rechercher un cours..." onkeyup="filterExos()"></div>
+        <header><div class="admin-trigger" onclick="showAdmin()">⚙️ Gérer</div><h1 style="margin:0">DavidSchool</h1></header>
+        <div id="news-bar"><div class="news-text" id="newsMsg">Initialisation...</div></div>
+        
+        <div class="search-area" id="searchArea">
+            <input type="text" id="searchBox" placeholder="🔍 Rechercher un titre..." onkeyup="filterExos()">
+            <select id="typeFilter" onchange="filterExos()" style="padding:10px; border-radius:10px; border:1px solid #ddd; background:var(--card-bg); color:var(--text);">
+                <option value="all">Tous les formats</option>
+                <option value="pdf">Uniquement PDF</option>
+                <option value="img">Uniquement Images</option>
+            </select>
+        </div>
+
         <main id="content" class="grid"></main>
         <center><button id="backBtn" class="btn-back" onclick="goBack()">⬅️ Retour</button></center>
     </div>
 
     <div id="admin-page">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="margin:0">Admin</h2><button onclick="hideAdmin()" style="border:none; background:none; font-weight:bold; color:red;">Fermer</button>
+            <h2 style="margin:0">Espace Admin</h2><button onclick="hideAdmin()" style="border:none; color:red; background:none; font-weight:bold;">Fermer</button>
         </div>
         <div id="auth-area" class="admin-card">
-            <input type="password" id="pass" placeholder="Code secret"><button class="btn-p" onclick="login()">Accéder</button>
+            <input type="password" id="pass" placeholder="Code secret" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px;"><button class="btn-p" onclick="login()">Se connecter</button>
         </div>
         <div id="admin-tools" style="display:none">
             <div class="admin-card">
-                <h3>📢 Annonce</h3>
+                <h3>📢 Modifier l'Annonce</h3>
                 <input id="newAnn" placeholder="Votre message..."><button class="btn-p" onclick="updateAnn()">Mettre à jour</button>
             </div>
             <div class="admin-card">
-                <h3 id="form-title">📤 Publier un cours</h3>
+                <h3 id="form-title">📤 Publication</h3>
                 <select id="aClass"></select><select id="aSub"></select>
-                <input id="aTitle" placeholder="Titre">
-                <input type="file" id="aFile">
+                <input id="aTitle" placeholder="Titre du cours">
+                <input type="file" id="aFile" style="margin:10px 0;">
                 <input type="hidden" id="edit-id">
                 <button class="btn-p" id="upBtn" onclick="handleUpload()">🚀 Valider</button>
                 <button class="btn-p" id="cancelBtn" style="display:none; background:#888; margin-top:10px;" onclick="resetForm()">Annuler</button>
@@ -96,11 +101,11 @@
     const CLASSES = ["6e", "5e", "4e", "3e"];
     const SUBS = ["MATH", "PHYSIQUE-CHIMIE", "SVT", "HISTOIRE-GÉO", "FRANÇAIS"];
     let step = "classes", curC = "", curS = "", allExos = [], globalData = [];
+    let favorites = JSON.parse(localStorage.getItem('davidschool_favs')) || [];
 
     window.onload = async () => {
         initSelectors(); fetchAnn(); await fetchGlobalData(); renderClasses();
-        setTimeout(() => document.getElementById('splash').style.opacity = '0', 2000);
-        setTimeout(() => document.getElementById('splash').style.display = 'none', 2800);
+        setTimeout(() => { document.getElementById('splash').style.opacity = '0'; setTimeout(() => document.getElementById('splash').style.display = 'none', 800); }, 2000);
     };
 
     async function fetchGlobalData() {
@@ -110,13 +115,28 @@
 
     function isNew(date) { return (new Date() - new Date(date)) < (24 * 60 * 60 * 1000); }
 
+    function toggleFav(id) {
+        if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+        else favorites.push(id);
+        localStorage.setItem('davidschool_favs', JSON.stringify(favorites));
+        display(allExos);
+    }
+
+    async function shareExo(title, url) {
+        if (navigator.share) {
+            navigator.share({ title: title, text: 'Regarde ce cours sur DavidSchool !', url: url });
+        } else {
+            alert("Lien copié : " + url);
+        }
+    }
+
     function renderClasses() {
         step = "classes"; document.getElementById('backBtn').style.display='none'; document.getElementById('searchArea').style.display='none';
         const c = document.getElementById('content'); c.innerHTML = "";
         CLASSES.forEach(cl => {
             const count = globalData.filter(d => d.class === cl).length;
             let b = document.createElement('button'); b.className="card";
-            b.innerHTML = `Classe de ${cl} <span class="card-count">${count} documents</span>`;
+            b.innerHTML = `Classe de ${cl} <span class="card-count">${count} cours</span>`;
             if(globalData.some(d => d.class === cl && isNew(d.created_at))) b.innerHTML += `<div class="dot-new"></div>`;
             b.onclick = () => { curC=cl; renderSubs(); }; c.appendChild(b);
         });
@@ -128,62 +148,62 @@
         SUBS.forEach(s => {
             const count = globalData.filter(d => d.class === curC && d.subject === s).length;
             let b = document.createElement('button'); b.className="card";
-            b.innerHTML = `${s} <span class="card-count">${count} documents</span>`;
+            b.innerHTML = `${s} <span class="card-count">${count} cours</span>`;
             if(globalData.some(d => d.class === curC && d.subject === s && isNew(d.created_at))) b.innerHTML += `<div class="dot-new"></div>`;
             b.onclick = () => { curS=s; renderExos(); }; c.appendChild(b);
         });
     }
 
     async function renderExos() {
-        step = "exos"; document.getElementById('searchArea').style.display='block';
+        step = "exos"; document.getElementById('searchArea').style.display='flex';
         const c = document.getElementById('content'); c.innerHTML = "Chargement...";
         const { data } = await _db.from('exercises').select('*').eq('class', curC).eq('subject', curS).order('created_at', {ascending: false});
         allExos = data || []; display(allExos);
     }
 
     function display(list) {
-        const c = document.getElementById('content'); c.innerHTML = list.length ? "" : "Aucun cours ici.";
+        const c = document.getElementById('content'); c.innerHTML = list.length ? "" : "Aucun cours.";
         list.forEach(e => {
             let d = document.createElement('div'); d.className="exo-item";
-            const type = e.file_type === 'img' ? 'IMAGE' : 'PDF';
-            d.innerHTML = `<span class="type-badge">${type}</span><br><b>${e.title}</b>`;
-            if(isNew(e.created_at)) d.innerHTML += ` <span style="color:var(--new); font-size:10px;">★ Nouveau</span>`;
-            
-            if(e.file_type==='img') d.innerHTML += `<img src="${e.file_url}" style="width:100%; border-radius:10px; margin-top:10px;">`;
-            
-            d.innerHTML += `<div class="action-btns">
-                <a href="${e.file_url}" target="_blank" class="btn-action" style="background:#6a00ff; color:white;">👁️ Ouvrir</a>
-                <button onclick="downloadFile('${e.file_url}', '${e.title}')" class="btn-action" style="background:#eee; color:#333;">📥 Télécharger</button>
-            </div>`;
+            const isFaved = favorites.includes(e.id);
+            d.innerHTML = `
+                <span class="fav-btn" onclick="toggleFav('${e.id}')">${isFaved ? '❤️' : '🤍'}</span>
+                <small>${e.file_type.toUpperCase()}</small><br><b>${e.title}</b>
+                ${e.file_type === 'img' ? `<img src="${e.file_url}" style="width:100%; border-radius:10px; margin-top:10px;">` : ''}
+                <div class="action-btns">
+                    <a href="${e.file_url}" target="_blank" class="btn-action" style="background:#6a00ff; color:white;">👁️ Ouvrir</a>
+                    <button onclick="downloadFile('${e.file_url}', '${e.title}')" class="btn-action" style="background:#eee; color:#333;">📥 Télécharger</button>
+                    <button onclick="shareExo('${e.title}', '${e.file_url}')" class="btn-action" style="background:#25D366; color:white;">🔗 Partager</button>
+                </div>`;
             c.appendChild(d);
         });
     }
 
-    // FONCTION FORCE TÉLÉCHARGEMENT
     async function downloadFile(url, filename) {
         try {
-            const response = await fetch(url);
-            const blob = await response.blob();
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (e) {
-            window.open(url, '_blank'); // Backup si erreur
-        }
+            const res = await fetch(url); const blob = await res.blob();
+            const a = document.createElement('a'); a.href = window.URL.createObjectURL(blob);
+            a.download = filename; a.click();
+        } catch (e) { window.open(url, '_blank'); }
     }
 
-    // --- ADMIN ---
+    function filterExos() {
+        const q = document.getElementById('searchBox').value.toLowerCase();
+        const type = document.getElementById('typeFilter').value;
+        let filtered = allExos.filter(x => x.title.toLowerCase().includes(q));
+        if(type !== 'all') filtered = filtered.filter(x => x.file_type === type);
+        display(filtered);
+    }
+
+    // --- ADMIN LOGIC ---
     async function handleUpload() {
         const editId = document.getElementById('edit-id').value;
         const f = document.getElementById('aFile').files[0];
         const t = document.getElementById('aTitle').value;
-        if(!t) return alert("Titre requis");
-        const btn = document.getElementById('upBtn'); btn.innerText = "Traitement...";
+        if(!t) return alert("Titre manquant");
+        const btn = document.getElementById('upBtn'); btn.innerText = "⏳ En cours...";
         try {
-            let url = null, path = null, type = null;
+            let url=null, path=null, type=null;
             if(f) {
                 path = Date.now() + "_" + f.name.replace(/[^\w.]/g, "_");
                 await _db.storage.from('exercise-files').upload(path, f);
@@ -197,14 +217,13 @@
             } else {
                 await _db.from('exercises').insert([{ class:document.getElementById('aClass').value, subject:document.getElementById('aSub').value, title:t, file_url:url, file_path:path, file_type:type }]);
             }
-            alert("Réussi !"); await fetchGlobalData(); resetForm(); refreshList();
+            alert("Effectué !"); await fetchGlobalData(); resetForm(); refreshList();
         } catch(e) { alert(e.message); }
         btn.innerText = "🚀 Valider";
     }
 
-    async function fetchAnn(){const {data}=await _db.from('settings').select('value').eq('key','announcement').maybeSingle();document.getElementById('newsMsg').innerText=data?data.value:"DavidSchool : Vos cours en ligne";}
-    async function updateAnn(){const v=document.getElementById('newAnn').value;await _db.from('settings').upsert({key:'announcement',value:v},{onConflict:'key'});alert("Annonce OK");document.getElementById('newsMsg').innerText=v}
-    function filterExos(){const q=document.getElementById('searchBox').value.toLowerCase();display(allExos.filter(x=>x.title.toLowerCase().includes(q)))}
+    async function fetchAnn(){const {data}=await _db.from('settings').select('value').eq('key','announcement').maybeSingle();document.getElementById('newsMsg').innerText=data?data.value:"Bienvenue !"}
+    async function updateAnn(){const v=document.getElementById('newAnn').value;await _db.from('settings').upsert({key:'announcement',value:v},{onConflict:'key'});alert("OK");document.getElementById('newsMsg').innerText=v}
     function goBack(){if(step==="exos")renderSubs();else renderClasses()}
     function showAdmin(){document.getElementById('user-page').style.display='none';document.getElementById('admin-page').style.display='block'}
     function hideAdmin(){document.getElementById('admin-page').style.display='none';document.getElementById('user-page').style.display='block';renderClasses()}
@@ -213,7 +232,7 @@
     async function refreshList(){const {data}=await _db.from('exercises').select('*').order('created_at',{ascending:false});const l=document.getElementById('adminList');l.innerHTML="<h4>Gestion :</h4>";data.forEach(e=>{l.innerHTML+=`<div style="padding:10px; border-bottom:1px solid #eee;"><b>${e.title}</b><br><button onclick="prepareEdit('${e.id}','${e.title}','${e.class}','${e.subject}')" style="color:orange; border:none; background:none;">Modifier</button> | <button onclick="del('${e.id}','${e.file_path}')" style="color:red; border:none; background:none;">Supprimer</button></div>`})}
     function prepareEdit(id,t,cl,s){document.getElementById('edit-id').value=id;document.getElementById('aTitle').value=t;document.getElementById('aClass').value=cl;document.getElementById('aSub').value=s;document.getElementById('form-title').innerText="📝 Modification";document.getElementById('cancelBtn').style.display="block";window.scrollTo(0,0)}
     function resetForm(){document.getElementById('edit-id').value="";document.getElementById('aTitle').value="";document.getElementById('aFile').value="";document.getElementById('form-title').innerText="📤 Publication";document.getElementById('cancelBtn').style.display="none"}
-    async function del(id,p){if(confirm("Supprimer ?")){await _db.from('exercises').delete().eq('id',id);if(p)await _db.storage.from('exercise-files').remove([p]);refreshList();fetchGlobalData()}}
+    async function del(id,p){if(confirm("Attention : Supprimer définitivement ce cours ?")){await _db.from('exercises').delete().eq('id',id);if(p)await _db.storage.from('exercise-files').remove([p]);refreshList();fetchGlobalData()}}
 </script>
 </body>
 </html>
