@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro v4</title>
+    <title>DavidSchool Pro v7</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --primary: #6a00ff; --secondary: #1e90ff; --bg: #f2f4f8; --text: #222; }
@@ -12,11 +12,10 @@
 
         /* SPLASH SCREEN */
         #splash { position: fixed; inset: 0; background: linear-gradient(135deg, #1e004e, #6a00ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: 0.8s ease-in-out; }
-        .splash-logo { width: 100px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
-        .loader { width: 35px; height: 35px; border: 4px solid rgba(255,255,255,0.2); border-top: 4px solid #00f2ff; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .splash-logo { width: 100px; height: 100px; border-radius: 20px; background: white; padding: 5px; object-fit: contain; }
+        .loader { width: 35px; height: 35px; border: 4px solid rgba(255,255,255,0.2); border-top: 4px solid #00f2ff; border-radius: 50%; animation: spin 1s linear infinite; margin-top: 20px; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* HEADER & NEWS */
         header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 40px 20px; text-align: center; position: relative; }
         .admin-trigger { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: 1px solid white; padding: 8px 15px; border-radius: 20px; font-size: 12px; cursor: pointer; color: white; }
         
@@ -34,13 +33,19 @@
         #admin-page { display: none; min-height: 100vh; background: white; padding: 20px; color: #333; }
         .admin-card { background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; }
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-        .btn-p { width: 100%; padding: 15px; background: #6a00ff; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-p { width: 100%; padding: 15px; background: #6a00ff; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        /* APERÇU */
+        #preview-container { margin: 10px 0; display: none; text-align: center; background: #eee; padding: 10px; border-radius: 10px; }
+        #preview-img { max-width: 100%; max-height: 150px; border-radius: 8px; display: none; margin: auto; }
+        #preview-pdf { font-size: 40px; display: none; }
     </style>
 </head>
 <body>
 
     <div id="splash">
-        <img src="https://lqevweyhxkvnckhtfpwh.supabase.co/storage/v1/object/public/exercise-files/1769899198248.png" class="splash-logo">
+        <img src="https://lqevweyhxkvnckhtfpwh.supabase.co/storage/v1/object/public/exercise-files/1769899198248.png" 
+             onerror="this.src='https://cdn-icons-png.flaticon.com/512/167/167707.png'" class="splash-logo">
         <div class="loader"></div>
     </div>
 
@@ -54,23 +59,37 @@
 
     <div id="admin-page">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>Admin</h2><button onclick="hideAdmin()">🏠 Retour</button>
+            <h2>Espace Admin</h2><button onclick="hideAdmin()">🏠 Quitter</button>
         </div>
+        
         <div id="auth-area" class="admin-card">
             <input type="password" id="pass" placeholder="Code secret"><button class="btn-p" onclick="login()">Entrer</button>
         </div>
+
         <div id="admin-tools" style="display:none">
             <div class="admin-card">
-                <h3>📢 Modifier l'annonce</h3>
+                <h3>📢 Annonce</h3>
                 <input id="newAnn" placeholder="Texte de l'annonce">
                 <button class="btn-p" onclick="updateAnn()">Mettre à jour</button>
             </div>
+            
             <div class="admin-card">
-                <h3>📤 Publier un cours</h3>
+                <h3 id="form-title">📤 Publier / Modifier</h3>
                 <select id="aClass"></select><select id="aSub"></select>
-                <input id="aTitle" placeholder="Titre"><input type="file" id="aFile">
-                <button class="btn-p" id="upBtn" onclick="uploadExo()">🚀 Publier</button>
+                <input id="aTitle" placeholder="Titre du cours">
+                
+                <div id="preview-container">
+                    <p style="font-size:10px; margin:0 0 5px 0;">APERÇU DU DOCUMENT :</p>
+                    <img id="preview-img" src="">
+                    <div id="preview-pdf">📄<br><small style="font-size:12px;">Document PDF</small></div>
+                </div>
+
+                <input type="file" id="aFile" onchange="showPreview(this)">
+                <input type="hidden" id="edit-id">
+                <button class="btn-p" id="upBtn" onclick="handleUpload()">🚀 Valider</button>
+                <button class="btn-p" id="cancelBtn" style="display:none; background:#777;" onclick="resetForm()">Annuler</button>
             </div>
+
             <div id="adminList"></div>
         </div>
     </div>
@@ -85,45 +104,18 @@
     let step = "classes", curC = "", curS = "", allExos = [];
 
     window.onload = () => {
-        initAdmin();
-        fetchAnn();
-        renderClasses();
+        initSelectors(); fetchAnn(); renderClasses();
         setTimeout(() => document.getElementById('splash').style.transform = 'translateY(-100%)', 2500);
     };
 
+    // --- LOGIQUE CORE ---
     async function fetchAnn() {
-    // On force la lecture de la colonne 'value'
-    const { data } = await _db.from('settings').select('value').eq('key', 'announcement').maybeSingle();
-    
-    const msgElement = document.getElementById('newsMsg');
-    if (data && data.value) {
-        msgElement.innerText = data.value;
-    } else {
-        msgElement.innerText = "Bienvenue sur DavidSchool !";
+        const { data } = await _db.from('settings').select('value').eq('key', 'announcement').maybeSingle();
+        document.getElementById('newsMsg').innerText = data ? data.value : "Bienvenue sur DavidSchool !";
     }
-}
-
-async function updateAnn() {
-    const v = document.getElementById('newAnn').value;
-    if(!v) return alert("Écrivez quelque chose !");
-
-    // L'upsert permet de créer ou de remplacer l'annonce existante
-    const { error } = await _db.from('settings').upsert({key:'announcement', value:v}, {onConflict: 'key'});
-    
-    if (error) {
-        alert("Erreur : " + error.message);
-    } else {
-        alert("Annonce mise à jour !");
-        // MISE À JOUR VISUELLE IMMÉDIATE
-        document.getElementById('newsMsg').innerText = v;
-        document.getElementById('newAnn').value = "";
-    }
-}
-
 
     function renderClasses() {
-        step = "classes"; document.getElementById('backBtn').style.display='none';
-        document.getElementById('searchArea').style.display='none';
+        step = "classes"; document.getElementById('backBtn').style.display='none'; document.getElementById('searchArea').style.display='none';
         const c = document.getElementById('content'); c.innerHTML = "";
         CLASSES.forEach(cl => {
             let b = document.createElement('button'); b.className="card"; b.innerText="Classe de "+cl;
@@ -144,68 +136,128 @@ async function updateAnn() {
         step = "exos"; document.getElementById('searchArea').style.display='block';
         const c = document.getElementById('content'); c.innerHTML = "Chargement...";
         const { data } = await _db.from('exercises').select('*').eq('class', curC).eq('subject', curS);
-        allExos = data || [];
-        display(allExos);
+        allExos = data || []; display(allExos);
     }
 
     function display(list) {
         const c = document.getElementById('content'); c.innerHTML = list.length ? "" : "Aucun cours.";
         list.forEach(e => {
             let d = document.createElement('div'); d.className="card"; d.style.background="#333";
-            let url = e.file_url.split('?')[0];
             d.innerHTML = `<b>${e.title}</b><br>`;
-            if(e.file_type==='img') d.innerHTML += `<img src="${url}" style="width:100%; border-radius:10px; margin-top:10px;">`;
-            else d.innerHTML += `<a href="${url}" target="_blank" style="color:#00f2ff; display:block; margin-top:10px; text-decoration:none;">📂 Ouvrir</a>`;
+            if(e.file_type==='img') d.innerHTML += `<img src="${e.file_url}" style="width:100%; border-radius:10px; margin-top:10px;">`;
+            else d.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:#00f2ff; display:block; margin-top:10px; text-decoration:none;">📂 Ouvrir le document</a>`;
             c.appendChild(d);
         });
+    }
+
+    // --- LOGIQUE ADMIN ---
+    function showPreview(input) {
+        const container = document.getElementById('preview-container');
+        const img = document.getElementById('preview-img');
+        const pdf = document.getElementById('preview-pdf');
+        
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            container.style.display = "block";
+            
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = e => { img.src = e.target.result; img.style.display="block"; pdf.style.display="none"; };
+                reader.readAsDataURL(file);
+            } else {
+                img.style.display="none"; pdf.style.display="block";
+            }
+        }
+    }
+
+    async function handleUpload() {
+        const editId = document.getElementById('edit-id').value;
+        const f = document.getElementById('aFile').files[0];
+        const t = document.getElementById('aTitle').value;
+        if(!t) return alert("Titre requis !");
+        
+        const btn = document.getElementById('upBtn'); btn.innerText = "...";
+        let finalUrl = null, finalPath = null, type = null;
+
+        try {
+            if(f) {
+                finalPath = Date.now() + "_" + f.name.replace(/[^\w.]/g, "_");
+                await _db.storage.from('exercise-files').upload(finalPath, f);
+                const { data: u } = _db.storage.from('exercise-files').getPublicUrl(finalPath);
+                finalUrl = u.publicUrl;
+                type = f.type.startsWith('image') ? 'img' : 'pdf';
+            }
+
+            if(editId) {
+                let upData = { title:t, class:document.getElementById('aClass').value, subject:document.getElementById('aSub').value };
+                if(finalUrl) { upData.file_url=finalUrl; upData.file_path=finalPath; upData.file_type=type; }
+                await _db.from('exercises').update(upData).eq('id', editId);
+                alert("Modifié !");
+            } else {
+                if(!f) throw new Error("Fichier requis !");
+                await _db.from('exercises').insert([{ class:document.getElementById('aClass').value, subject:document.getElementById('aSub').value, title:t, file_url:finalUrl, file_path:finalPath, file_type:type }]);
+                alert("Publié !");
+            }
+            resetForm(); refreshList();
+        } catch(e) { alert(e.message); }
+        btn.innerText = "🚀 Valider";
+    }
+
+    function prepareEdit(id, title, cl, sub, url, type) {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('aTitle').value = title;
+        document.getElementById('aClass').value = cl;
+        document.getElementById('aSub').value = sub;
+        
+        // Aperçu de l'ancien doc
+        const container = document.getElementById('preview-container');
+        container.style.display = "block";
+        if(type === 'img') {
+            document.getElementById('preview-img').src = url;
+            document.getElementById('preview-img').style.display = "block";
+            document.getElementById('preview-pdf').style.display = "none";
+        } else {
+            document.getElementById('preview-img').style.display = "none";
+            document.getElementById('preview-pdf').style.display = "block";
+        }
+
+        document.getElementById('form-title').innerText = "📝 Modifier";
+        document.getElementById('cancelBtn').style.display = "block";
+        window.scrollTo(0,0);
+    }
+
+    async function refreshList() {
+        const { data } = await _db.from('exercises').select('*').order('created_at',{ascending:false});
+        const l = document.getElementById('adminList'); l.innerHTML = "<h4>Vos cours :</h4>";
+        data.forEach(e => {
+            l.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;">
+                <b>${e.title}</b><br>
+                <button onclick="prepareEdit('${e.id}','${e.title}','${e.class}','${e.subject}','${e.file_url}','${e.file_type}')" style="color:orange; border:none; background:none; cursor:pointer;">Modifier</button> | 
+                <button onclick="del('${e.id}','${e.file_path}')" style="color:red; border:none; background:none; cursor:pointer;">Supprimer</button>
+            </div>`;
+        });
+    }
+
+    function resetForm() {
+        document.getElementById('edit-id').value = ""; document.getElementById('aTitle').value = ""; document.getElementById('aFile').value = "";
+        document.getElementById('preview-container').style.display = "none";
+        document.getElementById('form-title').innerText = "📤 Publier";
+        document.getElementById('cancelBtn').style.display = "none";
+    }
+
+    async function updateAnn() {
+        const v = document.getElementById('newAnn').value;
+        await _db.from('settings').upsert({key:'announcement', value:v}, {onConflict: 'key'});
+        alert("Annonce OK"); document.getElementById('newsMsg').innerText = v;
     }
 
     function filterExos() { display(allExos.filter(x => x.title.toLowerCase().includes(document.getElementById('searchBox').value.toLowerCase()))); }
     function goBack() { if(step==="exos") renderSubs(); else renderClasses(); }
     function showAdmin() { document.getElementById('user-page').style.display='none'; document.getElementById('admin-page').style.display='block'; }
     function hideAdmin() { document.getElementById('admin-page').style.display='none'; document.getElementById('user-page').style.display='block'; renderClasses(); }
-    function initAdmin() { CLASSES.forEach(cl => document.getElementById('aClass').add(new Option(cl,cl))); SUBS.forEach(s => document.getElementById('aSub').add(new Option(s,s))); }
+    function initSelectors() { CLASSES.forEach(cl => document.getElementById('aClass').add(new Option(cl,cl))); SUBS.forEach(s => document.getElementById('aSub').add(new Option(s,s))); }
     function login() { if(document.getElementById('pass').value==="1234") { document.getElementById('auth-area').style.display='none'; document.getElementById('admin-tools').style.display='block'; refreshList(); } }
-
-    async function updateAnn() {
-    const v = document.getElementById('newAnn').value;
-    
-    // On envoie à Supabase
-    const { error } = await _db.from('settings').upsert({key:'announcement', value:v}, {onConflict: 'key'});
-    
-    if (error) {
-        alert("Erreur Supabase : " + error.message);
-    } else {
-        alert("Annonce mise à jour !");
-        // CETTE LIGNE CI-DESSOUS FORCE L'AFFICHAGE IMMÉDIAT
-        document.getElementById('newsMsg').innerText = v;
-        // On vide le champ de texte
-        document.getElementById('newAnn').value = "";
-    }
-}
-// Recharge l'annonce immédiatement
-
-    async function uploadExo() {
-        const f = document.getElementById('aFile').files[0];
-        const t = document.getElementById('aTitle').value;
-        if(!f || !t) return alert("Remplissez tout !");
-        document.getElementById('upBtn').innerText = "...";
-        const path = Date.now() + "_" + f.name.replace(/[^\w.]/g, "_");
-        await _db.storage.from('exercise-files').upload(path, f);
-        const { data: u } = _db.storage.from('exercise-files').getPublicUrl(path);
-        await _db.from('exercises').insert([{class:document.getElementById('aClass').value, subject:document.getElementById('aSub').value, title:t, file_url:u.publicUrl, file_path:path, file_type:f.type.startsWith('image')?'img':'pdf'}]);
-        alert("Publié !");
-        document.getElementById('upBtn').innerText = "🚀 Publier";
-        refreshList(); // Met à jour la liste admin
-    }
-
-    async function refreshList() {
-        const { data } = await _db.from('exercises').select('*').order('created_at',{ascending:false});
-        const l = document.getElementById('adminList'); l.innerHTML = "<h4>Vos cours :</h4>";
-        data.forEach(e => { l.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>${e.title}</span><button onclick="del('${e.id}','${e.file_path}')" style="color:red; border:none; background:none;">X</button></div>`; });
-    }
-
-    async function del(id, path) { if(confirm("Supprimer ?")) { await _db.from('exercises').delete().eq('id', id); await _db.storage.from('exercise-files').remove([path]); refreshList(); } }
+    async function del(id, path) { if(confirm("Supprimer ?")) { await _db.from('exercises').delete().eq('id', id); if(path) await _db.storage.from('exercise-files').remove([path]); refreshList(); } }
 </script>
 </body>
 </html>
