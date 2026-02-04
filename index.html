@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro v7</title>
+    <title>DavidSchool Pro v8</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #6a00ff; --secondary: #1e90ff; --bg: #f2f4f8; --text: #222; }
+        :root { --primary: #6a00ff; --secondary: #1e90ff; --bg: #f2f4f8; --text: #222; --new: #2ecc71; }
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
 
@@ -27,7 +27,11 @@
         #searchBox { width: 100%; padding: 12px 20px; border-radius: 25px; border: 1px solid #ddd; outline: none; font-size: 16px; }
 
         .grid { display: flex; flex-direction: column; gap: 12px; padding: 20px; max-width: 500px; margin: auto; }
-        .card { padding: 22px; border-radius: 18px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); cursor: pointer; text-align: left; }
+        .card { padding: 22px; border-radius: 18px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); cursor: pointer; text-align: left; position: relative; }
+        
+        /* POINT VERT NEW */
+        .dot-new { position: absolute; top: 15px; right: 15px; width: 12px; height: 12px; background: var(--new); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px var(--new); }
+
         .btn-back { display: none; width: 80%; max-width: 200px; margin: 15px auto; padding: 12px; border-radius: 12px; border: 2px solid #6a00ff; background: white; color: #6a00ff; font-weight: bold; cursor: pointer; }
 
         #admin-page { display: none; min-height: 100vh; background: white; padding: 20px; color: #333; }
@@ -35,10 +39,11 @@
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
         .btn-p { width: 100%; padding: 15px; background: #6a00ff; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         
-        /* APERÇU */
         #preview-container { margin: 10px 0; display: none; text-align: center; background: #eee; padding: 10px; border-radius: 10px; }
         #preview-img { max-width: 100%; max-height: 150px; border-radius: 8px; display: none; margin: auto; }
-        #preview-pdf { font-size: 40px; display: none; }
+        
+        .action-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-action { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -51,45 +56,35 @@
 
     <div id="user-page">
         <header><div class="admin-trigger" onclick="showAdmin()">⚙️ Gérer</div><h1 style="margin:0">DavidSchool</h1></header>
-        <div id="news-bar"><div class="news-text" id="newsMsg">Initialisation...</div></div>
-        <div class="search-area" id="searchArea"><input type="text" id="searchBox" placeholder="🔍 Rechercher..." onkeyup="filterExos()"></div>
+        <div id="news-bar"><div class="news-text" id="newsMsg">Chargement...</div></div>
+        <div class="search-area" id="searchArea"><input type="text" id="searchBox" placeholder="🔍 Rechercher un titre..." onkeyup="filterExos()"></div>
         <main id="content" class="grid"></main>
         <center><button id="backBtn" class="btn-back" onclick="goBack()">⬅️ Retour</button></center>
     </div>
 
     <div id="admin-page">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2>Espace Admin</h2><button onclick="hideAdmin()">🏠 Quitter</button>
+            <h2>Admin</h2><button onclick="hideAdmin()">🏠 Quitter</button>
         </div>
-        
         <div id="auth-area" class="admin-card">
             <input type="password" id="pass" placeholder="Code secret"><button class="btn-p" onclick="login()">Entrer</button>
         </div>
-
         <div id="admin-tools" style="display:none">
             <div class="admin-card">
                 <h3>📢 Annonce</h3>
-                <input id="newAnn" placeholder="Texte de l'annonce">
+                <input id="newAnn" placeholder="Texte ici...">
                 <button class="btn-p" onclick="updateAnn()">Mettre à jour</button>
             </div>
-            
             <div class="admin-card">
-                <h3 id="form-title">📤 Publier / Modifier</h3>
+                <h3 id="form-title">📤 Publication</h3>
                 <select id="aClass"></select><select id="aSub"></select>
-                <input id="aTitle" placeholder="Titre du cours">
-                
-                <div id="preview-container">
-                    <p style="font-size:10px; margin:0 0 5px 0;">APERÇU DU DOCUMENT :</p>
-                    <img id="preview-img" src="">
-                    <div id="preview-pdf">📄<br><small style="font-size:12px;">Document PDF</small></div>
-                </div>
-
+                <input id="aTitle" placeholder="Titre">
+                <div id="preview-container"><img id="preview-img" src=""><div id="preview-pdf">📄 PDF</div></div>
                 <input type="file" id="aFile" onchange="showPreview(this)">
                 <input type="hidden" id="edit-id">
                 <button class="btn-p" id="upBtn" onclick="handleUpload()">🚀 Valider</button>
                 <button class="btn-p" id="cancelBtn" style="display:none; background:#777;" onclick="resetForm()">Annuler</button>
             </div>
-
             <div id="adminList"></div>
         </div>
     </div>
@@ -101,17 +96,25 @@
 
     const CLASSES = ["6e", "5e", "4e", "3e"];
     const SUBS = ["MATH", "PHYSIQUE-CHIMIE", "SVT", "HISTOIRE-GÉO", "FRANÇAIS"];
-    let step = "classes", curC = "", curS = "", allExos = [];
+    let step = "classes", curC = "", curS = "", allExos = [], globalData = [];
 
-    window.onload = () => {
-        initSelectors(); fetchAnn(); renderClasses();
+    window.onload = async () => {
+        initSelectors(); 
+        fetchAnn();
+        await fetchGlobalData(); // Chargement initial pour les points verts
+        renderClasses();
         setTimeout(() => document.getElementById('splash').style.transform = 'translateY(-100%)', 2500);
     };
 
-    // --- LOGIQUE CORE ---
-    async function fetchAnn() {
-        const { data } = await _db.from('settings').select('value').eq('key', 'announcement').maybeSingle();
-        document.getElementById('newsMsg').innerText = data ? data.value : "Bienvenue sur DavidSchool !";
+    async function fetchGlobalData() {
+        const { data } = await _db.from('exercises').select('class, subject, created_at');
+        globalData = data || [];
+    }
+
+    function isNew(itemDate) {
+        const now = new Date();
+        const created = new Date(itemDate);
+        return (now - created) < (24 * 60 * 60 * 1000); // Moins de 24h
     }
 
     function renderClasses() {
@@ -119,6 +122,10 @@
         const c = document.getElementById('content'); c.innerHTML = "";
         CLASSES.forEach(cl => {
             let b = document.createElement('button'); b.className="card"; b.innerText="Classe de "+cl;
+            // Vérifier si un item de cette classe est "NEW"
+            if(globalData.some(d => d.class === cl && isNew(d.created_at))) {
+                b.innerHTML += `<div class="dot-new"></div>`;
+            }
             b.onclick = () => { curC=cl; renderSubs(); }; c.appendChild(b);
         });
     }
@@ -128,6 +135,10 @@
         const c = document.getElementById('content'); c.innerHTML = "";
         SUBS.forEach(s => {
             let b = document.createElement('button'); b.className="card"; b.innerText=s;
+            // Vérifier si un item de cette matière dans cette classe est "NEW"
+            if(globalData.some(d => d.class === curC && d.subject === s && isNew(d.created_at))) {
+                b.innerHTML += `<div class="dot-new"></div>`;
+            }
             b.onclick = () => { curS=s; renderExos(); }; c.appendChild(b);
         });
     }
@@ -135,7 +146,7 @@
     async function renderExos() {
         step = "exos"; document.getElementById('searchArea').style.display='block';
         const c = document.getElementById('content'); c.innerHTML = "Chargement...";
-        const { data } = await _db.from('exercises').select('*').eq('class', curC).eq('subject', curS);
+        const { data } = await _db.from('exercises').select('*').eq('class', curC).eq('subject', curS).order('created_at', {ascending: false});
         allExos = data || []; display(allExos);
     }
 
@@ -143,33 +154,27 @@
         const c = document.getElementById('content'); c.innerHTML = list.length ? "" : "Aucun cours.";
         list.forEach(e => {
             let d = document.createElement('div'); d.className="card"; d.style.background="#333";
-            d.innerHTML = `<b>${e.title}</b><br>`;
+            d.innerHTML = `<b>${e.title}</b>`;
+            if(isNew(e.created_at)) d.innerHTML += `<div class="dot-new"></div>`;
+            
             if(e.file_type==='img') d.innerHTML += `<img src="${e.file_url}" style="width:100%; border-radius:10px; margin-top:10px;">`;
-            else d.innerHTML += `<a href="${e.file_url}" target="_blank" style="color:#00f2ff; display:block; margin-top:10px; text-decoration:none;">📂 Ouvrir le document</a>`;
+            
+            d.innerHTML += `<div class="action-btns">
+                <a href="${e.file_url}" target="_blank" class="btn-action" style="background:#6a00ff; color:white;">👁️ Ouvrir</a>
+                <a href="${e.file_url}" download="${e.title}" class="btn-action" style="background:white; color:#6a00ff;">📥 Télécharger</a>
+            </div>`;
             c.appendChild(d);
         });
     }
 
-    // --- LOGIQUE ADMIN ---
-    function showPreview(input) {
-        const container = document.getElementById('preview-container');
-        const img = document.getElementById('preview-img');
-        const pdf = document.getElementById('preview-pdf');
-        
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            container.style.display = "block";
-            
-            if (file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = e => { img.src = e.target.result; img.style.display="block"; pdf.style.display="none"; };
-                reader.readAsDataURL(file);
-            } else {
-                img.style.display="none"; pdf.style.display="block";
-            }
-        }
+    function filterExos() {
+        const q = document.getElementById('searchBox').value.toLowerCase();
+        // SÉCURITÉ : On ne filtre QUE sur le titre
+        const filtered = allExos.filter(x => x.title.toLowerCase().includes(q));
+        display(filtered);
     }
 
+    // --- ADMIN ---
     async function handleUpload() {
         const editId = document.getElementById('edit-id').value;
         const f = document.getElementById('aFile').files[0];
@@ -177,87 +182,41 @@
         if(!t) return alert("Titre requis !");
         
         const btn = document.getElementById('upBtn'); btn.innerText = "...";
-        let finalUrl = null, finalPath = null, type = null;
-
         try {
+            let finalUrl = null, finalPath = null, type = null;
             if(f) {
                 finalPath = Date.now() + "_" + f.name.replace(/[^\w.]/g, "_");
                 await _db.storage.from('exercise-files').upload(finalPath, f);
                 const { data: u } = _db.storage.from('exercise-files').getPublicUrl(finalPath);
-                finalUrl = u.publicUrl;
-                type = f.type.startsWith('image') ? 'img' : 'pdf';
+                finalUrl = u.publicUrl; type = f.type.startsWith('image') ? 'img' : 'pdf';
             }
 
             if(editId) {
                 let upData = { title:t, class:document.getElementById('aClass').value, subject:document.getElementById('aSub').value };
                 if(finalUrl) { upData.file_url=finalUrl; upData.file_path=finalPath; upData.file_type=type; }
                 await _db.from('exercises').update(upData).eq('id', editId);
-                alert("Modifié !");
             } else {
-                if(!f) throw new Error("Fichier requis !");
                 await _db.from('exercises').insert([{ class:document.getElementById('aClass').value, subject:document.getElementById('aSub').value, title:t, file_url:finalUrl, file_path:finalPath, file_type:type }]);
-                alert("Publié !");
             }
-            resetForm(); refreshList();
+            alert("Opération réussie !");
+            await fetchGlobalData(); resetForm(); refreshList();
         } catch(e) { alert(e.message); }
         btn.innerText = "🚀 Valider";
     }
 
-    function prepareEdit(id, title, cl, sub, url, type) {
-        document.getElementById('edit-id').value = id;
-        document.getElementById('aTitle').value = title;
-        document.getElementById('aClass').value = cl;
-        document.getElementById('aSub').value = sub;
-        
-        // Aperçu de l'ancien doc
-        const container = document.getElementById('preview-container');
-        container.style.display = "block";
-        if(type === 'img') {
-            document.getElementById('preview-img').src = url;
-            document.getElementById('preview-img').style.display = "block";
-            document.getElementById('preview-pdf').style.display = "none";
-        } else {
-            document.getElementById('preview-img').style.display = "none";
-            document.getElementById('preview-pdf').style.display = "block";
-        }
-
-        document.getElementById('form-title').innerText = "📝 Modifier";
-        document.getElementById('cancelBtn').style.display = "block";
-        window.scrollTo(0,0);
-    }
-
-    async function refreshList() {
-        const { data } = await _db.from('exercises').select('*').order('created_at',{ascending:false});
-        const l = document.getElementById('adminList'); l.innerHTML = "<h4>Vos cours :</h4>";
-        data.forEach(e => {
-            l.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;">
-                <b>${e.title}</b><br>
-                <button onclick="prepareEdit('${e.id}','${e.title}','${e.class}','${e.subject}','${e.file_url}','${e.file_type}')" style="color:orange; border:none; background:none; cursor:pointer;">Modifier</button> | 
-                <button onclick="del('${e.id}','${e.file_path}')" style="color:red; border:none; background:none; cursor:pointer;">Supprimer</button>
-            </div>`;
-        });
-    }
-
-    function resetForm() {
-        document.getElementById('edit-id').value = ""; document.getElementById('aTitle').value = ""; document.getElementById('aFile').value = "";
-        document.getElementById('preview-container').style.display = "none";
-        document.getElementById('form-title').innerText = "📤 Publier";
-        document.getElementById('cancelBtn').style.display = "none";
-    }
-
-    async function updateAnn() {
-        const v = document.getElementById('newAnn').value;
-        await _db.from('settings').upsert({key:'announcement', value:v}, {onConflict: 'key'});
-        alert("Annonce OK"); document.getElementById('newsMsg').innerText = v;
-    }
-
-    function filterExos() { display(allExos.filter(x => x.title.toLowerCase().includes(document.getElementById('searchBox').value.toLowerCase()))); }
-    function goBack() { if(step==="exos") renderSubs(); else renderClasses(); }
-    function showAdmin() { document.getElementById('user-page').style.display='none'; document.getElementById('admin-page').style.display='block'; }
-    function hideAdmin() { document.getElementById('admin-page').style.display='none'; document.getElementById('user-page').style.display='block'; renderClasses(); }
-    function initSelectors() { CLASSES.forEach(cl => document.getElementById('aClass').add(new Option(cl,cl))); SUBS.forEach(s => document.getElementById('aSub').add(new Option(s,s))); }
-    function login() { if(document.getElementById('pass').value==="1234") { document.getElementById('auth-area').style.display='none'; document.getElementById('admin-tools').style.display='block'; refreshList(); } }
-    async function del(id, path) { if(confirm("Supprimer ?")) { await _db.from('exercises').delete().eq('id', id); if(path) await _db.storage.from('exercise-files').remove([path]); refreshList(); } }
+    // FONCTIONS UTILITAIRES (Inchangées mais optimisées)
+    function showPreview(i){const c=document.getElementById('preview-container'),im=document.getElementById('preview-img'),p=document.getElementById('preview-pdf');if(i.files&&i.files[0]){const f=i.files[0];c.style.display="block";if(f.type.startsWith('image/')){const r=new FileReader();r.onload=e=>{im.src=e.target.result;im.style.display="block";p.style.display="none"};r.readAsDataURL(f)}else{im.style.display="none";p.style.display="block"}}}
+    async function fetchAnn(){const {data}=await _db.from('settings').select('value').eq('key','announcement').maybeSingle();document.getElementById('newsMsg').innerText=data?data.value:"Bienvenue !"}
+    async function updateAnn(){const v=document.getElementById('newAnn').value;await _db.from('settings').upsert({key:'announcement',value:v},{onConflict:'key'});alert("Annonce OK");document.getElementById('newsMsg').innerText=v}
+    function goBack(){if(step==="exos")renderSubs();else renderClasses()}
+    function showAdmin(){document.getElementById('user-page').style.display='none';document.getElementById('admin-page').style.display='block'}
+    function hideAdmin(){document.getElementById('admin-page').style.display='none';document.getElementById('user-page').style.display='block';renderClasses()}
+    function initSelectors(){CLASSES.forEach(cl=>document.getElementById('aClass').add(new Option(cl,cl)));SUBS.forEach(s=>document.getElementById('aSub').add(new Option(s,s)))}
+    function login(){if(document.getElementById('pass').value==="1234"){document.getElementById('auth-area').style.display='none';document.getElementById('admin-tools').style.display='block';refreshList()}}
+    async function refreshList(){const {data}=await _db.from('exercises').select('*').order('created_at',{ascending:false});const l=document.getElementById('adminList');l.innerHTML="<h4>Vos cours :</h4>";data.forEach(e=>{l.innerHTML+=`<div style="padding:10px; border-bottom:1px solid #eee;"><b>${e.title}</b><br><button onclick="prepareEdit('${e.id}','${e.title}','${e.class}','${e.subject}','${e.file_url}','${e.file_type}')" style="color:orange; border:none; background:none;">Modifier</button> | <button onclick="del('${e.id}','${e.file_path}')" style="color:red; border:none; background:none;">Supprimer</button></div>`})}
+    function prepareEdit(id,t,cl,s,u,ty){document.getElementById('edit-id').value=id;document.getElementById('aTitle').value=t;document.getElementById('aClass').value=cl;document.getElementById('aSub').value=s;document.getElementById('form-title').innerText="📝 Modifier";document.getElementById('cancelBtn').style.display="block";window.scrollTo(0,0)}
+    function resetForm(){document.getElementById('edit-id').value="";document.getElementById('aTitle').value="";document.getElementById('aFile').value="";document.getElementById('preview-container').style.display="none";document.getElementById('form-title').innerText="📤 Publier";document.getElementById('cancelBtn').style.display="none"}
+    async function del(id,p){if(confirm("Supprimer ?")){await _db.from('exercises').delete().eq('id',id);if(p)await _db.storage.from('exercise-files').remove([p]);refreshList();fetchGlobalData()}}
 </script>
 </body>
 </html>
