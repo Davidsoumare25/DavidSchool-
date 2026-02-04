@@ -145,11 +145,22 @@
     function login() { if(document.getElementById('pass').value==="1234") { document.getElementById('auth-area').style.display='none'; document.getElementById('admin-tools').style.display='block'; refreshList(); } }
 
     async function updateAnn() {
-        const v = document.getElementById('newAnn').value;
-        await _db.from('settings').upsert({key:'announcement', value:v}, {onConflict: 'key'});
+    const v = document.getElementById('newAnn').value;
+    
+    // On envoie à Supabase
+    const { error } = await _db.from('settings').upsert({key:'announcement', value:v}, {onConflict: 'key'});
+    
+    if (error) {
+        alert("Erreur Supabase : " + error.message);
+    } else {
         alert("Annonce mise à jour !");
-        fetchAnn(); // Recharge l'annonce immédiatement
+        // CETTE LIGNE CI-DESSOUS FORCE L'AFFICHAGE IMMÉDIAT
+        document.getElementById('newsMsg').innerText = v;
+        // On vide le champ de texte
+        document.getElementById('newAnn').value = "";
     }
+}
+// Recharge l'annonce immédiatement
 
     async function uploadExo() {
         const f = document.getElementById('aFile').files[0];
