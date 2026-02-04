@@ -92,11 +92,34 @@
     };
 
     async function fetchAnn() {
-        // Tentative de lecture forçée
-        const { data, error } = await _db.from('settings').select('value').eq('key', 'announcement').maybeSingle();
-        if(data) document.getElementById('newsMsg').innerText = data.value;
-        else document.getElementById('newsMsg').innerText = "Bienvenue sur DavidSchool !";
+    // On force la lecture de la colonne 'value'
+    const { data } = await _db.from('settings').select('value').eq('key', 'announcement').maybeSingle();
+    
+    const msgElement = document.getElementById('newsMsg');
+    if (data && data.value) {
+        msgElement.innerText = data.value;
+    } else {
+        msgElement.innerText = "Bienvenue sur DavidSchool !";
     }
+}
+
+async function updateAnn() {
+    const v = document.getElementById('newAnn').value;
+    if(!v) return alert("Écrivez quelque chose !");
+
+    // L'upsert permet de créer ou de remplacer l'annonce existante
+    const { error } = await _db.from('settings').upsert({key:'announcement', value:v}, {onConflict: 'key'});
+    
+    if (error) {
+        alert("Erreur : " + error.message);
+    } else {
+        alert("Annonce mise à jour !");
+        // MISE À JOUR VISUELLE IMMÉDIATE
+        document.getElementById('newsMsg').innerText = v;
+        document.getElementById('newAnn').value = "";
+    }
+}
+
 
     function renderClasses() {
         step = "classes"; document.getElementById('backBtn').style.display='none';
