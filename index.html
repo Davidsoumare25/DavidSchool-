@@ -3,93 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro v10</title>
+    <title>DavidSchool Multi-Prof v12.1</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #6a00ff; --secondary: #1e90ff; --bg: #f2f4f8; --text: #222; --new: #2ecc71; --card-bg: #ffffff; --fav: #ff4757; }
+        :root { --primary: #6a00ff; --secondary: #1e90ff; --bg: #f2f4f8; --text: #222; --card-bg: #ffffff; }
         @media (prefers-color-scheme: dark) { :root { --bg: #121212; --text: #ffffff; --card-bg: #1e1e1e; } }
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: var(--text); transition: 0.3s; padding-bottom: 50px; }
+        body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-        /* SPLASH SCREEN */
-        #splash { position: fixed; inset: 0; background: linear-gradient(135deg, #1e004e, #6a00ff); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; transition: 0.8s; }
-        .splash-logo { width: 100px; height: 100px; border-radius: 20px; background: white; padding: 5px; object-fit: contain; }
+        /* ÉCRAN DE SÉLECTION PROFESSEUR */
+        #prof-selector { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .prof-btn { width: 100%; max-width: 300px; padding: 18px; margin: 8px 0; border-radius: 15px; border: none; background: white; color: var(--primary); font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; font-size: 16px; }
 
-        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .admin-trigger { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: 1px solid white; padding: 8px 15px; border-radius: 20px; font-size: 11px; cursor: pointer; }
-        
-        #news-bar { background: var(--fav); color: white; padding: 12px; font-weight: bold; text-align: center; overflow: hidden; }
-        .news-text { display: inline-block; animation: scroll 15s linear infinite; white-space: nowrap; }
-        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+        /* HEADER */
+        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 35px 20px; text-align: center; position: relative; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; }
+        .change-prof { position: absolute; left: 15px; top: 15px; font-size: 12px; background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; cursor: pointer; }
 
-        .search-area { padding: 15px; display: none; max-width: 500px; margin: auto; flex-direction: column; gap: 10px; }
-        #searchBox { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid #ddd; background: var(--card-bg); color: var(--text); }
-
+        /* CONTENU */
         .grid { display: flex; flex-direction: column; gap: 15px; padding: 20px; max-width: 500px; margin: auto; }
-        .card { padding: 20px; border-radius: 20px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); cursor: pointer; position: relative; box-shadow: 0 4px 15px rgba(106,0,255,0.2); transition: 0.2s; }
-        .card:active { transform: scale(0.98); }
-        .card-count { font-size: 11px; opacity: 0.8; font-weight: normal; margin-top: 5px; display: block; }
-        
-        .dot-new { position: absolute; top: 12px; right: 12px; width: 10px; height: 10px; background: var(--new); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px var(--new); }
+        .card { padding: 25px; border-radius: 20px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); cursor: pointer; text-align: left; box-shadow: 0 4px 15px rgba(106, 0, 255, 0.2); }
+        .exo-item { background: var(--card-bg); padding: 20px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.05); }
 
-        .exo-item { background: var(--card-bg); padding: 20px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.1); position: relative; }
-        .fav-btn { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; }
+        .btn-p { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 10px; border: 1px solid #ccc; background: var(--card-bg); color: var(--text); }
 
-        .action-btns { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
-        .btn-action { flex: 1; min-width: 100px; padding: 12px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 12px; }
-        
-        /* ADMIN */
-        #admin-page { display: none; padding: 20px; background: var(--bg); min-height: 100vh; }
-        .admin-card { background: var(--card-bg); padding: 20px; border-radius: 20px; margin-bottom: 20px; }
-        .btn-p { width: 100%; padding: 15px; background: #6a00ff; color: white; border: none; border-radius: 12px; font-weight: bold; }
+        #admin-page { display: none; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="splash">
-        <img src="https://lqevweyhxkvnckhtfpwh.supabase.co/storage/v1/object/public/exercise-files/1769899198248.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/167/167707.png'" class="splash-logo">
-        <div class="loader" style="width:30px; height:30px; border:3px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:scroll 1s linear infinite; margin-top:20px;"></div>
+    <div id="prof-selector">
+        <div style="font-size: 50px; margin-bottom: 10px;">🎓</div>
+        <h2 style="margin-bottom: 5px;">DavidSchool</h2>
+        <p style="opacity: 0.7; margin-bottom: 25px;">Sélectionnez votre professeur pour voir ses cours</p>
+        <div id="prof-list" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
+        <button onclick="showAdmin()" style="margin-top: 40px; background: none; border: none; color: var(--primary); font-weight: bold; text-decoration: underline;">Espace Enseignant</button>
     </div>
 
-    <div id="user-page">
-        <header><div class="admin-trigger" onclick="showAdmin()">⚙️ Gérer</div><h1 style="margin:0">DavidSchool</h1></header>
-        <div id="news-bar"><div class="news-text" id="newsMsg">Initialisation...</div></div>
-        
-        <div class="search-area" id="searchArea">
-            <input type="text" id="searchBox" placeholder="🔍 Rechercher un titre..." onkeyup="filterExos()">
-            <select id="typeFilter" onchange="filterExos()" style="padding:10px; border-radius:10px; border:1px solid #ddd; background:var(--card-bg); color:var(--text);">
-                <option value="all">Tous les formats</option>
-                <option value="pdf">Uniquement PDF</option>
-                <option value="img">Uniquement Images</option>
-            </select>
-        </div>
-
+    <div id="user-page" style="display:none;">
+        <header>
+            <div class="change-prof" onclick="resetProfSelection()">🔄 Changer de prof</div>
+            <h1 style="margin:0; font-size: 22px;">DavidSchool</h1>
+            <div id="prof-name-tag" style="font-size: 12px; opacity: 0.9; margin-top: 8px;">Professeur : ...</div>
+        </header>
         <main id="content" class="grid"></main>
-        <center><button id="backBtn" class="btn-back" onclick="goBack()">⬅️ Retour</button></center>
+        <center><button id="backBtn" onclick="goBack()" style="display:none; margin-top: 20px; background: none; border: 2px solid var(--primary); color: var(--primary); padding: 10px 25px; border-radius: 10px; font-weight: bold;">⬅ RETOUR</button></center>
     </div>
 
     <div id="admin-page">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="margin:0">Espace Admin</h2><button onclick="hideAdmin()" style="border:none; color:red; background:none; font-weight:bold;">Fermer</button>
+            <h2 id="admin-title" style="margin:0">Admin</h2>
+            <button onclick="location.reload()" style="border:none; background:none; color:red; font-weight:bold;">Quitter</button>
         </div>
-        <div id="auth-area" class="admin-card">
-            <input type="password" id="pass" placeholder="Code secret" style="width:100%; padding:12px; margin-bottom:10px; border-radius:10px;"><button class="btn-p" onclick="login()">Se connecter</button>
+        
+        <div id="auth-area" class="exo-item">
+            <p>Connectez-vous pour gérer vos cours.</p>
+            <input type="text" id="prof-id-input" placeholder="Votre Nom (ex: M. David)">
+            <input type="password" id="pass" placeholder="Code secret">
+            <button class="btn-p" onclick="login()">Accéder à mon espace</button>
         </div>
+
         <div id="admin-tools" style="display:none">
-            <div class="admin-card">
-                <h3>📢 Modifier l'Annonce</h3>
-                <input id="newAnn" placeholder="Votre message..."><button class="btn-p" onclick="updateAnn()">Mettre à jour</button>
+            <div class="exo-item">
+                <h3>Ajouter un document</h3>
+                <select id="aClass"></select>
+                <select id="aSub"></select>
+                <input id="aTitle" placeholder="Titre de la leçon">
+                <input type="file" id="aFile">
+                <button class="btn-p" id="upBtn" onclick="handleUpload()">🚀 Publier pour mes élèves</button>
             </div>
-            <div class="admin-card">
-                <h3 id="form-title">📤 Publication</h3>
-                <select id="aClass"></select><select id="aSub"></select>
-                <input id="aTitle" placeholder="Titre du cours">
-                <input type="file" id="aFile" style="margin:10px 0;">
-                <input type="hidden" id="edit-id">
-                <button class="btn-p" id="upBtn" onclick="handleUpload()">🚀 Valider</button>
-                <button class="btn-p" id="cancelBtn" style="display:none; background:#888; margin-top:10px;" onclick="resetForm()">Annuler</button>
-            </div>
-            <div id="adminList"></div>
+            <div id="adminList" style="margin-top:20px;"></div>
         </div>
     </div>
 
@@ -100,44 +83,48 @@
 
     const CLASSES = ["6e", "5e", "4e", "3e"];
     const SUBS = ["MATH", "PHYSIQUE-CHIMIE", "SVT", "HISTOIRE-GÉO", "FRANÇAIS"];
-    let step = "classes", curC = "", curS = "", allExos = [], globalData = [];
-    let favorites = JSON.parse(localStorage.getItem('davidschool_favs')) || [];
+    let step = "classes", curC = "", curS = "", selectedProf = "";
 
-    window.onload = async () => {
-        initSelectors(); fetchAnn(); await fetchGlobalData(); renderClasses();
-        setTimeout(() => { document.getElementById('splash').style.opacity = '0'; setTimeout(() => document.getElementById('splash').style.display = 'none', 800); }, 2000);
+    window.onload = () => {
+        initSelectors();
+        const savedProf = localStorage.getItem('davidschool_prof_choice');
+        if(savedProf) startStudent(savedProf); else loadProfList();
     };
 
-    async function fetchGlobalData() {
-        const { data } = await _db.from('exercises').select('class, subject, created_at');
-        globalData = data || [];
+    async function loadProfList() {
+        const { data } = await _db.from('exercises').select('professor_id');
+        const uniqueProfs = [...new Set((data || []).map(p => p.professor_id))];
+        const listDiv = document.getElementById('prof-list');
+        listDiv.innerHTML = uniqueProfs.length ? "" : "<p>Aucun professeur n'a encore publié de cours.</p>";
+        uniqueProfs.forEach(p => {
+            let b = document.createElement('button');
+            b.className = "prof-btn";
+            b.innerText = p;
+            b.onclick = () => startStudent(p);
+            listDiv.appendChild(b);
+        });
     }
 
-    function isNew(date) { return (new Date() - new Date(date)) < (24 * 60 * 60 * 1000); }
-
-    function toggleFav(id) {
-        if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
-        else favorites.push(id);
-        localStorage.setItem('davidschool_favs', JSON.stringify(favorites));
-        display(allExos);
+    function startStudent(profName) {
+        selectedProf = profName;
+        localStorage.setItem('davidschool_prof_choice', profName);
+        document.getElementById('prof-selector').style.display = 'none';
+        document.getElementById('user-page').style.display = 'block';
+        document.getElementById('prof-name-tag').innerText = "Professeur : " + profName;
+        renderClasses();
     }
 
-    async function shareExo(title, url) {
-        if (navigator.share) {
-            navigator.share({ title: title, text: 'Regarde ce cours sur DavidSchool !', url: url });
-        } else {
-            alert("Lien copié : " + url);
-        }
+    function resetProfSelection() {
+        localStorage.removeItem('davidschool_prof_choice');
+        location.reload();
     }
 
+    // --- NAVIGATION ÉLÈVE ---
     function renderClasses() {
-        step = "classes"; document.getElementById('backBtn').style.display='none'; document.getElementById('searchArea').style.display='none';
+        step = "classes"; document.getElementById('backBtn').style.display='none';
         const c = document.getElementById('content'); c.innerHTML = "";
         CLASSES.forEach(cl => {
-            const count = globalData.filter(d => d.class === cl).length;
-            let b = document.createElement('button'); b.className="card";
-            b.innerHTML = `Classe de ${cl} <span class="card-count">${count} cours</span>`;
-            if(globalData.some(d => d.class === cl && isNew(d.created_at))) b.innerHTML += `<div class="dot-new"></div>`;
+            let b = document.createElement('button'); b.className="card"; b.innerText="Classe de "+cl;
             b.onclick = () => { curC=cl; renderSubs(); }; c.appendChild(b);
         });
     }
@@ -146,93 +133,80 @@
         step = "subs"; document.getElementById('backBtn').style.display='block';
         const c = document.getElementById('content'); c.innerHTML = "";
         SUBS.forEach(s => {
-            const count = globalData.filter(d => d.class === curC && d.subject === s).length;
-            let b = document.createElement('button'); b.className="card";
-            b.innerHTML = `${s} <span class="card-count">${count} cours</span>`;
-            if(globalData.some(d => d.class === curC && d.subject === s && isNew(d.created_at))) b.innerHTML += `<div class="dot-new"></div>`;
+            let b = document.createElement('button'); b.className="card"; b.innerText=s;
             b.onclick = () => { curS=s; renderExos(); }; c.appendChild(b);
         });
     }
 
     async function renderExos() {
-        step = "exos"; document.getElementById('searchArea').style.display='flex';
+        step = "exos";
         const c = document.getElementById('content'); c.innerHTML = "Chargement...";
-        const { data } = await _db.from('exercises').select('*').eq('class', curC).eq('subject', curS).order('created_at', {ascending: false});
-        allExos = data || []; display(allExos);
-    }
-
-    function display(list) {
-        const c = document.getElementById('content'); c.innerHTML = list.length ? "" : "Aucun cours.";
-        list.forEach(e => {
+        const { data } = await _db.from('exercises').select('*').eq('professor_id', selectedProf).eq('class', curC).eq('subject', curS);
+        c.innerHTML = data && data.length ? "" : "Aucun cours disponible ici.";
+        (data || []).forEach(e => {
             let d = document.createElement('div'); d.className="exo-item";
-            const isFaved = favorites.includes(e.id);
-            d.innerHTML = `
-                <span class="fav-btn" onclick="toggleFav('${e.id}')">${isFaved ? '❤️' : '🤍'}</span>
-                <small>${e.file_type.toUpperCase()}</small><br><b>${e.title}</b>
-                ${e.file_type === 'img' ? `<img src="${e.file_url}" style="width:100%; border-radius:10px; margin-top:10px;">` : ''}
-                <div class="action-btns">
-                    <a href="${e.file_url}" target="_blank" class="btn-action" style="background:#6a00ff; color:white;">👁️ Ouvrir</a>
-                    <button onclick="downloadFile('${e.file_url}', '${e.title}')" class="btn-action" style="background:#eee; color:#333;">📥 Télécharger</button>
-                    <button onclick="shareExo('${e.title}', '${e.file_url}')" class="btn-action" style="background:#25D366; color:white;">🔗 Partager</button>
+            d.innerHTML = `<b>${e.title}</b><br><br>
+                <div style="display:flex; gap:10px;">
+                    <a href="${e.file_url}" target="_blank" style="flex:1; text-align:center; background:var(--primary); color:white; padding:10px; border-radius:8px; text-decoration:none; font-size:14px;">👁️ Ouvrir</a>
+                    <button onclick="downloadFile('${e.file_url}','${e.title}')" style="flex:1; background:#eee; border:none; padding:10px; border-radius:8px; cursor:pointer;">📥 Télécharger</button>
                 </div>`;
             c.appendChild(d);
         });
     }
 
-    async function downloadFile(url, filename) {
-        try {
-            const res = await fetch(url); const blob = await res.blob();
-            const a = document.createElement('a'); a.href = window.URL.createObjectURL(blob);
-            a.download = filename; a.click();
-        } catch (e) { window.open(url, '_blank'); }
+    // --- LOGIQUE ADMIN ---
+    function login() {
+        const id = document.getElementById('prof-id-input').value.trim();
+        const p = document.getElementById('pass').value;
+        if(id.length < 3 || p !== "1234") return alert("Nom invalide ou code incorrect");
+        selectedProf = id;
+        document.getElementById('auth-area').style.display = 'none';
+        document.getElementById('admin-tools').style.display = 'block';
+        document.getElementById('admin-title').innerText = "Espace : " + id;
+        refreshAdminList();
     }
 
-    function filterExos() {
-        const q = document.getElementById('searchBox').value.toLowerCase();
-        const type = document.getElementById('typeFilter').value;
-        let filtered = allExos.filter(x => x.title.toLowerCase().includes(q));
-        if(type !== 'all') filtered = filtered.filter(x => x.file_type === type);
-        display(filtered);
-    }
-
-    // --- ADMIN LOGIC ---
     async function handleUpload() {
-        const editId = document.getElementById('edit-id').value;
         const f = document.getElementById('aFile').files[0];
         const t = document.getElementById('aTitle').value;
-        if(!t) return alert("Titre manquant");
-        const btn = document.getElementById('upBtn'); btn.innerText = "⏳ En cours...";
+        if(!f || !t) return alert("Veuillez remplir tous les champs");
+        
+        const btn = document.getElementById('upBtn'); btn.innerText = "⏳ Publication...";
+        const path = Date.now() + "_" + f.name.replace(/\s/g, "_");
+        
         try {
-            let url=null, path=null, type=null;
-            if(f) {
-                path = Date.now() + "_" + f.name.replace(/[^\w.]/g, "_");
-                await _db.storage.from('exercise-files').upload(path, f);
-                const { data: u } = _db.storage.from('exercise-files').getPublicUrl(path);
-                url = u.publicUrl; type = f.type.startsWith('image') ? 'img' : 'pdf';
-            }
-            if(editId) {
-                let up = { title:t, class:document.getElementById('aClass').value, subject:document.getElementById('aSub').value };
-                if(url) { up.file_url=url; up.file_path=path; up.file_type=type; }
-                await _db.from('exercises').update(up).eq('id', editId);
-            } else {
-                await _db.from('exercises').insert([{ class:document.getElementById('aClass').value, subject:document.getElementById('aSub').value, title:t, file_url:url, file_path:path, file_type:type }]);
-            }
-            alert("Effectué !"); await fetchGlobalData(); resetForm(); refreshList();
-        } catch(e) { alert(e.message); }
-        btn.innerText = "🚀 Valider";
+            await _db.storage.from('exercise-files').upload(path, f);
+            const { data: u } = _db.storage.from('exercise-files').getPublicUrl(path);
+            await _db.from('exercises').insert([{ 
+                professor_id: selectedProf, class: document.getElementById('aClass').value, 
+                subject: document.getElementById('aSub').value, title: t, 
+                file_url: u.publicUrl, file_path: path, file_type: f.type.startsWith('image') ? 'img' : 'pdf'
+            }]);
+            alert("Publié !"); document.getElementById('aTitle').value=""; refreshAdminList();
+        } catch(e) { alert("Erreur lors de l'envoi"); }
+        btn.innerText = "🚀 Publier pour mes élèves";
     }
 
-    async function fetchAnn(){const {data}=await _db.from('settings').select('value').eq('key','announcement').maybeSingle();document.getElementById('newsMsg').innerText=data?data.value:"Bienvenue !"}
-    async function updateAnn(){const v=document.getElementById('newAnn').value;await _db.from('settings').upsert({key:'announcement',value:v},{onConflict:'key'});alert("OK");document.getElementById('newsMsg').innerText=v}
-    function goBack(){if(step==="exos")renderSubs();else renderClasses()}
-    function showAdmin(){document.getElementById('user-page').style.display='none';document.getElementById('admin-page').style.display='block'}
-    function hideAdmin(){document.getElementById('admin-page').style.display='none';document.getElementById('user-page').style.display='block';renderClasses()}
-    function initSelectors(){CLASSES.forEach(cl=>document.getElementById('aClass').add(new Option(cl,cl)));SUBS.forEach(s=>document.getElementById('aSub').add(new Option(s,s)))}
-    function login(){if(document.getElementById('pass').value==="1234"){document.getElementById('auth-area').style.display='none';document.getElementById('admin-tools').style.display='block';refreshList()}}
-    async function refreshList(){const {data}=await _db.from('exercises').select('*').order('created_at',{ascending:false});const l=document.getElementById('adminList');l.innerHTML="<h4>Gestion :</h4>";data.forEach(e=>{l.innerHTML+=`<div style="padding:10px; border-bottom:1px solid #eee;"><b>${e.title}</b><br><button onclick="prepareEdit('${e.id}','${e.title}','${e.class}','${e.subject}')" style="color:orange; border:none; background:none;">Modifier</button> | <button onclick="del('${e.id}','${e.file_path}')" style="color:red; border:none; background:none;">Supprimer</button></div>`})}
-    function prepareEdit(id,t,cl,s){document.getElementById('edit-id').value=id;document.getElementById('aTitle').value=t;document.getElementById('aClass').value=cl;document.getElementById('aSub').value=s;document.getElementById('form-title').innerText="📝 Modification";document.getElementById('cancelBtn').style.display="block";window.scrollTo(0,0)}
-    function resetForm(){document.getElementById('edit-id').value="";document.getElementById('aTitle').value="";document.getElementById('aFile').value="";document.getElementById('form-title').innerText="📤 Publication";document.getElementById('cancelBtn').style.display="none"}
-    async function del(id,p){if(confirm("Attention : Supprimer définitivement ce cours ?")){await _db.from('exercises').delete().eq('id',id);if(p)await _db.storage.from('exercise-files').remove([p]);refreshList();fetchGlobalData()}}
+    async function refreshAdminList() {
+        const { data } = await _db.from('exercises').select('*').eq('professor_id', selectedProf);
+        const l = document.getElementById('adminList');
+        l.innerHTML = "<h4>Mes documents en ligne :</h4>";
+        (data || []).forEach(e => {
+            l.innerHTML += `<div style="padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:13px;">${e.class} | ${e.title}</span>
+                <button onclick="del('${e.id}','${e.file_path}')" style="color:red; background:none; border:none; font-size:18px;">🗑️</button>
+            </div>`;
+        });
+    }
+
+    async function del(id, p){ if(confirm("Supprimer ce document ?")){ await _db.from('exercises').delete().eq('id',id); refreshAdminList(); }}
+    async function downloadFile(url, n){ const r=await fetch(url); const b=await r.blob(); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=n; a.click(); }
+    function goBack(){ if(step==="exos") renderSubs(); else renderClasses(); }
+    function showAdmin(){ document.getElementById('prof-selector').style.display='none'; document.getElementById('admin-page').style.display='block'; }
+    function initSelectors(){ 
+        CLASSES.forEach(cl=>document.getElementById('aClass').add(new Option(cl,cl))); 
+        SUBS.forEach(s=>document.getElementById('aSub').add(new Option(s,s))); 
+    }
 </script>
 </body>
 </html>
