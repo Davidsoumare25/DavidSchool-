@@ -3,66 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro v19</title>
+    <title>DavidSchool Pro v20</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --p: #6a00ff; --s: #1e90ff; --bg: #f2f4f8; --card: #ffffff; --txt: #222; }
-        @media (prefers-color-scheme: dark) { :root { --bg: #121212; --card: #1e1e1e; --txt: #ffffff; } }
-        * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        :root { --p: #1e90ff; --s: #6a00ff; --bg: #f0f2f5; --card: #ffffff; --txt: #1c1e21; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #18191a; --card: #242526; --txt: #e4e6eb; } }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
         body { margin: 0; background: var(--bg); color: var(--txt); }
         
-        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 25px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; position: relative; }
+        header { background: linear-gradient(135deg, var(--p), var(--s)); color: white; padding: 25px; text-align: center; border-radius: 0 0 20px 20px; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .grid { display: grid; grid-template-columns: 1fr; gap: 15px; padding: 15px; max-width: 500px; margin: auto; }
-        .card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05); position: relative; }
-        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; background: var(--p); color: white; margin-top: 10px; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); }
+        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; background: var(--p); color: white; margin-top: 10px; transition: 0.2s; }
+        .btn-red { background: #ff4757; }
+        .btn-sec { background: var(--s); }
         .hidden { display: none !important; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #ddd; background: var(--card); color: var(--txt); }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; background: var(--card); color: var(--txt); }
         
-        /* Style spécial Annonce */
-        .announcement-box { background: #fff3cd; border-left: 5px solid #ffc107; color: #856404; padding: 15px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; }
+        /* Design des dossiers */
+        .folder { display: flex; align-items: center; background: var(--card); padding: 15px; border-radius: 12px; border-left: 6px solid var(--p); cursor: pointer; font-weight: bold; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .announcement-banner { background: #fff9db; border: 1px solid #fab005; color: #856404; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; line-height: 1.4; }
+        .nav-bar { display: flex; justify-content: space-between; padding: 10px 15px; align-items: center; }
     </style>
 </head>
 <body>
 
-    <div id="scr-auth" class="grid" style="margin-top: 50px;">
-        <div class="card">
-            <h2 style="text-align:center; color:var(--p)">DavidSchool</h2>
-            <input type="text" id="u-name" placeholder="Nom complet">
+    <div id="scr-auth" class="grid" style="margin-top: 40px;">
+        <div class="card" style="text-align: center;">
+            <h1 style="color: var(--p); margin-bottom: 5px;">DavidSchool</h1>
+            <p style="font-size: 14px; color: gray;">Plateforme d'apprentissage</p>
+            <input type="text" id="u-name" placeholder="Nom d'utilisateur">
             <input type="password" id="u-pass" placeholder="Mot de passe">
             <div id="reg-box" class="hidden">
-                <select id="u-role"><option value="student">Élève</option><option value="teacher">Professeur</option></select>
-                <input type="text" id="u-code" placeholder="Code de classe">
+                <select id="u-role"><option value="student">👨‍🎓 Élève</option><option value="teacher">👨‍🏫 Professeur</option></select>
+                <input type="text" id="u-code" placeholder="Code (ex: MATH10)">
             </div>
-            <button class="btn" onclick="handleAuth()" id="btn-auth">Entrer</button>
-            <p onclick="toggleAuth()" style="text-align:center; font-size:12px; cursor:pointer; text-decoration:underline; margin-top:15px;">S'inscrire / Se connecter</p>
+            <button class="btn" onclick="handleAuth()" id="btn-auth">Se connecter</button>
+            <p onclick="toggleAuth()" style="font-size: 13px; cursor: pointer; text-decoration: underline; margin-top: 15px;">Pas de compte ? S'inscrire</p>
         </div>
     </div>
 
     <div id="scr-prof" class="hidden">
-        <header><div style="position:absolute; right:20px; top:20px;" onclick="location.reload()">🚪</div><h2>Espace Prof</h2></header>
+        <header>
+            <div style="position:absolute; right:20px; top:20px;" onclick="location.reload()">Logout 🚪</div>
+            <h2>Tableau de Bord Prof</h2>
+        </header>
         <div class="grid">
             <div class="card">
-                <h3>📤 Publier un cours</h3>
-                <input type="text" id="p-title" placeholder="Titre (ex: Devoir Maison n°1)">
-                <textarea id="p-ann" placeholder="Ajouter une annonce/consigne (Optionnel)"></textarea>
+                <h3>📤 Nouvelle Publication</h3>
+                <input type="text" id="p-title" placeholder="Nom du document (ex: Cours PDF)">
+                <textarea id="p-ann" placeholder="Message ou consigne pour les élèves..."></textarea>
                 <select id="p-class"><option>6e</option><option>5e</option><option>4e</option><option>3e</option></select>
                 <select id="p-sub"><option>MATHS</option><option>SVT</option><option>PC</option><option>HISTOIRE-GÉO</option></select>
                 <input type="file" id="p-file">
-                <button class="btn" onclick="upload()" id="btn-pub">🚀 Publier</button>
+                <button class="btn" onclick="upload()" id="btn-pub">🚀 Mettre en ligne</button>
             </div>
             <div id="prof-list"></div>
+            <button class="btn btn-red" onclick="deleteAccount()" style="margin-top: 30px;">⚠️ Supprimer mon compte</button>
         </div>
     </div>
 
     <div id="scr-student" class="hidden">
-        <header><div style="position:absolute; right:20px; top:20px;" onclick="location.reload()">🚪</div><h2 id="stu-head">Mes Cours</h2></header>
+        <header>
+            <div style="position:absolute; right:20px; top:20px;" onclick="location.reload()">🚪</div>
+            <h2 id="stu-title">Mes Classes</h2>
+        </header>
+
         <div id="view-teachers" class="grid"></div>
-        <div id="view-classes" class="grid hidden"><button onclick="showTeachers()" class="btn" style="background:gray">⬅ Retour</button><div id="classes-list"></div></div>
-        <div id="view-subs" class="grid hidden"><button onclick="showClassesNav()" class="btn" style="background:gray">⬅ Retour</button><div id="subs-list"></div></div>
+
+        <div id="view-classes" class="grid hidden">
+            <div class="nav-bar"><span onclick="showTeachers()" style="cursor:pointer">⬅ Retour</span></div>
+            <div id="classes-list"></div>
+        </div>
+
+        <div id="view-subs" class="grid hidden">
+            <div class="nav-bar"><span onclick="showClassesNav()" style="cursor:pointer">⬅ Retour</span></div>
+            <div id="subs-list"></div>
+        </div>
+
         <div id="view-files" class="grid hidden">
-            <button onclick="showSubsNav()" class="btn" style="background:gray">⬅ Retour</button>
+            <div class="nav-bar"><span onclick="showSubsNav()" style="cursor:pointer">⬅ Retour</span></div>
             <div id="files-list"></div>
         </div>
+        
+        <div class="grid"><button class="btn btn-red" onclick="deleteAccount()">Supprimer mon compte</button></div>
     </div>
 
 <script>
@@ -72,18 +96,19 @@
 
     let user = null, isLogin = true, curCode = "", curClass = "", curSub = "";
 
-    function toggleAuth() { isLogin = !isLogin; document.getElementById('reg-box').classList.toggle('hidden', isLogin); }
+    function toggleAuth() { isLogin = !isLogin; document.getElementById('reg-box').classList.toggle('hidden', isLogin); document.getElementById('btn-auth').innerText = isLogin ? "Se connecter" : "Créer le compte"; }
 
     async function handleAuth() {
         const n = document.getElementById('u-name').value.trim(), p = document.getElementById('u-pass').value;
         if(isLogin) {
             const { data } = await _db.from('users_profile').select('*').eq('full_name', n).eq('password', p).maybeSingle();
-            if(!data) return alert("Identifiants incorrects");
+            if(!data) return alert("Erreur d'identifiants");
             user = data; start();
         } else {
             const r = document.getElementById('u-role').value, c = document.getElementById('u-code').value.trim();
-            await _db.from('users_profile').insert([{ full_name:n, password:p, role:r, class_code:[c] }]);
-            alert("Compte créé !"); toggleAuth();
+            const { error } = await _db.from('users_profile').insert([{ full_name:n, password:p, role:r, class_code:[c] }]);
+            if(error) return alert("Ce nom existe déjà");
+            alert("Compte créé !"); location.reload();
         }
     }
 
@@ -93,58 +118,69 @@
         else { document.getElementById('scr-student').classList.remove('hidden'); renderTeachers(); }
     }
 
+    async function deleteAccount() {
+        if(confirm("Es-tu sûr de vouloir supprimer ton compte définitivement ?")) {
+            await _db.from('users_profile').delete().eq('id', user.id);
+            alert("Compte supprimé."); location.reload();
+        }
+    }
+
+    // --- LOGIQUE PROF ---
     async function upload() {
         const f = document.getElementById('p-file').files[0], t = document.getElementById('p-title').value, a = document.getElementById('p-ann').value;
-        if(!f || !t) return alert("Titre et fichier requis");
-        const b = document.getElementById('btn-pub'); b.innerText = "Envoi...";
-        const path = Date.now() + "_" + f.name.replace(/\s/g, "_");
-        await _db.storage.from('exercise-files').upload(path, f);
-        const { data: u } = _db.storage.from('exercise-files').getPublicUrl(path);
+        if(!f || !t) return alert("Titre et fichier obligatoires");
+        const b = document.getElementById('btn-pub'); b.innerText = "⏳ Chargement...";
+        const name = Date.now() + "_" + f.name.replace(/\s/g, "_");
+        await _db.storage.from('exercise-files').upload(name, f);
+        const { data: u } = _db.storage.from('exercise-files').getPublicUrl(name);
         
         await _db.from('exercises').insert([{
             professor_id: user.full_name, title: t, announcement: a,
             class: document.getElementById('p-class').value, subject: document.getElementById('p-sub').value,
             file_url: u.publicUrl, class_code: user.class_code[0]
         }]);
-        alert("Publié !"); loadProfDocs(); b.innerText = "🚀 Publier";
+        alert("Publié avec succès !"); loadProfDocs(); b.innerText = "🚀 Mettre en ligne";
     }
 
     async function loadProfDocs() {
-        // .order('created_at', { ascending: false }) permet de mettre le plus récent en haut
         const { data } = await _db.from('exercises').select('*').eq('class_code', user.class_code[0]).order('created_at', { ascending: false });
         const list = document.getElementById('prof-list');
-        list.innerHTML = "<h4>Vos publications (Récent en haut) :</h4>";
-        data.forEach(d => { list.innerHTML += `<div class="card"><b>${d.class}</b> - ${d.title} <button onclick="delDoc('${d.id}')" style="float:right; color:red; border:none; background:none; cursor:pointer">🗑️</button></div>`; });
+        list.innerHTML = "<h4>Vos publications récentes :</h4>";
+        data.forEach(d => { list.innerHTML += `<div class="card" style="margin-bottom:10px"><b>${d.class}</b> - ${d.title} <button onclick="delDoc('${d.id}')" style="float:right; color:red; border:none; background:none; cursor:pointer">🗑️ Supprimer</button></div>`; });
     }
 
-    async function delDoc(id) { if(confirm("Supprimer ?")) { await _db.from('exercises').delete().eq('id', id); loadProfDocs(); } }
+    async function delDoc(id) { if(confirm("Supprimer ce document ?")) { await _db.from('exercises').delete().eq('id', id); loadProfDocs(); } }
 
+    // --- LOGIQUE ÉLÈVE ---
     function renderTeachers() {
-        const div = document.getElementById('view-teachers'); div.innerHTML = "<h3>Choisir un prof</h3>";
-        user.class_code.forEach(c => { div.innerHTML += `<div class="card" onclick="openTeacher('${c}')">👨‍🏫 Professeur : ${c}</div>`; });
+        const div = document.getElementById('view-teachers'); div.innerHTML = "<h3>Choisir un Professeur</h3>";
+        user.class_code.forEach(c => { div.innerHTML += `<div class="folder" onclick="openTeacher('${c}')">📁 Prof : ${c}</div>`; });
     }
 
     function openTeacher(code) { curCode = code; showClassesNav(); }
     function showClassesNav() { hideAllNav(); document.getElementById('view-classes').classList.remove('hidden'); 
-        const div = document.getElementById('classes-list'); div.innerHTML = "<h3>Choisir la classe</h3>";
-        ["6e","5e","4e","3e"].forEach(cl => { div.innerHTML += `<div class="card" onclick="openClass('${cl}')">📂 Classe de ${cl}</div>`; });
+        const div = document.getElementById('classes-list'); div.innerHTML = "<h3>Choisir la Classe</h3>";
+        ["6e","5e","4e","3e"].forEach(cl => { div.innerHTML += `<div class="folder" onclick="openClass('${cl}')">📂 Classe de ${cl}</div>`; });
     }
     function openClass(cl) { curClass = cl; showSubsNav(); }
     function showSubsNav() { hideAllNav(); document.getElementById('view-subs').classList.remove('hidden');
-        const div = document.getElementById('subs-list'); div.innerHTML = "<h3>Matières</h3>";
-        ["MATHS","SVT","PC","HISTOIRE-GÉO"].forEach(s => { div.innerHTML += `<div class="card" onclick="openSub('${s}')">📖 ${s}</div>`; });
+        const div = document.getElementById('subs-list'); div.innerHTML = "<h3>Matières disponibles</h3>";
+        ["MATHS","SVT","PC","HISTOIRE-GÉO"].forEach(s => { div.innerHTML += `<div class="folder" onclick="openSub('${s}')">📖 ${s}</div>`; });
     }
     function openSub(s) { curSub = s; showFilesNav(); }
 
     async function showFilesNav() {
         hideAllNav(); document.getElementById('view-files').classList.remove('hidden');
-        const div = document.getElementById('files-list'); div.innerHTML = "Chargement...";
-        // On trie aussi ici : .order('created_at', { ascending: false })
+        const div = document.getElementById('files-list'); div.innerHTML = "Recherche des documents...";
         const { data } = await _db.from('exercises').select('*').eq('class_code', curCode).eq('class', curClass).eq('subject', curSub).order('created_at', { ascending: false });
-        div.innerHTML = data.length ? "" : "Aucun cours.";
+        div.innerHTML = data.length ? "" : "<p>Aucun document trouvé.</p>";
         data.forEach(f => {
-            let annHtml = f.announcement ? `<div class="announcement-box"><b>Annonce :</b> ${f.announcement}</div>` : "";
-            div.innerHTML += `<div class="card">${annHtml}<h4>${f.title}</h4><button class="btn" onclick="window.open('${f.file_url}', '_blank')">👁️ Ouvrir le document</button></div>`;
+            let ann = f.announcement ? `<div class="announcement-banner"><b>Message du prof :</b><br>${f.announcement}</div>` : "";
+            div.innerHTML += `<div class="card" style="margin-bottom:15px;">
+                ${ann}
+                <h4 style="margin:10px 0;">${f.title}</h4>
+                <a href="${f.file_url}" target="_blank" download class="btn btn-sec" style="display:block; text-align:center; text-decoration:none;">📥 Télécharger / Voir</a>
+            </div>`;
         });
     }
 
@@ -153,3 +189,4 @@
 </script>
 </body>
 </html>
+
