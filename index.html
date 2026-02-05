@@ -3,226 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro v15</title>
+    <title>DavidSchool Pro v16.1</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #6a00ff; --secondary: #1e90ff; --bg: #f2f4f8; --text: #222; --card-bg: #ffffff; }
-        @media (prefers-color-scheme: dark) { :root { --bg: #121212; --text: #ffffff; --card-bg: #1e1e1e; } }
+        :root { --primary: #6a00ff; --bg: #f2f4f8; --card-bg: #ffffff; --text: #222; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #121212; --card-bg: #1e1e1e; --text: #ffffff; } }
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { margin: 0; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-        .auth-container { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px; min-height: 100vh; }
-        .auth-card { background: var(--card-bg); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        .btn-main { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; font-size: 16px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .auth-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .auth-card { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         
         input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; background: var(--card-bg); color: var(--text); }
+        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-p { background: var(--primary); color: white; }
+        .btn-danger { background: #ff4d4d; color: white; margin-top: 20px; font-size: 12px; }
 
-        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 30px 20px; text-align: center; position: relative; border-bottom-radius: 20px; }
-        .logout { position: absolute; right: 15px; top: 15px; font-size: 11px; cursor: pointer; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 15px; }
-        
+        header { background: linear-gradient(135deg, #1e004e, #6a00ff); color: white; padding: 25px; text-align: center; position: relative; }
         .grid { display: flex; flex-direction: column; gap: 15px; padding: 20px; max-width: 500px; margin: auto; }
-        .card { padding: 25px; border-radius: 20px; color: white; font-weight: bold; border: none; background: linear-gradient(90deg, #6a00ff, #1e90ff); cursor: pointer; text-align: left; }
-        .exo-item { background: var(--card-bg); padding: 20px; border-radius: 20px; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .exo-item { background: var(--card-bg); padding: 15px; border-radius: 15px; border: 1px solid rgba(0,0,0,0.1); margin-bottom: 10px; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="screen-welcome" class="auth-container">
+    <div id="screen-auth" class="auth-container">
         <h1 style="color: var(--primary);">DavidSchool</h1>
         <div class="auth-card">
-            <button class="btn-main btn-primary" onclick="showScreen('screen-register')">Créer un compte</button>
-            <button class="btn-main btn-outline" onclick="showScreen('screen-login')">Se connecter</button>
-        </div>
-    </div>
+            <h2 id="auth-title">Connexion</h2>
+            <input type="text" id="u-name" placeholder="Nom complet">
+            <input type="password" id="u-pass" placeholder="Mot de passe">
+            
+            <div id="register-only" class="hidden">
+                <select id="u-role" onchange="toggleRegFields()">
+                    <option value="student">Élève</option>
+                    <option value="teacher">Professeur</option>
+                </select>
+                <input type="text" id="u-code" placeholder="Code de classe">
+            </div>
 
-    <div id="screen-register" class="auth-container hidden">
-        <h2>Inscription</h2>
-        <div class="auth-card">
-            <select id="reg-role" onchange="toggleCodeField()">
-                <option value="student">Je suis un Élève</option>
-                <option value="teacher">Je suis un Professeur</option>
-            </select>
-            <input type="text" id="reg-name" placeholder="Nom complet">
-            <input type="password" id="reg-pass" placeholder="Mot de passe">
-            <div id="div-class-code"><input type="text" id="reg-class-code" placeholder="Code donné par le prof"></div>
-            <div id="div-teacher-code" class="hidden"><input type="text" id="reg-my-code" placeholder="Créez votre code (ex: MATH12)"></div>
-            <button class="btn-main btn-primary" onclick="handleRegister()">Valider</button>
-            <button class="btn-main btn-outline" onclick="showScreen('screen-welcome')">Retour</button>
-        </div>
-    </div>
-
-    <div id="screen-login" class="auth-container hidden">
-        <h2>Connexion</h2>
-        <div class="auth-card">
-            <input type="text" id="login-name" placeholder="Nom complet">
-            <input type="password" id="login-pass" placeholder="Mot de passe">
-            <button class="btn-main btn-primary" onclick="handleLogin()">Entrer</button>
-            <button class="btn-main btn-outline" onclick="showScreen('screen-welcome')">Retour</button>
+            <button class="btn btn-p" id="btn-main-auth" onclick="handleAuth()">Se connecter</button>
+            <p id="toggle-link" onclick="toggleAuthMode()" style="cursor:pointer; font-size: 13px; margin-top: 15px; text-decoration: underline;">S'inscrire</p>
         </div>
     </div>
 
     <div id="screen-teacher" class="hidden">
         <header>
-            <div class="logout" onclick="logout()">Déconnexion</div>
-            <h1 id="teacher-title">Espace Prof</h1>
-            <div id="display-my-code" style="font-size: 12px;"></div>
+            <div style="position: absolute; right: 15px; top: 15px; cursor:pointer;" onclick="location.reload()">🚪</div>
+            <h3>Espace Enseignant</h3>
+            <div id="prof-code-tag" style="font-size: 12px; opacity: 0.8;"></div>
         </header>
         <div class="grid">
             <div class="exo-item">
-                <h3>📤 Publier</h3>
-                <select id="pub-class"></select>
-                <select id="pub-sub"></select>
-                <input type="text" id="pub-title" placeholder="Titre">
-                <input type="file" id="pub-file">
-                <button class="btn-main btn-primary" id="btn-pub" onclick="handleUpload()">🚀 Publier</button>
+                <select id="p-class"></select>
+                <select id="p-sub"></select>
+                <input type="text" id="p-title" placeholder="Titre du cours">
+                <input type="file" id="p-file">
+                <button class="btn btn-p" id="btn-pub" onclick="uploadDoc()">🚀 Publier</button>
             </div>
-            <div id="teacher-list"></div>
+            <div id="p-list"></div>
+            <button class="btn btn-danger" onclick="deleteAccount()">Supprimer mon compte</button>
         </div>
     </div>
 
     <div id="screen-student" class="hidden">
         <header>
-            <div class="logout" onclick="logout()">Quitter</div>
-            <h1 id="student-title">Mes Cours</h1>
+            <div style="position: absolute; right: 15px; top: 15px; cursor:pointer;" onclick="location.reload()">🚪</div>
+            <h3>Mes Classes</h3>
         </header>
-        <div id="breadcrumbs" style="padding: 15px 20px; font-weight: bold; color: var(--primary);">Accueil</div>
-        <main id="content" class="grid"></main>
-        <center><button id="backBtn" class="btn-outline" style="display:none; padding: 10px 25px; margin: 20px;" onclick="goBack()">⬅ RETOUR</button></center>
+        <div class="grid">
+            <div id="class-list-area">
+                <div id="my-teachers"></div>
+                <div class="exo-item" style="margin-top: 20px;">
+                    <p style="margin:0; font-size: 12px; color: gray;">Ajouter un prof :</p>
+                    <input type="text" id="add-new-code" placeholder="Ex: MATH101">
+                    <button class="btn btn-p" onclick="addNewClass()">+ Ajouter</button>
+                </div>
+            </div>
+            <div id="student-content" class="hidden">
+                <button onclick="showClassList()" style="background:none; border:none; color:var(--primary); font-weight:bold; cursor:pointer; margin-bottom:10px;">⬅ Retour</button>
+                <div id="student-files"></div>
+            </div>
+            <button class="btn btn-danger" onclick="deleteAccount()">Supprimer mon compte</button>
+        </div>
     </div>
 
 <script>
+    // --- CONFIGURATION ---
     const S_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
     const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
     const _db = supabase.createClient(S_URL, S_KEY);
 
-    let user = null;
-    const CLASSES = ["6e", "5e", "4e", "3e"];
-    const SUBS = ["MATH", "PHYSIQUE-CHIMIE", "SVT", "HISTOIRE-GÉO", "FRANÇAIS"];
-    let step = "classes", curC = "", curS = "";
+    let user = null, isLogin = true;
+    const CLASSES = ["6e", "5e", "4e", "3e"], SUBS = ["MATHS", "SVT", "PC", "FR", "HG"];
 
-    function showScreen(id) {
-        document.querySelectorAll('div[id^="screen-"]').forEach(s => s.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
+    // --- AUTH ---
+    function toggleAuthMode() {
+        isLogin = !isLogin;
+        document.getElementById('register-only').classList.toggle('hidden', isLogin);
+        document.getElementById('btn-main-auth').innerText = isLogin ? "Se connecter" : "Créer mon compte";
     }
 
-    function toggleCodeField() {
-        const role = document.getElementById('reg-role').value;
-        document.getElementById('div-class-code').classList.toggle('hidden', role === 'teacher');
-        document.getElementById('div-teacher-code').classList.toggle('hidden', role === 'student');
-    }
+    async function handleAuth() {
+        const name = document.getElementById('u-name').value.trim();
+        const pass = document.getElementById('u-pass').value;
+        if(!name || !pass) return alert("Remplissez tout !");
 
-    function initSelectors() {
-        const cSel = document.getElementById('pub-class');
-        const sSel = document.getElementById('pub-sub');
-        if(cSel.options.length === 0) {
-            CLASSES.forEach(cl => cSel.add(new Option(cl, cl)));
-            SUBS.forEach(s => sSel.add(new Option(s, s)));
+        if(isLogin) {
+            const { data } = await _db.from('users_profile').select('*').eq('full_name', name).eq('password', pass).maybeSingle();
+            if(!data) return alert("Compte introuvable");
+            user = data; startApp();
+        } else {
+            const role = document.getElementById('u-role').value;
+            const code = document.getElementById('u-code').value.trim();
+            const { error } = await _db.from('users_profile').insert([{ 
+                full_name: name, password: pass, role: role, class_code: [code] 
+            }]);
+            if(error) return alert("Ce nom est déjà pris");
+            alert("Compte créé ! Connectez-vous."); toggleAuthMode();
         }
     }
 
-    async function handleRegister() {
-        const role = document.getElementById('reg-role').value;
-        const name = document.getElementById('reg-name').value.trim();
-        const pass = document.getElementById('reg-pass').value;
-        const code = (role === 'teacher') ? document.getElementById('reg-my-code').value.trim() : document.getElementById('reg-class-code').value.trim();
-        if(!name || !pass || !code) return alert("Champs vides !");
-        const { error } = await _db.from('users_profile').insert([{ full_name: name, password: pass, role: role, class_code: code }]);
-        if(error) return alert("Erreur d'inscription");
-        alert("Succès ! Connectez-vous.");
-        showScreen('screen-login');
+    function startApp() {
+        document.getElementById('screen-auth').classList.add('hidden');
+        if(user.role === 'teacher') {
+            document.getElementById('screen-teacher').classList.remove('hidden');
+            document.getElementById('prof-code-tag').innerText = "Code de classe : " + user.class_code[0];
+            fillSelectors(); loadTeacherDocs();
+        } else {
+            document.getElementById('screen-student').classList.remove('hidden');
+            loadStudentTeachers();
+        }
     }
 
-    async function handleLogin() {
-        const name = document.getElementById('login-name').value.trim();
-        const pass = document.getElementById('login-pass').value;
-        const { data } = await _db.from('users_profile').select('*').eq('full_name', name).eq('password', pass).maybeSingle();
-        if(!data) return alert("Erreur de connexion");
-        user = data;
-        if(user.role === 'teacher') startTeacher(); else startStudent();
+    // --- PROFESSEUR ---
+    function fillSelectors() {
+        const c = document.getElementById('p-class'), s = document.getElementById('p-sub');
+        if(c.options.length === 0) {
+            CLASSES.forEach(x => c.add(new Option(x, x)));
+            SUBS.forEach(x => s.add(new Option(x, x)));
+        }
     }
 
-    function logout() { user = null; location.reload(); }
-
-    // --- PROF ---
-    function startTeacher() {
-        showScreen('screen-teacher');
-        initSelectors();
-        document.getElementById('teacher-title').innerText = "Salut " + user.full_name;
-        document.getElementById('display-my-code').innerText = "Votre code : " + user.class_code;
-        refreshTeacherList();
-    }
-
-    async function handleUpload() {
-        const f = document.getElementById('pub-file').files[0];
-        const t = document.getElementById('pub-title').value;
-        if(!f || !t) return alert("Fichier et titre requis");
+    async function uploadDoc() {
+        const f = document.getElementById('p-file').files[0];
+        const t = document.getElementById('p-title').value;
+        if(!f || !t) return alert("Fichier et titre manquants");
+        
         const btn = document.getElementById('btn-pub'); btn.innerText = "⏳...";
         const path = Date.now() + "_" + f.name.replace(/\s/g, "_");
-        try {
-            await _db.storage.from('exercise-files').upload(path, f);
-            const { data: u } = _db.storage.from('exercise-files').getPublicUrl(path);
-            // ENREGISTREMENT AVEC class_code
-            await _db.from('exercises').insert([{
-                professor_id: user.full_name, class: document.getElementById('pub-class').value,
-                subject: document.getElementById('pub-sub').value, title: t,
-                file_url: u.publicUrl, class_code: user.class_code
-            }]);
-            alert("Publié !"); refreshTeacherList();
-        } catch(e) { alert("Erreur"); }
+        
+        await _db.storage.from('exercise-files').upload(path, f);
+        const { data: u } = _db.storage.from('exercise-files').getPublicUrl(path);
+
+        await _db.from('exercises').insert([{
+            professor_id: user.full_name, class: document.getElementById('p-class').value,
+            subject: document.getElementById('p-sub').value, title: t,
+            file_url: u.publicUrl, class_code: user.class_code[0] // On prend le premier code du prof
+        }]);
+
+        alert("Publié !"); loadTeacherDocs();
         btn.innerText = "🚀 Publier";
     }
 
-    async function refreshTeacherList() {
-        const { data } = await _db.from('exercises').select('*').eq('class_code', user.class_code);
-        const l = document.getElementById('teacher-list');
-        l.innerHTML = "<h4>Vos cours :</h4>";
-        data.forEach(e => {
-            l.innerHTML += `<div class="exo-item"><b>${e.class}</b> - ${e.title} <button onclick="del('${e.id}')" style="float:right; color:red; border:none; background:none; cursor:pointer;">🗑️</button></div>`;
+    async function loadTeacherDocs() {
+        const { data } = await _db.from('exercises').select('*').eq('class_code', user.class_code[0]);
+        const list = document.getElementById('p-list');
+        list.innerHTML = "<h4>Vos publications :</h4>";
+        data.forEach(d => {
+            list.innerHTML += `<div class="exo-item">${d.class} - ${d.title} <button onclick="delDoc('${d.id}')" style="float:right; color:red; border:none; background:none; cursor:pointer;">🗑️</button></div>`;
         });
     }
 
-    async function del(id) { if(confirm("Supprimer ?")) { await _db.from('exercises').delete().eq('id', id); refreshTeacherList(); } }
+    async function delDoc(id) { if(confirm("Supprimer ?")) { await _db.from('exercises').delete().eq('id', id); loadTeacherDocs(); } }
 
     // --- ÉLÈVE ---
-    function startStudent() {
-        showScreen('screen-student');
-        renderStudentClasses();
-    }
-
-    function renderStudentClasses() {
-        step = "classes"; document.getElementById('backBtn').style.display='none';
-        const c = document.getElementById('content'); c.innerHTML = "";
-        CLASSES.forEach(cl => {
-            let b = document.createElement('button'); b.className="card"; b.innerText="Classe de "+cl;
-            b.onclick = () => { curC=cl; renderStudentSubs(); }; c.appendChild(b);
+    function loadStudentTeachers() {
+        const div = document.getElementById('my-teachers'); div.innerHTML = "<h4>Mes Professeurs</h4>";
+        user.class_code.forEach(code => {
+            let b = document.createElement('button'); b.className = "btn btn-p"; b.style.marginBottom = "8px";
+            b.innerText = "Classe : " + code;
+            b.onclick = () => loadFilesForClass(code);
+            div.appendChild(b);
         });
     }
 
-    function renderStudentSubs() {
-        step = "subs"; document.getElementById('backBtn').style.display='block';
-        const c = document.getElementById('content'); c.innerHTML = "";
-        SUBS.forEach(s => {
-            let b = document.createElement('button'); b.className="card"; b.innerText=s;
-            b.onclick = () => { curS=s; renderStudentExos(); }; c.appendChild(b);
+    async function addNewClass() {
+        const newCode = document.getElementById('add-new-code').value.trim();
+        if(!newCode || user.class_code.includes(newCode)) return;
+        const newCodes = [...user.class_code, newCode];
+        const { error } = await _db.from('users_profile').update({ class_code: newCodes }).eq('id', user.id);
+        if(!error) { user.class_code = newCodes; loadStudentTeachers(); document.getElementById('add-new-code').value = ""; }
+    }
+
+    async function loadFilesForClass(code) {
+        document.getElementById('class-list-area').classList.add('hidden');
+        document.getElementById('student-content').classList.remove('hidden');
+        const { data } = await _db.from('exercises').select('*').eq('class_code', code);
+        const area = document.getElementById('student-files');
+        area.innerHTML = `<h4>Documents (Code: ${code})</h4>`;
+        if(data.length === 0) area.innerHTML += "<p>Aucun document trouvé.</p>";
+        data.forEach(f => {
+            area.innerHTML += `<div class="exo-item"><b>${f.subject}</b> - ${f.title} <br><a href="${f.file_url}" target="_blank" style="color:var(--primary); font-weight:bold;">👁️ Ouvrir</a></div>`;
         });
     }
 
-    async function renderStudentExos() {
-        step = "exos";
-        const c = document.getElementById('content'); c.innerHTML = "Chargement...";
-        const { data } = await _db.from('exercises').select('*').eq('class_code', user.class_code).eq('class', curC).eq('subject', curS);
-        c.innerHTML = data.length ? "" : "Aucun cours.";
-        data.forEach(e => {
-            let d = document.createElement('div'); d.className="exo-item";
-            d.innerHTML = `<b>${e.title}</b><br><br><a href="${e.file_url}" target="_blank" style="display:block; text-align:center; background:var(--primary); color:white; padding:10px; border-radius:10px; text-decoration:none;">👁️ Ouvrir</a>`;
-            c.appendChild(d);
-        });
+    function showClassList() {
+        document.getElementById('class-list-area').classList.remove('hidden');
+        document.getElementById('student-content').classList.add('hidden');
     }
-    function goBack() { if(step==="exos") renderStudentSubs(); else renderStudentClasses(); }
+
+    async function deleteAccount() {
+        if(confirm("Supprimer votre compte et toutes vos données ?")) {
+            await _db.from('users_profile').delete().eq('id', user.id);
+            location.reload();
+        }
+    }
 </script>
 </body>
 </html>
