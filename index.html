@@ -3,79 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro v23</title>
+    <title>DavidSchool Pro v25</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --p: #1e90ff; --s: #6a00ff; --bg: #f4f7f6; --card: #ffffff; --txt: #333; }
-        @media (prefers-color-scheme: dark) { :root { --bg: #1a1a1a; --card: #2d2d2d; --txt: #eee; } }
+        :root { --p: #1e90ff; --s: #6a00ff; --bg: #121212; --card: #1e1e1e; --txt: #ffffff; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { margin: 0; background: var(--bg); color: var(--txt); }
-        header { background: linear-gradient(135deg, var(--s), var(--p)); color: white; padding: 25px; text-align: center; border-radius: 0 0 25px 25px; position: relative; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 15px; max-width: 500px; margin: auto; }
-        .card { background: var(--card); padding: 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); }
-        .folder { display: flex; align-items: center; justify-content: space-between; background: var(--card); padding: 15px; border-radius: 10px; border-left: 6px solid var(--p); cursor: pointer; font-weight: bold; }
-        .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; background: var(--p); color: white; margin-top: 8px; }
-        .btn-red { background: #eb4d4b; }
+        body { margin: 0; background: var(--bg); color: var(--txt); padding-bottom: 80px; }
+        header { background: linear-gradient(135deg, var(--s), var(--p)); color: white; padding: 25px; text-align: center; border-radius: 0 0 25px 25px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 0 15px; max-width: 500px; margin: auto; }
+        .card { background: var(--card); padding: 18px; border-radius: 12px; border: 1px solid #333; }
+        .folder { display: flex; align-items: center; justify-content: space-between; background: #2a2a2a; padding: 15px; border-radius: 10px; border-left: 5px solid var(--p); cursor: pointer; margin-bottom: 8px; }
+        .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; background: var(--p); color: white; margin-top: 10px; }
         .hidden { display: none !important; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #ddd; background: var(--card); color: var(--txt); }
-        .nav-back { color: var(--p); font-weight: bold; cursor: pointer; margin-bottom: 10px; display: block; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #444; background: #252525; color: white; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1e1e1e; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #333; }
+        .nav-item { cursor: pointer; opacity: 0.6; font-size: 13px; }
+        .nav-item.active { opacity: 1; color: var(--p); border-bottom: 2px solid var(--p); }
+        .debug-info { background: #331111; color: #ffaaaa; padding: 10px; font-size: 11px; border-radius: 5px; margin-top: 10px; border: 1px solid red; }
     </style>
 </head>
 <body>
 
     <div id="scr-auth" class="grid" style="margin-top: 50px;">
         <div class="card" style="text-align: center;">
-            <h1 style="color: var(--p);">DavidSchool</h1>
+            <h1>DavidSchool</h1>
             <input type="text" id="u-name" placeholder="Nom d'utilisateur">
             <input type="password" id="u-pass" placeholder="Mot de passe">
             <div id="reg-box" class="hidden">
-                <select id="u-role"><option value="student">👨‍🎓 Élève</option><option value="teacher">👨‍🏫 Professeur</option></select>
-                <input type="text" id="u-code" placeholder="Code de classe (ex: Cool)">
+                <select id="u-role"><option value="student">Élève</option><option value="teacher">Professeur</option></select>
+                <input type="text" id="u-code" placeholder="Code (ex: Cool)">
             </div>
-            <button class="btn" onclick="handleAuth()" id="btn-auth">Se connecter</button>
-            <p onclick="toggleAuth()" style="font-size: 13px; cursor: pointer; text-decoration: underline; margin-top: 15px;">Créer un compte</p>
+            <button class="btn" onclick="handleAuth()">Connexion</button>
+            <p onclick="toggleAuth()" style="text-decoration: underline; font-size: 13px; margin-top: 15px; cursor: pointer;">Créer un compte</p>
         </div>
     </div>
 
-    <div id="scr-prof" class="hidden">
-        <header><div style="position:absolute; right:15px; top:15px;" onclick="location.reload()">🚪</div><h2>Espace Prof</h2></header>
-        <div class="grid">
-            <div class="card">
-                <h3>📤 Publier / Modifier</h3>
-                <input type="hidden" id="edit-id">
-                <input type="text" id="p-title" placeholder="Titre du cours">
-                <textarea id="p-ann" placeholder="Annonce (optionnel)"></textarea>
-                <select id="p-class"><option>6e</option><option>5e</option><option>4e</option><option>3e</option></select>
-                <select id="p-sub"><option>FRANÇAIS</option><option>MATHS</option><option>SVT</option><option>PC</option><option>HG</option></select>
-                <input type="file" id="p-file">
-                <button class="btn" onclick="upload()" id="btn-pub">🚀 Publier</button>
-                <button class="btn hidden" id="btn-cancel" onclick="cancelEdit()" style="background:gray">Annuler</button>
+    <div id="main-app" class="hidden">
+        <header><h2 id="header-title">DavidSchool</h2></header>
+
+        <div id="tab-home">
+            <div id="prof-ui" class="grid hidden">
+                <div class="card">
+                    <h3>Nouvelle Publication</h3>
+                    <input type="text" id="p-title" placeholder="Titre du document">
+                    <textarea id="p-ann" placeholder="Message aux élèves..."></textarea>
+                    <select id="p-class"><option>6e</option><option>5e</option><option>4e</option><option>3e</option></select>
+                    <select id="p-sub"><option>FRANÇAIS</option><option>MATHS</option><option>SVT</option><option>PC</option><option>HG</option></select>
+                    <input type="file" id="p-file">
+                    <button class="btn" onclick="upload()">🚀 Publier</button>
+                </div>
+                <div id="prof-list"></div>
             </div>
-            <div id="prof-list"></div>
-            <hr>
-            <div class="card">
-                <h4>⚙️ Mon Compte</h4>
-                <input type="text" id="upd-name-p" placeholder="Nouveau nom">
-                <button class="btn" onclick="updateAccount('p')">Modifier mon nom</button>
-                <button class="btn btn-red" onclick="deleteAccount()">Supprimer mon compte</button>
+
+            <div id="stu-ui" class="hidden">
+                <div id="step-teachers" class="grid"></div>
+                <div id="step-classes" class="grid hidden"><div id="list-classes"></div></div>
+                <div id="step-subs" class="grid hidden"><div id="list-subs"></div></div>
+                <div id="step-files" class="grid hidden"><div id="list-files"></div></div>
             </div>
         </div>
-    </div>
 
-    <div id="scr-student" class="hidden">
-        <header><div style="position:absolute; right:15px; top:15px;" onclick="location.reload()">🚪</div><h2>Espace Élève</h2></header>
-        <div id="step-teachers" class="grid"></div>
-        <div id="step-classes" class="grid hidden"><span class="nav-back" onclick="showStep('step-teachers')">⬅ Retour</span><div id="list-classes"></div></div>
-        <div id="step-subs" class="grid hidden"><span class="nav-back" onclick="showStep('step-classes')">⬅ Retour</span><div id="list-subs"></div></div>
-        <div id="step-files" class="grid hidden"><span class="nav-back" onclick="showStep('step-subs')">⬅ Retour</span><div id="list-files"></div></div>
-        
-        <div class="grid">
+        <div id="tab-account" class="grid hidden">
             <div class="card">
-                <h4>⚙️ Mon Compte Élève</h4>
-                <input type="text" id="upd-name-s" placeholder="Nouveau nom">
-                <button class="btn" onclick="updateAccount('s')">Enregistrer</button>
-                <button class="btn btn-red" onclick="deleteAccount()">Supprimer mon compte</button>
+                <h3>Paramètres</h3>
+                <p>Nom : <span id="display-name"></span></p>
+                <div id="stu-add-code" class="hidden">
+                    <input type="text" id="add-code" placeholder="Nouveau code prof">
+                    <button class="btn" onclick="addCode()">Ajouter la classe</button>
+                </div>
+                <button class="btn" style="background: #eb4d4b; margin-top: 30px;" onclick="deleteAccount()">Supprimer mon compte</button>
             </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" id="nav-home" onclick="switchTab('home')">🏠 Cours</div>
+            <div class="nav-item" id="nav-account" onclick="switchTab('account')">👤 Compte</div>
+            <div class="nav-item" onclick="location.reload()">🚪 Quitter</div>
         </div>
     </div>
 
@@ -84,7 +87,7 @@
     const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
     const _db = supabase.createClient(S_URL, S_KEY);
 
-    let user = null, isLogin = true, selCode="", selClass="", selSub="", isEdit=false;
+    let user = null, isLogin = true, selCode="", selClass="", selSub="";
 
     function toggleAuth() { isLogin = !isLogin; document.getElementById('reg-box').classList.toggle('hidden', isLogin); }
 
@@ -92,11 +95,10 @@
         const n = document.getElementById('u-name').value.trim(), p = document.getElementById('u-pass').value;
         if(isLogin) {
             const { data } = await _db.from('users_profile').select('*').eq('full_name', n).eq('password', p).maybeSingle();
-            if(!data) return alert("Identifiants incorrects");
+            if(!data) return alert("Erreur d'accès");
             user = data; start();
         } else {
             const r = document.getElementById('u-role').value, c = document.getElementById('u-code').value.trim();
-            if(!c) return alert("Le code est obligatoire !");
             await _db.from('users_profile').insert([{ full_name:n, password:p, role:r, class_code:[c] }]);
             alert("Compte créé !"); location.reload();
         }
@@ -104,83 +106,112 @@
 
     function start() {
         document.getElementById('scr-auth').classList.add('hidden');
-        if(user.role === 'teacher') { document.getElementById('scr-prof').classList.remove('hidden'); loadProfDocs(); }
-        else { document.getElementById('scr-student').classList.remove('hidden'); renderTeachers(); }
-    }
-
-    // GESTION COMPTE
-    async function updateAccount(suffix) {
-        const newName = document.getElementById('upd-name-'+suffix).value.trim();
-        if(!newName) return;
-        await _db.from('users_profile').update({ full_name: newName }).eq('id', user.id);
-        alert("Nom modifié ! Reconnectez-vous."); location.reload();
-    }
-    async function deleteAccount() {
-        if(confirm("Supprimer définitivement votre compte ?")) {
-            await _db.from('users_profile').delete().eq('id', user.id);
-            location.reload();
+        document.getElementById('main-app').classList.remove('hidden');
+        document.getElementById('display-name').innerText = user.full_name;
+        if(user.role === 'teacher') {
+            document.getElementById('prof-ui').classList.remove('hidden');
+            loadProfDocs();
+        } else {
+            document.getElementById('stu-ui').classList.remove('hidden');
+            document.getElementById('stu-add-code').classList.remove('hidden');
+            renderTeachers();
         }
     }
 
-    // PROFESSEUR
+    function switchTab(t) {
+        document.getElementById('tab-home').classList.toggle('hidden', t !== 'home');
+        document.getElementById('tab-account').classList.toggle('hidden', t !== 'account');
+        document.getElementById('nav-home').classList.toggle('active', t === 'home');
+        document.getElementById('nav-account').classList.toggle('active', t === 'account');
+    }
+
+    // --- PROF ---
     async function upload() {
-        const f = document.getElementById('p-file').files[0], t = document.getElementById('p-title').value, id = document.getElementById('edit-id').value;
-        if(!t) return alert("Titre manquant");
-        const b = document.getElementById('btn-pub'); b.innerText = "⏳...";
+        const f = document.getElementById('p-file').files[0], t = document.getElementById('p-title').value;
+        if(!f || !t) return alert("Fichier et titre requis");
+        const path = Date.now() + "_" + f.name.replace(/\s/g, "_");
+        await _db.storage.from('exercise-files').upload(path, f);
+        const url = _db.storage.from('exercise-files').getPublicUrl(path).data.publicUrl;
         
-        let url = null;
-        if(f) {
-            const path = Date.now() + "_" + f.name.replace(/\s/g, "_");
-            await _db.storage.from('exercise-files').upload(path, f);
-            url = _db.storage.from('exercise-files').getPublicUrl(path).data.publicUrl;
-        }
-
-        const obj = { title:t, announcement:document.getElementById('p-ann').value, class:document.getElementById('p-class').value, subject:document.getElementById('p-sub').value, class_code: user.class_code[0] };
-        if(url) obj.file_url = url;
-
-        if(isEdit) await _db.from('exercises').update(obj).eq('id', id);
-        else await _db.from('exercises').insert([obj]);
-
-        alert("Opération réussie !"); cancelEdit(); loadProfDocs();
+        await _db.from('exercises').insert([{
+            title: t, announcement: document.getElementById('p-ann').value,
+            class: document.getElementById('p-class').value,
+            subject: document.getElementById('p-sub').value,
+            file_url: url, class_code: user.class_code[0]
+        }]);
+        alert("Publié !"); loadProfDocs();
     }
 
     async function loadProfDocs() {
         const { data } = await _db.from('exercises').select('*').eq('class_code', user.class_code[0]).order('created_at', { ascending: false });
-        const list = document.getElementById('prof-list'); list.innerHTML = "<h4>Vos documents :</h4>";
-        data.forEach(d => {
-            list.innerHTML += `<div class="card"><b>${d.class} - ${d.title}</b><br><button onclick='prepEdit(${JSON.stringify(d)})'>✏️</button> <button onclick="delDoc('${d.id}')">🗑️</button></div>`;
-        });
+        const list = document.getElementById('prof-list');
+        list.innerHTML = "<h4>Vos publications :</h4>";
+        data.forEach(d => { list.innerHTML += `<div class="card" style="margin-top:5px">${d.title} [${d.class}] <button onclick="delDoc('${d.id}')">🗑️</button></div>`; });
     }
-    function prepEdit(d) { 
-        isEdit=true; document.getElementById('edit-id').value=d.id; document.getElementById('p-title').value=d.title; 
-        document.getElementById('p-ann').value=d.announcement; document.getElementById('btn-pub').innerText="Enregistrer";
-        document.getElementById('btn-cancel').classList.remove('hidden');
-    }
-    function cancelEdit() { isEdit=false; document.getElementById('edit-id').value=""; document.getElementById('p-title').value=""; document.getElementById('btn-pub').innerText="Publier"; document.getElementById('btn-cancel').classList.add('hidden'); }
     async function delDoc(id) { if(confirm("Supprimer ?")) { await _db.from('exercises').delete().eq('id', id); loadProfDocs(); } }
 
-    // ELEVE
-    function showStep(s) { ['step-teachers','step-classes','step-subs','step-files'].forEach(i => document.getElementById(i).classList.add('hidden')); document.getElementById(s).classList.remove('hidden'); }
-    function renderTeachers() {
-        const d = document.getElementById('step-teachers'); d.innerHTML = "<h3>Profs</h3>";
-        user.class_code.forEach(c => { d.innerHTML += `<div class="folder" onclick="selCode='${c}'; showStep('step-classes'); renderClasses();">👨‍🏫 ${c} ➡</div>`; });
+    // --- ELEVE NAVIGATION ---
+    function showStep(s) { 
+        ['step-teachers','step-classes','step-subs','step-files'].forEach(i => document.getElementById(i).classList.add('hidden')); 
+        document.getElementById(s).classList.remove('hidden'); 
     }
+    
+    function renderTeachers() {
+        const d = document.getElementById('step-teachers'); 
+        d.innerHTML = "<h3>Choisir un Prof</h3>";
+        user.class_code.forEach(c => { d.innerHTML += `<div class="folder" onclick="selCode='${c}'; showStep('step-classes'); renderClasses();">👨‍🏫 Code : ${c} ➡</div>`; });
+    }
+
     function renderClasses() {
-        const d = document.getElementById('list-classes'); d.innerHTML = "<h3>Classes</h3>";
+        const d = document.getElementById('list-classes'); 
+        d.innerHTML = "<p onclick='showStep(\"step-teachers\")'>⬅ Retour</p><h3>Classe</h3>";
         ["6e","5e","4e","3e"].forEach(c => { d.innerHTML += `<div class="folder" onclick="selClass='${c}'; showStep('step-subs'); renderSubs();">📂 ${c} ➡</div>`; });
     }
+
     function renderSubs() {
-        const d = document.getElementById('list-subs'); d.innerHTML = "<h3>Matières</h3>";
+        const d = document.getElementById('list-subs'); 
+        d.innerHTML = "<p onclick='showStep(\"step-classes\")'>⬅ Retour</p><h3>Matière</h3>";
         ["FRANÇAIS","MATHS","SVT","PC","HG"].forEach(s => { d.innerHTML += `<div class="folder" onclick="selSub='${s}'; showStep('step-files'); renderFiles();">📖 ${s} ➡</div>`; });
     }
+
     async function renderFiles() {
-        const d = document.getElementById('list-files'); d.innerHTML = "Chargement...";
-        const { data } = await _db.from('exercises').select('*').eq('class_code', selCode).eq('class', selClass).eq('subject', selSub).order('created_at', { ascending: false });
-        d.innerHTML = data.length ? "" : "Aucun document.";
-        data.forEach(f => {
-            d.innerHTML += `<div class="card">${f.announcement ? `<p>📢 ${f.announcement}</p>`:''}<h4>${f.title}</h4><a href="${f.file_url}" target="_blank" class="btn" style="display:block;text-align:center;text-decoration:none">Ouvrir</a></div>`;
-        });
+        const d = document.getElementById('list-files'); 
+        d.innerHTML = "<p onclick='showStep(\"step-subs\")'>⬅ Retour</p><h3>Documents</h3>";
+        const { data, error } = await _db.from('exercises').select('*')
+            .eq('class_code', selCode)
+            .eq('class', selClass)
+            .eq('subject', selSub)
+            .order('created_at', { ascending: false });
+
+        if(!data || data.length === 0) {
+            d.innerHTML += `
+                <div class="debug-info">
+                    🔍 <b>Aucun document trouvé</b><br>
+                    Le code cherché : "${selCode}"<br>
+                    La classe : "${selClass}"<br>
+                    La matière : "${selSub}"<br>
+                    <i>Vérifiez que le prof a bien publié avec ces infos exactes.</i>
+                </div>`;
+        } else {
+            data.forEach(f => {
+                d.innerHTML += `<div class="card" style="margin-top:10px">
+                    ${f.announcement ? `<p style="color:orange">📢 ${f.announcement}</p>`:''}
+                    <h4>${f.title}</h4>
+                    <a href="${f.file_url}" target="_blank" class="btn" style="display:block;text-align:center;text-decoration:none">Ouvrir</a>
+                </div>`;
+            });
+        }
     }
+
+    async function addCode() {
+        const c = document.getElementById('add-code').value.trim();
+        if(!c) return;
+        let codes = [...user.class_code, c];
+        await _db.from('users_profile').update({ class_code: codes }).eq('id', user.id);
+        alert("Classe ajoutée !"); location.reload();
+    }
+
+    async function deleteAccount() { if(confirm("Supprimer ?")) { await _db.from('users_profile').delete().eq('id', user.id); location.reload(); } }
 </script>
 </body>
 </html>
