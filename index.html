@@ -3,223 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DavidSchool Pro v26</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta name="theme-color" content="#00853f">
+    <title>Calculateur Sénégal Pro</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
-        :root { --p: #1e90ff; --s: #6a00ff; --bg: #0f0f10; --card: #1c1c1e; --txt: #ffffff; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { margin: 0; background: var(--bg); color: var(--txt); padding-bottom: 70px; }
-        header { background: linear-gradient(135deg, var(--s), var(--p)); color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 15px; max-width: 450px; margin: auto; }
-        .card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #333; }
-        .folder { display: flex; align-items: center; justify-content: space-between; background: #2c2c2e; padding: 15px; border-radius: 10px; cursor: pointer; margin-bottom: 8px; border-left: 4px solid var(--p); }
-        .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; background: var(--p); color: white; }
-        .hidden { display: none !important; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #333; background: #2c2c2e; color: white; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1c1c1e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #333; }
-        .nav-item { cursor: pointer; opacity: 0.5; font-size: 12px; text-align: center; }
-        .nav-item.active { opacity: 1; color: var(--p); }
-        .badge { background: #ff4757; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+        :root {
+            --primary: #00853f; /* Vert Sénégal */
+            --accent: #e31b23;  /* Rouge Sénégal */
+            --yellow: #fdef42;
+            --bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 15px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .container { width: 100%; max-width: 500px; }
+
+        /* En-tête avec la moyenne */
+        .header-card {
+            background: linear-gradient(135deg, var(--primary), #005f2d);
+            color: white; padding: 30px; border-radius: 25px;
+            text-align: center; margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 133, 63, 0.2);
+        }
+
+        #moyenne-generale { font-size: 4rem; font-weight: 900; margin: 10px 0; color: var(--yellow); }
+        #mention { font-weight: bold; font-size: 1.1rem; min-height: 1.5em; }
+
+        /* Lignes des matières */
+        .subject-row {
+            background: white; padding: 15px; border-radius: 15px;
+            display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 8px;
+            margin-bottom: 10px; align-items: end;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        input {
+            width: 100%; padding: 12px; border: 1px solid #e2e8f0;
+            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--primary); }
+
+        .label-style { font-size: 0.7rem; color: #64748b; font-weight: bold; margin-bottom: 5px; display: block; }
+
+        /* Boutons */
+        .btn-calc {
+            width: 100%; padding: 20px; background: var(--primary);
+            color: white; border: none; border-radius: 15px;
+            font-size: 1.2rem; font-weight: bold; cursor: pointer;
+            margin: 10px 0; box-shadow: 0 4px 12px rgba(0, 133, 63, 0.3);
+        }
+
+        .btn-calc:active { transform: scale(0.98); background: #006b33; }
+
+        .add-btn {
+            background: #e2e8f0; border: none; padding: 12px;
+            border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold;
+            margin-bottom: 10px; color: #475569;
+        }
+
+        .del-btn {
+            background: #fee2e2; color: var(--accent); border: none;
+            border-radius: 8px; padding: 12px 10px; cursor: pointer; font-weight: bold;
+        }
+
+        #info-calcul { font-size: 0.8rem; margin-top: 10px; opacity: 0.8; }
     </style>
 </head>
 <body>
 
-    <div id="scr-auth" class="grid" style="margin-top: 40px;">
-        <div class="card" style="text-align: center;">
-            <h1 style="color:var(--p)">DavidSchool</h1>
-            <input type="text" id="u-name" placeholder="Nom d'utilisateur">
-            <input type="password" id="u-pass" placeholder="Mot de passe">
-            <div id="reg-box" class="hidden">
-                <select id="u-role"><option value="student">Élève</option><option value="teacher">Professeur</option></select>
-                <input type="text" id="u-code" placeholder="Code unique (ex: Cool)">
-            </div>
-            <button class="btn" onclick="handleAuth()">Se connecter</button>
-            <p onclick="toggleAuth()" style="font-size: 13px; cursor: pointer; color: gray; margin-top: 15px;">Créer un compte</p>
-        </div>
+<div class="container">
+    <div class="header-card">
+        <span style="text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem;">Moyenne Semestrielle</span>
+        <div id="moyenne-generale">--</div>
+        <div id="mention"></div>
+        <div id="info-calcul">Entrez vos notes</div>
     </div>
 
-    <div id="main-app" class="hidden">
-        <header><h2 id="header-title">Mes Cours</h2></header>
-
-        <div id="tab-home">
-            <div id="prof-ui" class="grid hidden">
-                <div class="card">
-                    <h3>📤 Publier</h3>
-                    <input type="text" id="p-title" placeholder="Titre (ex: Trigonométrie)">
-                    <textarea id="p-ann" placeholder="Instructions..."></textarea>
-                    <select id="p-class"><option>6e</option><option>5e</option><option>4e</option><option>3e</option></select>
-                    <select id="p-sub"><option>FRANÇAIS</option><option>MATHS</option><option>SVT</option><option>PC</option><option>HG</option></select>
-                    <input type="file" id="p-file">
-                    <button class="btn" onclick="upload()">🚀 Lancer la publication</button>
-                </div>
-                <div id="prof-list"></div>
-            </div>
-
-            <div id="stu-ui" class="hidden">
-                <div id="step-teachers" class="grid"></div>
-                <div id="step-classes" class="grid hidden"><div id="list-classes"></div></div>
-                <div id="step-subs" class="grid hidden"><div id="list-subs"></div></div>
-                <div id="step-files" class="grid hidden"><div id="list-files"></div></div>
-            </div>
+    <div id="liste-matieres">
         </div>
 
-        <div id="tab-account" class="grid hidden">
-            <div class="card">
-                <h3>👤 Mon Profil</h3>
-                <p>Nom : <b id="display-name"></b></p>
-                <p>Mes accès : <span id="display-codes"></span></p>
-                <div id="stu-add" class="hidden">
-                    <input type="text" id="add-code" placeholder="Ajouter un code prof">
-                    <button class="btn" onclick="addCode()">Rejoindre une classe</button>
-                </div>
-                <button class="btn" style="background: #ff4757; margin-top: 20px;" onclick="deleteAccount()">Supprimer mon compte</button>
-            </div>
-        </div>
-
-        <div class="bottom-nav">
-            <div class="nav-item active" id="btn-h" onclick="switchTab('home')">🏠<br>Cours</div>
-            <div class="nav-item" id="btn-a" onclick="switchTab('account')">👤<br>Compte</div>
-            <div class="nav-item" onclick="location.reload()">🚪<br>Sortir</div>
-        </div>
-    </div>
+    <button class="add-btn" onclick="ajouterLigne()">+ Ajouter une matière</button>
+    <button class="btn-calc" onclick="calculerMoyenne()">CALCULER LA MOYENNE</button>
+</div>
 
 <script>
-    const S_URL = "https://lqevweyhxkvnckhtfpwh.supabase.co";
-    const S_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxxZXZ3ZXloeGt2bmNraHRmcHdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTk2NTIsImV4cCI6MjA4NTYzNTY1Mn0.F6EUcdco3mn8AxlR9CMzxCmcxL-5-BypAhSak0JQSWw";
-    const _db = supabase.createClient(S_URL, S_KEY);
+    /** * SAUVEGARDE & CHARGEMENT 
+     **/
+    let matieresSaisies = JSON.parse(localStorage.getItem('notesSaved')) || [
+        {nom: 'Mathématiques', coef: '5', note: ''},
+        {nom: 'Français', coef: '5', note: ''}
+    ];
 
-    let user = null, isLogin = true, selCode="", selClass="", selSub="";
-
-    function toggleAuth() { isLogin = !isLogin; document.getElementById('reg-box').classList.toggle('hidden', isLogin); }
-
-    async function handleAuth() {
-        const n = document.getElementById('u-name').value.trim(), p = document.getElementById('u-pass').value;
-        if(isLogin) {
-            const { data } = await _db.from('users_profile').select('*').eq('full_name', n).eq('password', p).maybeSingle();
-            if(!data) return alert("Erreur d'identification");
-            user = data; startApp();
-        } else {
-            const r = document.getElementById('u-role').value, c = document.getElementById('u-code').value.trim();
-            if(!c) return alert("Code requis");
-            await _db.from('users_profile').insert([{ full_name:n, password:p, role:r, class_code:[c] }]);
-            alert("Compte prêt !"); location.reload();
-        }
+    function initialiser() {
+        const container = document.getElementById('liste-matieres');
+        container.innerHTML = '';
+        matieresSaisies.forEach((m, index) => creerLigne(m));
     }
 
-    function startApp() {
-        document.getElementById('scr-auth').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('display-name').innerText = user.full_name;
-        document.getElementById('display-codes').innerText = user.class_code.join(', ');
-        if(user.role === 'teacher') {
-            document.getElementById('prof-ui').classList.remove('hidden');
-            loadProfDocs();
-        } else {
-            document.getElementById('stu-ui').classList.remove('hidden');
-            document.getElementById('stu-add').classList.remove('hidden');
-            renderTeachers();
-        }
+    function creerLigne(data = {nom:'', coef:'', note:''}) {
+        const container = document.getElementById('liste-matieres');
+        const div = document.createElement('div');
+        div.className = 'subject-row';
+        div.innerHTML = `
+            <div><span class="label-style">MATIÈRE</span><input type="text" value="${data.nom}" placeholder="Nom" class="m-name" oninput="sauvegarder()"></div>
+            <div><span class="label-style">COEF</span><input type="number" value="${data.coef}" placeholder="1" class="m-coef" oninput="sauvegarder()"></div>
+            <div><span class="label-style">NOTE</span><input type="number" value="${data.note}" step="0.01" placeholder="/20" class="m-note" oninput="sauvegarder()"></div>
+            <button class="del-btn" onclick="supprimerLigne(this)">✕</button>
+        `;
+        container.appendChild(div);
     }
 
-    function switchTab(t) {
-        document.getElementById('tab-home').classList.toggle('hidden', t !== 'home');
-        document.getElementById('tab-account').classList.toggle('hidden', t !== 'account');
-        document.getElementById('btn-h').classList.toggle('active', t === 'home');
-        document.getElementById('btn-a').classList.toggle('active', t === 'account');
+    function ajouterLigne() {
+        creerLigne();
+        sauvegarder();
     }
 
-    // --- LOGIQUE PROF ---
-    async function upload() {
-        const f = document.getElementById('p-file').files[0], t = document.getElementById('p-title').value;
-        if(!f || !t) return alert("Titre et fichier obligatoires");
-        const path = Date.now() + "_" + f.name.replace(/\s/g, "_");
-        const { error: stErr } = await _db.storage.from('exercise-files').upload(path, f);
-        if(stErr) return alert("Erreur stockage: " + stErr.message);
-        
-        const url = _db.storage.from('exercise-files').getPublicUrl(path).data.publicUrl;
-        const { error: dbErr } = await _db.from('exercises').insert([{
-            title: t, announcement: document.getElementById('p-ann').value,
-            class: document.getElementById('p-class').value,
-            subject: document.getElementById('p-sub').value,
-            file_url: url, class_code: user.class_code[0]
-        }]);
-        
-        if(dbErr) alert("Erreur base: " + dbErr.message);
-        else { alert("Document publié avec succès !"); loadProfDocs(); }
+    function supprimerLigne(btn) {
+        btn.parentElement.remove();
+        sauvegarder();
     }
 
-    async function loadProfDocs() {
-        const { data } = await _db.from('exercises').select('*').eq('class_code', user.class_code[0]).order('created_at', { ascending: false });
-        const list = document.getElementById('prof-list');
-        list.innerHTML = "<h4>Vos publications récentes :</h4>";
-        data.forEach(d => {
-            list.innerHTML += `<div class="card" style="margin-top:8px"><b>${d.title}</b> [${d.class}] <button onclick="delDoc('${d.id}')" style="float:right; color:red; background:none; border:none; cursor:pointer">🗑️</button></div>`;
-        });
-    }
-    async function delDoc(id) { if(confirm("Supprimer ce document ?")) { await _db.from('exercises').delete().eq('id', id); loadProfDocs(); } }
-
-    // --- LOGIQUE ELEVE ---
-    function showStep(s) { 
-        ['step-teachers','step-classes','step-subs','step-files'].forEach(i => document.getElementById(i).classList.add('hidden')); 
-        document.getElementById(s).classList.remove('hidden'); 
-    }
-
-    function renderTeachers() {
-        const d = document.getElementById('step-teachers');
-        d.innerHTML = "<h3>Choisir un Professeur</h3>";
-        user.class_code.forEach(c => {
-            d.innerHTML += `<div class="folder" onclick="selCode='${c}'; showStep('step-classes'); renderClasses();">👨‍🏫 Code Prof : ${c} ➡</div>`;
-        });
-    }
-
-    function renderClasses() {
-        const d = document.getElementById('list-classes');
-        d.innerHTML = "<p onclick='showStep(\"step-teachers\")' style='cursor:pointer'>⬅ Retour</p><h3>Choisir la Classe</h3>";
-        ["6e","5e","4e","3e"].forEach(c => {
-            d.innerHTML += `<div class="folder" onclick="selClass='${c}'; showStep('step-subs'); renderSubs();">📂 Classe de ${c} ➡</div>`;
-        });
-    }
-
-    function renderSubs() {
-        const d = document.getElementById('list-subs');
-        d.innerHTML = "<p onclick='showStep(\"step-classes\")' style='cursor:pointer'>⬅ Retour</p><h3>Choisir la Matière</h3>";
-        ["FRANÇAIS","MATHS","SVT","PC","HG"].forEach(s => {
-            d.innerHTML += `<div class="folder" onclick="selSub='${s}'; showStep('step-files'); renderFiles();">📖 ${s} ➡</div>`;
-        });
-    }
-
-    async function renderFiles() {
-        const d = document.getElementById('list-files');
-        d.innerHTML = "<p onclick='showStep(\"step-subs\")' style='cursor:pointer'>⬅ Retour</p><h3>Documents trouvés</h3>";
-        
-        // RECHERCHE PRÉCISE
-        const { data } = await _db.from('exercises').select('*').eq('class_code', selCode).eq('class', selClass).eq('subject', selSub).order('created_at', { ascending: false });
-
-        if(!data || data.length === 0) {
-            d.innerHTML += `<div style="color:#ff4757; padding:15px; border:1px dashed #ff4757; border-radius:10px; font-size:12px">
-                ⚠️ Aucun document pour <b>${selSub}</b> en <b>${selClass}</b>.<br><br>
-                <i>Vérifiez que le prof a bien sélectionné ces options lors de la publication.</i>
-            </div>`;
-        } else {
-            data.forEach(f => {
-                d.innerHTML += `<div class="card" style="margin-top:10px">
-                    ${f.announcement ? `<div style="color:#ffa500; font-size:13px; margin-bottom:8px">📢 ${f.announcement}</div>` : ''}
-                    <h4 style="margin:0">${f.title}</h4>
-                    <a href="${f.file_url}" target="_blank" class="btn" style="display:block; text-align:center; text-decoration:none; margin-top:10px">📥 Télécharger / Ouvrir</a>
-                </div>`;
+    function sauvegarder() {
+        const rows = document.querySelectorAll('.subject-row');
+        let currentData = [];
+        rows.forEach(row => {
+            currentData.push({
+                nom: row.querySelector('.m-name').value,
+                coef: row.querySelector('.m-coef').value,
+                note: row.querySelector('.m-note').value
             });
+        });
+        localStorage.setItem('notesSaved', JSON.stringify(currentData));
+    }
+
+    /** * LOGIQUE DE CALCUL EXACT 
+     **/
+    function calculerMoyenne() {
+        const coefs = document.querySelectorAll('.m-coef');
+        const notes = document.querySelectorAll('.m-note');
+        let cumulPoints = 0, totalCoef = 0, count = 0;
+
+        for (let i = 0; i < notes.length; i++) {
+            const n = parseFloat(notes[i].value);
+            const c = parseFloat(coefs[i].value);
+            
+            // Calcul exact : Note x Coefficient
+            if (!isNaN(n) && !isNaN(c) && c > 0) {
+                cumulPoints += (n * c);
+                totalCoef += c;
+                count++;
+            }
         }
+
+        const res = document.getElementById('moyenne-generale');
+        const men = document.getElementById('mention');
+        const inf = document.getElementById('info-calcul');
+
+        if (totalCoef > 0) {
+            const moyenne = cumulPoints / totalCoef;
+            res.textContent = moyenne.toFixed(2);
+            inf.textContent = `Basé sur ${count} matière(s) • Total Coef: ${totalCoef}`;
+            
+            // Mentions sénégalaises
+            if (moyenne >= 16) men.textContent = "Mention Très Bien 🌟";
+            else if (moyenne >= 14) men.textContent = "Mention Bien ⭐";
+            else if (moyenne >= 12) men.textContent = "Mention Assez-Bien ✅";
+            else if (moyenne >= 10) men.textContent = "Passable 👍";
+            else men.textContent = "Encouragements 💪";
+        } else {
+            alert("Veuillez entrer au moins une note et un coefficient !");
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function addCode() {
-        const c = document.getElementById('add-code').value.trim();
-        if(!c || user.class_code.includes(c)) return;
-        let codes = [...user.class_code, c];
-        await _db.from('users_profile').update({ class_code: codes }).eq('id', user.id);
-        alert("Nouveau professeur ajouté !"); location.reload();
+    /** * ACTIVATION PWA 
+     **/
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW non enregistré', err));
+        });
     }
 
-    async function deleteAccount() { if(confirm("Supprimer votre compte DavidSchool ?")) { await _db.from('users_profile').delete().eq('id', user.id); location.reload(); } }
+    initialiser();
 </script>
 </body>
 </html>
