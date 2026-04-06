@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #e0e0e0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* ── Animations ── */
+.fadein {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeUp 0.7s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.loader {
+  height: 100%;
+  width: 0;
+  background: rgba(255,255,255,0.85);
+  border-radius: 100px;
+  animation: loadBar 2s ease forwards;
+}
+
+@keyframes loadBar {
+  to { width: 100%; }
+}
+
+/* ── Button press effect ── */
+.press {
+  transition: transform 0.12s;
+  cursor: pointer;
+}
+.press:active {
+  transform: scale(0.96);
+}
+
+/* ── Spinner ── */
+.spin {
+  display: inline-block;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Input focus ── */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #FF6B35 !important;
+  background: #fff !important;
+  outline: none;
+}
+
+/* ── Card hover ── */
+.card-lift {
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.card-lift:active {
+  transform: scale(0.97);
+}
+
+/* ── Toast animation ── */
+.toast-enter {
+  animation: toastIn 0.3s ease;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Category scroll hide scrollbar ── */
+.cat-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.cat-scroll::-webkit-scrollbar { display: none; }
+
+/* ── Image slider dots ── */
+.img-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
+}
+.img-dot.active {
+  background: #fff;
+  width: 20px;
+  border-radius: 4px;
+}
+
+/* ── Responsive max width ── */
+#root {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #f7f7f7;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.15);
+}
+
