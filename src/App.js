@@ -618,7 +618,7 @@ function PublishTab({ user, profile, onAdd, notify, onDone }) {
 
 // ─── MESSAGES TAB ─────────────────────────────────────────────────────────────
 function MsgsTab({ userId, convs, fetchConvs }) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+     eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchConvs(); }, []);
 
   return (
