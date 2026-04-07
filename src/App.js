@@ -618,6 +618,7 @@ function PublishTab({ user, profile, onAdd, notify, onDone }) {
 
 // ─── MESSAGES TAB ─────────────────────────────────────────────────────────────
 function MsgsTab({ userId, convs, fetchConvs }) {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchConvs(); }, []);
 
   return (
@@ -1087,4 +1088,3 @@ const S = {
   btnS:{width:"100%",padding:"14px",background:"#f3f4f6",border:"none",borderRadius:14,color:"#374151",fontWeight:700,fontSize:15,cursor:"pointer",fontFamily:"inherit",boxSizing:"border-box"},
   btnDanger:{width:"100%",padding:"14px",background:"#fee2e2",border:"none",borderRadius:14,color:"#ef4444",fontWeight:700,fontSize:15,cursor:"pointer",fontFamily:"inherit",boxSizing:"border-box"},
 };
-
